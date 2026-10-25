@@ -177,8 +177,28 @@
 
         .tarot-box { background: var(--bg-card); border: 1px solid var(--purple-glow); border-radius: 20px; padding: 2rem 1rem; text-align: center; }
         .tarot-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin: 1.5rem 0; }
-        .tarot-card-back { display: block; width: min(100%, 150px); aspect-ratio: 2 / 3; object-fit: cover; border-radius: 10px; border: 1px solid rgba(240,198,116,.7); box-shadow: 0 8px 22px rgba(0,0,0,.42); margin-bottom: 10px; transition: transform .25s ease, box-shadow .25s ease; }
+        .card-slot { position: relative; overflow: hidden; perspective: 1100px; transform-style: preserve-3d; }
+        .tarot-card-back { display: block; width: min(100%, 150px); aspect-ratio: 2 / 3; object-fit: cover; border-radius: 10px; border: 1px solid rgba(240,198,116,.7); box-shadow: 0 8px 22px rgba(0,0,0,.42); margin-bottom: 10px; transition: transform .25s ease, box-shadow .25s ease; backface-visibility: hidden; }
         .card-slot:hover .tarot-card-back { transform: translateY(-4px) rotate(-1deg); box-shadow: 0 12px 28px rgba(189,95,255,.28); }
+        .card-slot.is-flipping { border-color: #f0c674 !important; box-shadow: 0 0 18px rgba(189,95,255,.72), inset 0 0 25px rgba(189,95,255,.2); }
+        .card-slot.is-flipping::after { content: ""; position: absolute; z-index: 2; inset: 0; pointer-events: none; border-radius: inherit; background: linear-gradient(112deg, transparent 18%, rgba(189,95,255,.08) 37%, rgba(255,237,190,.85) 49%, rgba(189,95,255,.28) 56%, transparent 72%); animation: tarot-mystery-shimmer .72s ease-in-out both; }
+        .card-slot.is-flipping .tarot-card-back { animation: tarot-mystery-flip .72s cubic-bezier(.2,.72,.25,1) both; transition: none; }
+        .tarot-front-reveal { backface-visibility: hidden; animation: tarot-mystery-reveal .82s cubic-bezier(.16,.82,.22,1) both; }
+        @keyframes tarot-mystery-flip {
+            0% { transform: rotateY(0) scale(1); filter: brightness(1); opacity: 1; }
+            46% { transform: rotateY(88deg) scale(.92); filter: brightness(1.7) drop-shadow(0 0 18px #bd5fff); opacity: .92; }
+            100% { transform: rotateY(180deg) scale(.88); filter: brightness(.35); opacity: .18; }
+        }
+        @keyframes tarot-mystery-shimmer {
+            0% { opacity: 0; transform: translateX(-105%); }
+            35% { opacity: 1; }
+            100% { opacity: 0; transform: translateX(105%); }
+        }
+        @keyframes tarot-mystery-reveal {
+            0% { opacity: 0; transform: rotateY(-86deg) scale(.88); filter: blur(8px) brightness(1.9); }
+            58% { opacity: 1; transform: rotateY(12deg) scale(1.025); filter: blur(0) brightness(1.35) drop-shadow(0 0 18px rgba(189,95,255,.8)); }
+            100% { opacity: 1; transform: rotateY(0) scale(1); filter: none; }
+        }
         .tarot-deck { margin: 3rem auto 1rem; }
         .tarot-deck-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
         .tarot-deck-card { background: rgba(17, 8, 35, .92); border: 1px solid rgba(189, 95, 255, .35); border-radius: 14px; padding: .65rem; transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease; }
@@ -285,6 +305,7 @@
         }
         @media (prefers-reduced-motion: reduce) {
             nav.desktop-nav a i { animation: none; }
+            .card-slot.is-flipping::after, .card-slot.is-flipping .tarot-card-back, .tarot-front-reveal { animation-duration: .01ms !important; }
         }
 
 
@@ -1422,19 +1443,29 @@
 
             const arcano = arcanosTarot[Math.floor(Math.random() * arcanosTarot.length)];
             const invertida = Math.random() < 0.35;
-
             tiradaActual[idx] = { arcano, invertida };
 
             const slot = document.getElementById(`slot-${idx}`);
-            slot.style.background = "rgba(30, 12, 60, 0.95)";
-            slot.style.borderColor = "#f0c674";
-            slot.innerHTML = `
-                <img class="tarot-revealed-image" src="${arcano.imagen}" alt="Carta ${arcano.nombre}">
-                <h4 style="color:#f0c674; font-family:'Cinzel',serif; font-size:1rem; margin-bottom:6px;">${arcano.nombre}</h4>
-                <span style="background:#7b1fa2; color:white; padding:2px 8px; border-radius:10px; font-size:0.7rem; font-weight:bold; margin-bottom:8px; display:inline-block;">${invertida ? 'INVERTIDA 🔄' : 'AL DERECHO ✦'}</span>
-                <p style="color:#e2d8f3; font-size:0.8rem; line-height:1.35;">${invertida ? arcano.invertido : arcano.desc}</p>
-            `;
-            showToast(`✨ Revelado: ${arcano.nombre}`);
+            const revelarFrente = () => {
+                slot.classList.remove('is-flipping');
+                slot.style.background = "rgba(30, 12, 60, 0.95)";
+                slot.style.borderColor = "#f0c674";
+                slot.innerHTML = `
+                    <img class="tarot-revealed-image tarot-front-reveal" src="${arcano.imagen}" alt="Carta ${arcano.nombre}">
+                    <h4 style="color:#f0c674; font-family:'Cinzel',serif; font-size:1rem; margin-bottom:6px;">${arcano.nombre}</h4>
+                    <span style="background:#7b1fa2; color:white; padding:2px 8px; border-radius:10px; font-size:0.7rem; font-weight:bold; margin-bottom:8px; display:inline-block;">${invertida ? 'INVERTIDA 🔄' : 'AL DERECHO ✦'}</span>
+                    <p style="color:#e2d8f3; font-size:0.8rem; line-height:1.35;">${invertida ? arcano.invertido : arcano.desc}</p>
+                `;
+                showToast(`✨ Revelado: ${arcano.nombre}`);
+            };
+
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                revelarFrente();
+                return;
+            }
+
+            slot.classList.add('is-flipping');
+            window.setTimeout(revelarFrente, 720);
         }
 
         function reiniciarLectura() {
