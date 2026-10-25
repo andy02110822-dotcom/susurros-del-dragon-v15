@@ -177,6 +177,13 @@
 
         .tarot-box { background: var(--bg-card); border: 1px solid var(--purple-glow); border-radius: 20px; padding: 2rem 1rem; text-align: center; }
         .tarot-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin: 1.5rem 0; }
+        .tarot-deck { margin: 3rem auto 1rem; }
+        .tarot-deck-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+        .tarot-deck-card { background: rgba(17, 8, 35, .92); border: 1px solid rgba(189, 95, 255, .35); border-radius: 14px; padding: .65rem; transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease; }
+        .tarot-deck-card:hover { transform: translateY(-5px); border-color: var(--text-gold); box-shadow: 0 12px 28px rgba(107, 40, 160, .32); }
+        .tarot-deck-card img, .tarot-revealed-image { display: block; width: 100%; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 9px; border: 1px solid rgba(240, 198, 116, .6); }
+        .tarot-deck-card h3 { color: var(--text-gold); font-family: 'Cinzel', serif; font-size: .8rem; line-height: 1.3; margin: .65rem .15rem .2rem; }
+        .tarot-revealed-image { width: min(100%, 185px); margin: 0 auto 12px; box-shadow: 0 10px 30px rgba(0,0,0,.45); }
 
         .cart-drawer { position: fixed; top: 0; right: -100%; width: 100%; max-width: 380px; height: 100vh; background: #090314; border-left: 1px solid var(--purple-glow); z-index: 3000; transition: right 0.4s; display: flex; flex-direction: column; padding: 1.5rem; }
         .cart-drawer.open { right: 0; }
@@ -540,6 +547,12 @@
                 <div class="tarot-grid" id="tarot-slots"></div>
                 <button class="btn-outline" onclick="reiniciarLectura()"><i class="fa-solid fa-rotate-right"></i> BARAJARA DE NUEVO</button>
             </div>
+            <section class="tarot-deck" aria-labelledby="tarot-deck-title">
+                <span class="hero-tag">✦ LOS 22 ARCANOS MAYORES ✦</span>
+                <h2 class="section-title" id="tarot-deck-title" style="color: var(--text-gold); font-size: 1.7rem; margin-top: .5rem;">MAZO DEL ORÁCULO</h2>
+                <p style="color: var(--text-muted);">Explora las cartas y descubre su mensaje en la tirada sagrada.</p>
+                <div class="tarot-deck-grid" id="tarot-deck-grid"></div>
+            </section>
         </div>
     </div>
 
@@ -1288,12 +1301,33 @@
             { nombre: "El Mundo", desc: "Culminación exitosa de un gran ciclo, integración, realización y plenitud total.", invertido: "Falta de cierre, metas incompletas a un paso de la gloria." }
         ];
 
+        const imagenesArcanosTarot = [
+            "00-el-loco.webp", "01-el-mago.webp", "02-la-sacerdotisa.webp", "03-la-emperatriz.webp",
+            "04-el-emperador.webp", "05-el-hierofante.webp", "06-los-amantes.webp", "07-el-carro.webp",
+            "08-la-fuerza.webp", "09-el-ermitano.webp", "10-la-rueda-de-la-fortuna.webp", "11-la-justicia.webp",
+            "12-el-colgado.webp", "13-la-muerte.webp", "14-la-templanza.webp", "15-el-diablo.webp",
+            "16-la-torre.webp", "17-la-estrella.webp", "18-la-luna.webp", "19-el-sol.webp",
+            "20-el-juicio.webp", "21-el-mundo.webp"
+        ];
+        arcanosTarot.forEach((arcano, index) => { arcano.imagen = `/static/images/tarot/${imagenesArcanosTarot[index]}`; });
+
         let tiradaActual = [];
 
         function inicializarTarot() {
             const grid = document.getElementById('tarot-slots');
             if(!grid) return;
             grid.innerHTML = '';
+
+            const mazo = document.getElementById('tarot-deck-grid');
+            if (mazo && !mazo.dataset.loaded) {
+                mazo.innerHTML = arcanosTarot.map(arcano => `
+                    <article class="tarot-deck-card">
+                        <img src="${arcano.imagen}" alt="Carta ${arcano.nombre}" loading="lazy">
+                        <h3>${arcano.nombre}</h3>
+                    </article>
+                `).join('');
+                mazo.dataset.loaded = 'true';
+            }
 
             const posiciones = ["PASADO / RAÍZ", "PRESENTE / ENERGÍA", "FUTURO / DESTINO"];
 
@@ -1322,6 +1356,7 @@
             slot.style.background = "rgba(30, 12, 60, 0.95)";
             slot.style.borderColor = "#f0c674";
             slot.innerHTML = `
+                <img class="tarot-revealed-image" src="${arcano.imagen}" alt="Carta ${arcano.nombre}">
                 <h4 style="color:#f0c674; font-family:'Cinzel',serif; font-size:1rem; margin-bottom:6px;">${arcano.nombre}</h4>
                 <span style="background:#7b1fa2; color:white; padding:2px 8px; border-radius:10px; font-size:0.7rem; font-weight:bold; margin-bottom:8px; display:inline-block;">${invertida ? 'INVERTIDA 🔄' : 'AL DERECHO ✦'}</span>
                 <p style="color:#e2d8f3; font-size:0.8rem; line-height:1.35;">${invertida ? arcano.invertido : arcano.desc}</p>
