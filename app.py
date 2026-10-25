@@ -245,6 +245,13 @@ def home():
 def admin():
     return render_template('index.html')
 
+@app.route('/service-worker.js')
+def service_worker():
+    response = send_from_directory(app.static_folder, 'service-worker.js', mimetype='application/javascript')
+    response.headers['Service-Worker-Allowed'] = '/'
+    response.headers['Cache-Control'] = 'no-cache'
+    return response
+
 @app.route('/static/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
