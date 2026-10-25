@@ -10,9 +10,5 @@ services:
     envVars:
       - key: SECRET_KEY
         generateValue: true
-      - key: ADMIN_USER
-        sync: false
-      - key: ADMIN_PASS
-        sync: false
       - key: SESSION_COOKIE_SECURE
         value: "true"
