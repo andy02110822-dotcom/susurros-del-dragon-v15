@@ -127,6 +127,7 @@
         }
 
         /* Caldero flotante ajustado arriba de la barra inferior */
+        .cauldron-icon { width: 22px; height: 22px; flex: 0 0 auto; color: #fff4cc; filter: drop-shadow(0 0 4px rgba(255, 225, 145, 0.65)); }
         .cart-trigger {
             position: fixed; top: 15px; right: 15px; z-index: 1600;
             background: linear-gradient(135deg, #7b1fa2, #bd5fff); padding: 8px 14px; border-radius: 30px; color: white;
@@ -225,7 +226,7 @@
     </header>
 
     <div class="cart-trigger" onclick="toggleCart()">
-        <i class="fa-solid fa-cauldron"></i>
+        <svg class="cauldron-icon" viewBox="0 0 32 32" role="img" aria-label="Caldero" xmlns="http://www.w3.org/2000/svg"><path d="M9 12c0-2 2-3 3-3s2 1 2 3m4 0c0-2 2-3 3-3s2 1 2 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M6 14h20l-2 10a9 9 0 0 1-16 0L6 14Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M4 15h3m18 0h3M11 26l-1 3m11-3 1 3M12 18h8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
         <span>CALDERO</span>
         <span id="cart-badge" style="background: var(--text-gold); color: black; border-radius: 50%; padding: 2px 7px; font-size: 0.75rem;">0</span>
     </div>
