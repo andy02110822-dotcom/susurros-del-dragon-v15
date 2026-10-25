@@ -208,7 +208,7 @@
             nav.desktop-nav a { font-size: 0.5rem; padding: 3px 1px; }
             nav.desktop-nav a i { font-size: 1rem; }
         }
-    
+
         /* Navegación flotante de cristal, integrada con el nuevo fondo */
         header {
             background: transparent;
@@ -276,6 +276,91 @@
         }
         @media (prefers-reduced-motion: reduce) {
             nav.desktop-nav a i { animation: none; }
+        }
+
+
+        /* Panel de administración con navegación lateral en el mismo lenguaje visual */
+        body.admin-mode > header, body.admin-mode .cart-trigger { display: none !important; }
+        #admin-sec > .main-container { max-width: 1500px; padding: 1rem; }
+        .admin-dashboard {
+            width: 100%; max-width: 1420px; margin: 0 auto; padding: 0; border: 0; border-radius: 0;
+            background: transparent; display: grid; grid-template-columns: 248px minmax(0, 1fr); align-items: start; gap: 1.1rem;
+        }
+        .admin-sidebar {
+            position: sticky; top: 14px; min-height: min(690px, calc(100vh - 125px)); padding: 16px 12px;
+            display: flex; flex-direction: column; gap: 18px;
+            border: 1px solid rgba(168, 220, 255, 0.3); border-radius: 22px;
+            background: linear-gradient(155deg, rgba(13, 20, 49, 0.94), rgba(42, 20, 69, 0.91));
+            box-shadow: 0 14px 36px rgba(2, 6, 20, 0.38), 0 0 18px rgba(102, 190, 255, 0.12);
+            backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+        }
+        .admin-brand { display: flex; align-items: center; gap: 10px; padding: 4px 7px 15px; border-bottom: 1px solid rgba(168, 220, 255, 0.18); }
+        .admin-brand-icon { width: 42px; height: 42px; border-radius: 15px; display: grid; place-items: center; color: #c7f1ff; background: linear-gradient(140deg, rgba(105, 78, 181, 0.9), rgba(22, 117, 164, 0.88)); box-shadow: 0 5px 16px rgba(71, 169, 230, 0.24); font-size: 1.2rem; }
+        .admin-brand strong { display: block; color: #fff; font-family: 'Cinzel', serif; letter-spacing: .7px; font-size: .95rem; }
+        .admin-brand small { display: block; color: #aeeaff; margin-top: 3px; font-size: .62rem; letter-spacing: 1.5px; }
+        .admin-side-nav { display: grid; gap: 7px; }
+        .admin-nav-item, .admin-nav-home {
+            width: 100%; min-height: 45px; display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+            color: #dcd8ef; text-align: left; font: 600 .84rem 'Plus Jakarta Sans', sans-serif; cursor: pointer;
+            border: 1px solid transparent; border-radius: 14px;
+            background: linear-gradient(145deg, rgba(22, 31, 67, 0.58), rgba(47, 28, 76, 0.58));
+            transition: transform .2s ease, color .2s ease, background .2s ease, box-shadow .2s ease, border-color .2s ease;
+        }
+        .admin-nav-item i, .admin-nav-home i { width: 20px; color: #aeeaff; text-align: center; font-size: 1rem; filter: drop-shadow(0 0 6px rgba(104,205,255,.55)); }
+        .admin-nav-item span { flex: 1; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .admin-nav-item small { min-width: 22px; padding: 3px 7px; border-radius: 20px; color: #fff; background: rgba(107,78,181,.8); text-align: center; font-size: .68rem; }
+        .admin-nav-item:hover, .admin-nav-home:hover, .admin-nav-item.active {
+            color: #fff; border-color: rgba(195,238,255,.55); background: linear-gradient(135deg, rgba(91,55,142,.9), rgba(18,91,137,.9));
+            box-shadow: 0 7px 18px rgba(2,6,20,.34), 0 0 14px rgba(112,204,255,.2); transform: translateX(3px);
+        }
+        .admin-nav-item.active i, .admin-nav-item:hover i, .admin-nav-home:hover i { color: #f1d4ff; }
+        .admin-nav-home { margin-top: auto; border-color: rgba(168,220,255,.16); color: #c9eaff; }
+        .admin-workspace { min-width: 0; }
+        .admin-header {
+            min-height: 78px; margin-bottom: 12px; padding: 12px 16px; display: flex; justify-content: space-between;
+            align-items: center; gap: 12px; border: 1px solid rgba(168,220,255,.24); border-radius: 20px;
+            background: linear-gradient(120deg,rgba(13,20,49,.86),rgba(42,20,69,.78));
+            box-shadow: 0 8px 22px rgba(2,6,20,.22); backdrop-filter: blur(10px);
+        }
+        .admin-eyebrow { color: #aeeaff; font-size: .65rem; font-weight: 700; letter-spacing: 1.7px; }
+        .admin-header h2 { color: #fff; margin-top: 5px; margin-bottom: 0; font-size: 1.25rem; letter-spacing: .8px; }
+        .admin-logout {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px; flex: 0 0 auto; padding: 9px 13px;
+            color: #ffe8ef; background: rgba(153,45,91,.34); border: 1px solid rgba(255,151,184,.38);
+            border-radius: 12px; font: 600 .78rem 'Plus Jakarta Sans', sans-serif; cursor: pointer;
+        }
+        .admin-logout:hover { background: rgba(190,54,108,.52); }
+        .admin-content {
+            min-height: 420px; padding: 18px; border: 1px solid rgba(168,220,255,.26); border-radius: 22px;
+            background: linear-gradient(145deg, rgba(8,13,34,.9), rgba(24,12,43,.88));
+            box-shadow: 0 14px 34px rgba(2,6,20,.3); backdrop-filter: blur(12px);
+        }
+        .admin-content > form, .admin-content > #tab-admin-citas { max-width: 920px; margin: 0 auto; }
+        .admin-content > form h3, .admin-content > #tab-admin-citas h3 { color: #b8edff !important; }
+        .admin-content .form-input { background: rgba(6,10,26,.82); }
+        .admin-content .form-group label { color: #c9b9ff; }
+        #admin-login-box { margin-top: 3rem; }
+        @media (max-width: 860px) {
+            .admin-dashboard { grid-template-columns: 205px minmax(0,1fr); gap: .75rem; }
+            .admin-sidebar { padding: 13px 9px; }
+            .admin-content { padding: 14px; }
+        }
+        @media (max-width: 680px) {
+            #admin-sec > .main-container { padding: .75rem .65rem; }
+            .admin-dashboard { grid-template-columns: 1fr; gap: .7rem; }
+            .admin-sidebar { position: static; min-height: 0; padding: 12px; gap: 11px; }
+            .admin-brand { padding-bottom: 10px; }
+            .admin-side-nav { display: flex; gap: 7px; overflow-x: auto; padding: 2px 1px 6px; scrollbar-width: thin; }
+            .admin-nav-item { width: auto; min-width: 112px; min-height: 55px; flex: 0 0 auto; padding: 8px 10px; flex-direction: column; justify-content: center; gap: 5px; text-align: center; font-size: .68rem; }
+            .admin-nav-item i { font-size: 1.05rem; }
+            .admin-nav-item span { display: block; white-space: nowrap; }
+            .admin-nav-item small { display: inline-block; margin-left: 3px; }
+            .admin-nav-home { margin-top: 0; width: auto; align-self: flex-start; }
+            .admin-header { min-height: 68px; padding: 10px 12px; }
+            .admin-header h2 { font-size: 1rem; }
+            .admin-eyebrow { font-size: .57rem; }
+            .admin-logout { padding: 8px 9px; font-size: .68rem; }
+            .admin-content { min-height: 320px; padding: 12px; }
         }
 
     </style>
@@ -470,20 +555,29 @@
                 </form>
             </div>
 
-            <div id="admin-panel-control" class="admin-form-wrap" style="display: none;">
-                <button onclick="cerrarSesionAdmin()" style="float: right; background: #dc3545; color: white; border: none; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem;">Cerrar Sesión</button>
-                <h2 class="section-title" style="color: var(--text-gold); margin-bottom: 1rem; font-size: 1.4rem;">GESTIÓN PANEL</h2>
-
-                <div class="admin-tabs-btn" style="display: flex; gap: 8px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px;">
-                    <button class="btn-outline" onclick="switchAdminTab('citas')">Ver Citas (<span id="citas-count">0</span>)</button>
-                    <button class="btn-outline" onclick="switchAdminTab('personalizado')">Personalizado</button>
-                    <button class="btn-outline" onclick="switchAdminTab('ritual')">Ritual</button>
-                    <button class="btn-outline" onclick="switchAdminTab('producto')">Producto</button>
-                    <button class="btn-outline" onclick="switchAdminTab('remedio')">Remedio</button>
-                    <button class="btn-outline" onclick="switchAdminTab('suscripcion')">Suscripción</button>
-                    <button class="btn-outline" onclick="switchAdminTab('foro')">Foro</button>
-                </div>
-
+            <div id="admin-panel-control" class="admin-dashboard" style="display: none;">
+                <aside class="admin-sidebar" aria-label="Navegación administrativa">
+                    <div class="admin-brand">
+                        <span class="admin-brand-icon"><i class="fa-solid fa-dragon"></i></span>
+                        <span><strong>Susurros</strong><small>ADMINISTRACIÓN</small></span>
+                    </div>
+                    <nav class="admin-side-nav" aria-label="Secciones de administración">
+                        <button type="button" class="admin-nav-item active" data-admin-tab="citas" onclick="switchAdminTab('citas')"><i class="fa-solid fa-calendar-check"></i><span>Citas <small id="citas-count">0</small></span></button>
+                        <button type="button" class="admin-nav-item" data-admin-tab="personalizado" onclick="switchAdminTab('personalizado')"><i class="fa-solid fa-wand-sparkles"></i><span>Personalizados</span></button>
+                        <button type="button" class="admin-nav-item" data-admin-tab="ritual" onclick="switchAdminTab('ritual')"><i class="fa-solid fa-moon"></i><span>Rituales</span></button>
+                        <button type="button" class="admin-nav-item" data-admin-tab="producto" onclick="switchAdminTab('producto')"><i class="fa-solid fa-gem"></i><span>Productos</span></button>
+                        <button type="button" class="admin-nav-item" data-admin-tab="remedio" onclick="switchAdminTab('remedio')"><i class="fa-solid fa-leaf"></i><span>Remedios</span></button>
+                        <button type="button" class="admin-nav-item" data-admin-tab="suscripcion" onclick="switchAdminTab('suscripcion')"><i class="fa-solid fa-crown"></i><span>Suscripciones</span></button>
+                        <button type="button" class="admin-nav-item" data-admin-tab="foro" onclick="switchAdminTab('foro')"><i class="fa-solid fa-comments"></i><span>Foro</span></button>
+                    </nav>
+                    <button type="button" class="admin-nav-home" onclick="showSection('inicio')"><i class="fa-solid fa-arrow-left"></i><span>Volver al sitio</span></button>
+                </aside>
+                <section class="admin-workspace">
+                    <div class="admin-header">
+                        <div><span class="admin-eyebrow"><i class="fa-solid fa-sparkles"></i> SANTUARIO DIGITAL</span><h2 class="section-title">Panel de administración</h2></div>
+                        <button type="button" onclick="cerrarSesionAdmin()" class="admin-logout"><i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión</button>
+                    </div>
+                    <div class="admin-content">
                 <!-- Lista Citas -->
                 <div id="tab-admin-citas">
                     <h3 style="color: var(--text-gold); margin-bottom: 10px; font-size: 1.1rem;"><i class="fa-solid fa-calendar-days"></i> Citas Agendadas por Clientes</h3>
@@ -496,7 +590,7 @@
                     <div class="form-group"><label>Nombre del Elemento</label><input type="text" id="pers-nombre" class="form-input" required placeholder="Ej: Amuleto de Protección Personal"></div>
                     <div class="form-group"><label>Tipo</label><input type="text" id="pers-tipo" class="form-input" placeholder="Ej: Amuleto / Velón / Saquito Ritual"></div>
                     <div class="form-group"><label>Precio Base ($ COP)</label><input type="number" id="pers-precio" class="form-input" required placeholder="60000"></div>
-                    
+
                     <div class="form-group">
                         <label>Subir Imagen (.jpg, .png, .webp)</label>
                         <input type="file" id="pers-file" class="form-input" accept=".jpg,.jpeg,.png,.webp,.gif">
@@ -519,7 +613,7 @@
                     <div class="form-group"><label>Categoría</label><input type="text" id="rit-cat" class="form-input" placeholder="Ej: Protección / Abundancia / Amor"></div>
                     <div class="form-group"><label>Precio ($ COP)</label><input type="number" id="rit-precio" class="form-input" required placeholder="75000"></div>
                     <div class="form-group"><label>Duración / Modalidad</label><input type="text" id="rit-dur" class="form-input" placeholder="Ej: 1 Sesión / Presencial o Distancia"></div>
-                    
+
                     <div class="form-group">
                         <label>Subir Imagen (.jpg, .png, .webp)</label>
                         <input type="file" id="rit-file" class="form-input" accept=".jpg,.jpeg,.png,.webp,.gif">
@@ -540,7 +634,7 @@
                     <h3 style="color: var(--text-gold); margin-bottom: 8px; font-size: 1.1rem;">Nuevo Producto</h3>
                     <div class="form-group"><label>Nombre</label><input type="text" id="p-nombre" class="form-input" required></div>
                     <div class="form-group"><label>Precio ($ COP)</label><input type="number" id="p-precio" class="form-input" required></div>
-                    
+
                     <div class="form-group">
                         <label>Subir Imagen (.jpg, .png, .webp)</label>
                         <input type="file" id="p-file" class="form-input" accept=".jpg,.jpeg,.png,.webp,.gif">
@@ -560,7 +654,7 @@
                     <h3 style="color: var(--text-gold); margin-bottom: 8px; font-size: 1.1rem;">Nuevo Remedio Natural</h3>
                     <div class="form-group"><label>Nombre del Remedio</label><input type="text" id="r-nombre" class="form-input" required></div>
                     <div class="form-group"><label>Precio ($ COP)</label><input type="number" id="r-precio" class="form-input" required></div>
-                    
+
                     <div class="form-group">
                         <label>Subir Imagen (.jpg, .png, etc.)</label>
                         <input type="file" id="r-file" class="form-input" accept=".jpg,.jpeg,.png,.webp,.gif">
@@ -592,7 +686,7 @@
                     <h3 style="color: var(--text-gold); margin-bottom: 8px; font-size: 1.1rem;">Publicar Tema Semanal</h3>
                     <div class="form-group"><label>Título</label><input type="text" id="f-titulo" class="form-input" required></div>
                     <div class="form-group"><label>Semana</label><input type="text" id="f-semana" class="form-input" placeholder="Semana 43"></div>
-                    
+
                     <div class="form-group">
                         <label>Subir Imagen (.jpg, .png, .webp)</label>
                         <input type="file" id="f-file" class="form-input" accept=".jpg,.jpeg,.png,.webp,.gif">
@@ -606,6 +700,8 @@
                     <div class="form-group"><label>Contenido</label><textarea id="f-contenido" class="form-input" rows="4" required></textarea></div>
                     <button type="submit" class="btn-purple" style="width: 100%;">PUBLICAR EN FORO</button>
                 </form>
+                    </div>
+                </section>
             </div>
         </div>
     </div>
@@ -616,7 +712,7 @@
             <button onclick="cerrarModalCustom()" style="position: absolute; top: 12px; right: 15px; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">&times;</button>
             <h3 style="color: var(--text-gold); margin-bottom: 6px; font-size: 1.2rem;" id="modal-item-title">PERSONALIZAR ELEMENTO</h3>
             <p style="color: #c4b5fd; font-size: 0.8rem; margin-bottom: 12px;" id="modal-item-desc"></p>
-            
+
             <form onsubmit="confirmarAgregarCustom(event)">
                 <input type="hidden" id="custom-base-nombre">
                 <input type="hidden" id="custom-base-precio">
@@ -714,7 +810,7 @@
             const d = await res.json();
             estaAutenticado = d.authenticated;
             document.getElementById('admin-login-box').style.display = estaAutenticado ? 'none' : 'block';
-            document.getElementById('admin-panel-control').style.display = estaAutenticado ? 'block' : 'none';
+            document.getElementById('admin-panel-control').style.display = estaAutenticado ? 'grid' : 'none';
             if(estaAutenticado) cargarCitasAdmin();
         }
 
@@ -957,7 +1053,7 @@
             data.forEach(f => {
                 let del = estaAutenticado ? `<button class="delete-btn" onclick="eliminarItem('foro', ${f.id})"><i class="fa-solid fa-trash"></i></button>` : '';
                 let imgHtml = f.imagen ? `<img src="${f.imagen}" style="width:100%; max-height:300px; object-fit:cover; border-radius:12px; margin-bottom:12px; border:1px solid var(--border-glow);">` : '';
-                
+
                 container.innerHTML += `
                     <div class="foro-item">
                         ${del}
@@ -972,6 +1068,9 @@
         }
 
         function switchAdminTab(tab) {
+            document.querySelectorAll('.admin-nav-item[data-admin-tab]').forEach(item => {
+                item.classList.toggle('active', item.dataset.adminTab === tab);
+            });
             document.getElementById('tab-admin-citas').style.display = tab === 'citas' ? 'block' : 'none';
             document.getElementById('form-admin-personalizado').style.display = tab === 'personalizado' ? 'block' : 'none';
             document.getElementById('form-admin-ritual').style.display = tab === 'ritual' ? 'block' : 'none';
@@ -1147,10 +1246,11 @@
         }
 
         function showSection(sec) {
+            document.body.classList.toggle('admin-mode', sec === 'admin');
             ['inicio', 'personalizados', 'citas', 'rituales', 'catalogo', 'remedios', 'suscripciones', 'foro', 'tarot', 'admin'].forEach(s => {
                 const el = document.getElementById(`${s}-sec`);
                 if(el) el.style.display = (s === sec) ? 'block' : 'none';
-                
+
                 const n = document.getElementById(`nav-${s}`);
                 if(n) n.classList.toggle('active', s === sec);
             });
@@ -1194,9 +1294,9 @@
             const grid = document.getElementById('tarot-slots');
             if(!grid) return;
             grid.innerHTML = '';
-            
+
             const posiciones = ["PASADO / RAÍZ", "PRESENTE / ENERGÍA", "FUTURO / DESTINO"];
-            
+
             for(let i=0; i<3; i++) {
                 grid.innerHTML += `
                     <div class="card-slot" id="slot-${i}" onclick="revelarCarta(${i})" style="background: linear-gradient(145deg, #140a26, #220d42); border: 1px solid rgba(189,95,255,0.4); border-radius: 16px; padding: 1.8rem 1rem; cursor: pointer; min-height: 230px; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: all 0.3s;">
@@ -1212,12 +1312,12 @@
 
         function revelarCarta(idx) {
             if(tiradaActual[idx] !== null) return;
-            
+
             const arcano = arcanosTarot[Math.floor(Math.random() * arcanosTarot.length)];
             const invertida = Math.random() < 0.35;
-            
+
             tiradaActual[idx] = { arcano, invertida };
-            
+
             const slot = document.getElementById(`slot-${idx}`);
             slot.style.background = "rgba(30, 12, 60, 0.95)";
             slot.style.borderColor = "#f0c674";
