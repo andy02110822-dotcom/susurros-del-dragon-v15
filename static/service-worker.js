@@ -1,8 +1,10 @@
-const CACHE_NAME = "susurros-dragon-shell-v1";
+const CACHE_NAME = "susurros-dragon-shell-v2";
 const APP_SHELL = [
   "/",
   "/static/images/logo-dragon.jpeg",
-  "/static/images/Gemini_Generated_Image_we3nw5we3nw5we3n.jpg"
+  "/static/images/fondo-mistico-dragones.jpg",
+  "/static/images/app-icon-192.png",
+  "/static/images/app-icon-512.png"
 ];
 
 self.addEventListener("install", (event) => {
