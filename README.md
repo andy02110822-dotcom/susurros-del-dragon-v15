@@ -19,9 +19,9 @@ En producción usa HTTPS y configura `SESSION_COOKIE_SECURE=true`. La aplicació
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/andy02110822-dotcom/susurros-del-dragon-v15)
 
 1. Abre el botón **Deploy to Render** y conecta GitHub con Render si te lo solicita.
-2. Revisa el servicio definido en `render.yaml`; el plan configurado es gratuito.
-3. Cuando Render lo pida, define `ADMIN_USER` y `ADMIN_PASS` con valores nuevos y únicos. Nunca uses credenciales antiguas ni las publiques en el repositorio.
-4. Crea el servicio y espera a que termine el primer deploy. Render mostrará una dirección pública `onrender.com`.
+2. Revisa el servicio definido en `render.yaml`; el plan configurado es gratuito y la clave de sesión la genera Render.
+3. Crea el servicio y espera a que termine el primer deploy. Render mostrará una dirección pública `onrender.com`.
+4. El inicio del panel administrativo queda deshabilitado en esta vista previa. Si necesitas administrarlo, añade `ADMIN_USER` y `ADMIN_PASS` como variables secretas en Render, con valores nuevos y únicos.
 
 La primera visita puede tardar aproximadamente un minuto si el servicio gratuito se ha detenido por inactividad. En el plan gratuito el sistema de archivos es temporal: los cambios en SQLite y los archivos de imagen cargados pueden perderse al reiniciarse o redeplegarse. Usa almacenamiento persistente antes de utilizar la app con datos reales.
 
