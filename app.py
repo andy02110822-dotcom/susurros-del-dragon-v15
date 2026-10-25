@@ -241,6 +241,10 @@ def init_db():
 def home():
     return render_template('index.html')
 
+@app.route('/admin')
+def admin():
+    return render_template('index.html')
+
 @app.route('/static/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
