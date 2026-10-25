@@ -177,6 +177,8 @@
 
         .tarot-box { background: var(--bg-card); border: 1px solid var(--purple-glow); border-radius: 20px; padding: 2rem 1rem; text-align: center; }
         .tarot-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin: 1.5rem 0; }
+        .tarot-card-back { display: block; width: min(100%, 150px); aspect-ratio: 2 / 3; object-fit: cover; border-radius: 10px; border: 1px solid rgba(240,198,116,.7); box-shadow: 0 8px 22px rgba(0,0,0,.42); margin-bottom: 10px; transition: transform .25s ease, box-shadow .25s ease; }
+        .card-slot:hover .tarot-card-back { transform: translateY(-4px) rotate(-1deg); box-shadow: 0 12px 28px rgba(189,95,255,.28); }
         .tarot-deck { margin: 3rem auto 1rem; }
         .tarot-deck-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
         .tarot-deck-card { background: rgba(17, 8, 35, .92); border: 1px solid rgba(189, 95, 255, .35); border-radius: 14px; padding: .65rem; transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease; }
@@ -1404,8 +1406,8 @@
 
             for(let i=0; i<3; i++) {
                 grid.innerHTML += `
-                    <div class="card-slot" id="slot-${i}" onclick="revelarCarta(${i})" style="background: linear-gradient(145deg, #140a26, #220d42); border: 1px solid rgba(189,95,255,0.4); border-radius: 16px; padding: 1.8rem 1rem; cursor: pointer; min-height: 230px; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: all 0.3s;">
-                        <i class="fa-solid fa-moon" style="font-size: 2.2rem; color: #bd5fff; margin-bottom: 12px;"></i>
+                    <div class="card-slot" id="slot-${i}" onclick="revelarCarta(${i})" style="background: linear-gradient(145deg, #140a26, #220d42); border: 1px solid rgba(189,95,255,0.4); border-radius: 16px; padding: 1rem; cursor: pointer; min-height: 320px; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: all 0.3s;">
+                        <img class="tarot-card-back" src="/static/images/tarot/reverso.webp" alt="Reverso de una carta del tarot">
                         <h4 style="color:#f0c674; font-family:'Cinzel',serif; margin-bottom:4px; font-size:1rem;">CARTA ${i+1}</h4>
                         <span style="color:#a496c4; font-size:0.75rem; text-transform:uppercase;">${posiciones[i]}</span>
                         <p style="color:#d8b4fe; font-size:0.8rem; margin-top:8px; font-style:italic;">(Toca para revelar)</p>
