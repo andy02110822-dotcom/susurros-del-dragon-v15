@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Susurros del Dragón | Santuario, Personalizados & Ritualística</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-dark: #05020a;
+            --bg-card: rgba(20, 10, 38, 0.85);
+            --purple-main: #7b1fa2;
+            --purple-glow: #bd5fff;
+            --text-light: #f3f0f7;
+            --text-gold: #f0c674;
+            --border-glow: rgba(189, 95, 255, 0.3);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(123, 31, 162, 0.35), transparent 70%),
+                radial-gradient(circle at 80% 60%, rgba(42, 0, 78, 0.3), transparent 50%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            /* Margen inferior para que la barra fija no tape contenido */
+            padding-bottom: 80px;
+        }
+
+        h1, h2, h3, .brand-title, .section-title { font-family: 'Cinzel', serif; letter-spacing: 1.5px; }
+
+        .top-banner {
+            background: linear-gradient(90deg, #190033, #4a0072, #190033);
+            color: var(--text-gold);
+            text-align: center;
+            font-size: 0.78rem;
+            padding: 8px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border-glow);
+            box-shadow: 0 0 15px rgba(189, 95, 255, 0.25);
+        }
+
+        /* HEADER / BARRA DE NAVEGACIÓN FIJA EN LA PARTE INFERIOR */
+        header {
+            background: rgba(5, 2, 10, 0.98);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--purple-glow);
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 68px;
+            z-index: 1500;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 5px;
+            box-shadow: 0 -5px 25px rgba(123, 31, 162, 0.4);
+        }
+
+        .logo-container { display: none; } /* Ocultamos el logo en la barra inferior para ganar espacio limpio */
+
+        nav.desktop-nav {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            width: 100%;
+            gap: 2px;
+        }
+
+        nav.desktop-nav a {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #a496c4;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.58rem;
+            transition: all 0.3s;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            padding: 4px 2px;
+            border-radius: 8px;
+            text-transform: uppercase;
+            flex: 1;
+            text-align: center;
+            gap: 2px;
+        }
+
+        nav.desktop-nav a i { font-size: 1.1rem; margin-bottom: 1px; }
+
+        nav.desktop-nav a:hover, nav.desktop-nav a.active {
+            color: var(--text-gold);
+            background: rgba(123, 31, 162, 0.3);
+        }
+
+        .btn-admin-nav {
+            background: linear-gradient(135deg, #4a148c, #7b1fa2);
+            border: 1px solid var(--purple-glow);
+            color: #fff !important;
+            border-radius: 12px;
+        }
+
+        /* Caldero flotante ajustado arriba de la barra inferior */
+        .cart-trigger {
+            position: fixed; top: 15px; right: 15px; z-index: 1600;
+            background: linear-gradient(135deg, #7b1fa2, #bd5fff); padding: 8px 14px; border-radius: 30px; color: white;
+            cursor: pointer; box-shadow: 0 0 20px rgba(189, 95, 255, 0.5); display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 0.8rem;
+            transition: transform 0.3s;
+        }
+
+        .hero-portal {
+            text-align: center; padding: 2.5rem 1rem 2rem 1rem;
+            background: radial-gradient(circle, rgba(123, 31, 162, 0.2) 0%, transparent 70%); border-bottom: 1px solid var(--border-glow);
+        }
+        .hero-tag { color: var(--text-gold); font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; display: inline-block; }
+        .hero-portal h1 { font-size: 2.2rem; color: #ffffff; margin-bottom: 12px; text-shadow: 0 0 20px var(--purple-glow); }
+        .hero-portal p { max-width: 650px; margin: 0 auto 1.5rem auto; color: #c4b5fd; font-size: 0.95rem; line-height: 1.6; }
+
+        .hero-buttons { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        .btn-purple {
+            background: linear-gradient(135deg, var(--purple-main), var(--purple-glow)); color: white; padding: 10px 22px; border-radius: 30px;
+            font-weight: 700; border: 1px solid var(--purple-glow); cursor: pointer; box-shadow: 0 0 20px rgba(189, 95, 255, 0.4); transition: all 0.3s;
+            text-transform: uppercase; letter-spacing: 1px; font-size: 0.82rem;
+        }
+        .btn-outline {
+            background: rgba(20, 10, 38, 0.8); color: var(--text-light); padding: 10px 22px; border-radius: 30px; font-weight: 600;
+            border: 1px solid var(--border-glow); cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px; font-size: 0.82rem;
+        }
+
+        .main-container { max-width: 1200px; margin: 0 auto; padding: 1.5rem 1rem; }
+
+        .grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
+        .custom-card {
+            background: var(--bg-card); border: 1px solid var(--border-glow); border-radius: 16px; overflow: hidden;
+            display: flex; flex-direction: column; position: relative;
+        }
+
+        .card-body { padding: 1.2rem; display: flex; flex-direction: column; flex-grow: 1; }
+        .card-price { font-size: 1.25rem; font-weight: 800; color: var(--text-gold); }
+
+        .delete-btn { position: absolute; top: 10px; right: 10px; background: rgba(220, 53, 69, 0.9); color: white; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; z-index: 10; }
+
+        .foro-item { background: var(--bg-card); border: 1px solid var(--border-glow); border-radius: 16px; padding: 1.5rem; margin-bottom: 15px; position: relative; }
+        .foro-badge { background: var(--purple-main); color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; display: inline-block; margin-bottom: 8px; }
+
+        .tarot-box { background: var(--bg-card); border: 1px solid var(--purple-glow); border-radius: 20px; padding: 2rem 1rem; text-align: center; }
+        .tarot-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin: 1.5rem 0; }
+
+        .cart-drawer { position: fixed; top: 0; right: -100%; width: 100%; max-width: 380px; height: 100vh; background: #090314; border-left: 1px solid var(--purple-glow); z-index: 3000; transition: right 0.4s; display: flex; flex-direction: column; padding: 1.5rem; }
+        .cart-drawer.open { right: 0; }
+        .btn-wa-checkout { background: #25d366; color: white; width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: 800; font-size: 0.95rem; cursor: pointer; margin-top: 1rem; display: flex; align-items: center; justify-content: center; gap: 10px; }
+
+        .admin-form-wrap { max-width: 650px; margin: 0 auto; background: var(--bg-card); border: 1px solid var(--purple-glow); padding: 1.5rem; border-radius: 20px; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: 5px; color: var(--text-gold); font-weight: 600; font-size: 0.85rem; }
+        .form-input { width: 100%; padding: 10px; background: rgba(5, 2, 10, 0.9); border: 1px solid var(--border-glow); border-radius: 8px; color: white; font-size: 0.95rem; }
+
+        .toast { position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #4a148c, #7b1fa2); border: 1px solid var(--purple-glow); color: white; padding: 12px 20px; border-radius: 25px; display: none; z-index: 3500; font-weight: 600; font-size: 0.85rem; text-align: center; white-space: nowrap; box-shadow: 0 5px 20px rgba(0,0,0,0.8); }
+
+        .cita-card-admin { background: rgba(10, 5, 25, 0.9); border: 1px solid var(--border-glow); padding: 12px; border-radius: 12px; margin-bottom: 10px; position: relative; }
+
+        /* MODAL PERSONALIZAR */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 3500; display: none; justify-content: center; align-items: center; padding: 15px; }
+        .modal-content { background: #0c051a; border: 1px solid var(--purple-glow); width: 100%; max-width: 500px; border-radius: 20px; padding: 1.5rem; position: relative; box-shadow: 0 0 30px rgba(189,95,255,0.4); }
+
+        @media (max-width: 768px) {
+            .hero-portal h1 { font-size: 1.8rem; }
+            .cart-trigger { top: 12px; right: 10px; padding: 6px 10px; font-size: 0.72rem; }
+            .main-container { padding: 1rem 0.8rem; }
+            .grid-cards { grid-template-columns: 1fr; }
+            .admin-tabs-btn { flex-wrap: wrap; }
+            .admin-tabs-btn button { font-size: 0.72rem; padding: 6px 10px; }
+            nav.desktop-nav a { font-size: 0.5rem; padding: 3px 1px; }
+            nav.desktop-nav a i { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-banner">✦ ENVÍOS MÍSTICOS A TODO EL REINO | RITUALES & PERSONALIZADOS ✦</div>
+
+    <!-- BARRA DE NAVEGACIÓN FIJA EN LA PARTE INFERIOR -->
+    <header>
+        <div class="logo-container"></div>
+        <nav class="desktop-nav">
+            <a onclick="showSection('inicio')" id="nav-inicio" class="active"><i class="fa-solid fa-house"></i>Inicio</a>
+            <a onclick="showSection('personalizados')" id="nav-personalizados"><i class="fa-solid fa-wand-sparkles"></i>Custom</a>
+            <a onclick="showSection('citas')" id="nav-citas"><i class="fa-solid fa-calendar-check"></i>Agendar</a>
+            <a onclick="showSection('rituales')" id="nav-rituales"><i class="fa-solid fa-wand-magic-sparkles"></i>Ritual</a>
+            <a onclick="showSection('catalogo')" id="nav-catalogo"><i class="fa-solid fa-gem"></i>Tienda</a>
+            <a onclick="showSection('remedios')" id="nav-remedios"><i class="fa-solid fa-leaf"></i>Remedio</a>
+            <a onclick="showSection('suscripciones')" id="nav-suscripciones"><i class="fa-solid fa-crown"></i>VIP</a>
+            <a onclick="showSection('foro')" id="nav-foro"><i class="fa-solid fa-comments"></i>Foro</a>
+            <a onclick="showSection('tarot')" id="nav-tarot"><i class="fa-solid fa-moon"></i>Tarot</a>
+            <a onclick="showSection('admin')" id="nav-admin" class="btn-admin-nav"><i class="fa-solid fa-lock"></i>Admin</a>
+        </nav>
+    </header>
+
+    <div class="cart-trigger" onclick="toggleCart()">
+        <i class="fa-solid fa-cauldron"></i>
+        <span>CALDERO</span>
+        <span id="cart-badge" style="background: var(--text-gold); color: black; border-radius: 50%; padding: 2px 7px; font-size: 0.75rem;">0</span>
+    </div>
+
+    <!-- SECCIÓN INICIO -->
+    <div id="inicio-sec">
+        <div class="hero-portal">
+            <span class="hero-tag">✦ ALQUIMIA, RITUALES & SABIDURÍA ✦</span>
+            <h1>SUSURROS DEL DRAGÓN</h1>
+            <p>Diseña amuletos, velas y trabajos totalmente personalizados con tu nombre, intenciones y piedras rituales preparadas a medida.</p>
+            <div class="hero-buttons">
+                <button class="btn-purple" onclick="showSection('personalizados')"><i class="fa-solid fa-wand-sparkles"></i> CREAR PERSONALIZADO</button>
+                <button class="btn-outline" onclick="showSection('citas')"><i class="fa-solid fa-calendar-check"></i> AGENDAR CITA</button>
+                <button class="btn-purple" onclick="showSection('catalogo')"><i class="fa-solid fa-gem"></i> CATÁLOGO</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN PERSONALIZADOS -->
+    <div id="personalizados-sec" style="display: none;">
+        <div class="main-container">
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <span class="hero-tag">✦ HECHO ESPECIALMENTE PARA TI ✦</span>
+                <h2 class="section-title" style="color: var(--text-gold); font-size: 1.8rem;">PRODUCTOS & AMULETOS PERSONALIZADOS</h2>
+                <p style="color: #c4b5fd; font-size: 0.9rem; max-width: 650px; margin: 8px auto 0 auto;">Elige un modelo y personalízalo con tu nombre, fecha de nacimiento, intención mágica y minerales preferidos.</p>
+            </div>
+            <div class="grid-cards" id="personalizados-grid"></div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN AGENDAR CITAS Y ASESORÍAS -->
+    <div id="citas-sec" style="display: none;">
+        <div class="main-container">
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <span class="hero-tag">✦ ATENCIÓN PERSONALIZADA ✦</span>
+                <h2 class="section-title" style="color: var(--text-gold); font-size: 1.8rem;">PROGRAMA TU CITA O ASESORÍA</h2>
+                <p style="color: #c4b5fd; font-size: 0.9rem; max-width: 600px; margin: 8px auto 0 auto;">Elige el día, la hora y el tipo de servicio (asesoría privada o diagnóstico para preparación de rituales).</p>
+            </div>
+
+            <div class="admin-form-wrap">
+                <form id="form-publico-cita" onsubmit="solicitarCitaCliente(event)">
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-user"></i> Tu Nombre Completo *</label>
+                        <input type="text" id="c-nombre" class="form-input" required placeholder="Ej: María Fernanda Gómez">
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-phone"></i> Teléfono / WhatsApp *</label>
+                        <input type="tel" id="c-telefono" class="form-input" required placeholder="Ej: +57 321 825 9526">
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-wand-magic-sparkles"></i> Tipo de Servicio *</label>
+                        <select id="c-servicio" class="form-input" style="background: #090314;">
+                            <option value="Asesoría Mística & Lectura Diagnóstica">🔮 Asesoría Mística & Lectura Diagnóstica</option>
+                            <option value="Programación de Ritual Personalizado">🕯️ Programación de Ritual Personalizado</option>
+                            <option value="Consulta sobre Remedios Naturales">🌿 Consulta sobre Remedios Naturales</option>
+                            <option value="Revisión de Membresía / Círculo VIP">⭐ Revisión de Membresía VIP</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-location-dot"></i> Modalidad *</label>
+                        <select id="c-modalidad" class="form-input" style="background: #090314;">
+                            <option value="Virtual (Videollamada / WhatsApp)">Virtual (Videollamada / WhatsApp)</option>
+                            <option value="Presencial (Santuario)">Presencial (Santuario)</option>
+                        </select>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div class="form-group">
+                            <label><i class="fa-solid fa-calendar"></i> Fecha Preferida *</label>
+                            <input type="date" id="c-fecha" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fa-solid fa-clock"></i> Hora Preferida *</label>
+                            <input type="time" id="c-hora" class="form-input" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fa-solid fa-comment-dots"></i> Motivo o Detalles Adicionales</label>
+                        <textarea id="c-notas" class="form-input" rows="3" placeholder="Cuéntanos brevemente qué deseas consultar o qué situación quieres trabajar..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-purple" style="width: 100%; font-size: 0.95rem; padding: 12px;"><i class="fa-solid fa-paper-plane"></i> CONFIRMAR & NOTIFICAR POR WHATSAPP</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN RITUALES -->
+    <div id="rituales-sec" style="display: none;">
+        <div class="main-container">
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <span class="hero-tag">✦ ALQUIMIA & TRABAJOS SAGRADOS ✦</span>
+                <h2 class="section-title" style="color: var(--text-gold); font-size: 1.8rem;">RITUALES OFRECIDOS</h2>
+            </div>
+            <div class="grid-cards" id="rituales-grid"></div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN CATÁLOGO -->
+    <div id="catalogo-sec" style="display: none;">
+        <div class="main-container">
+            <h2 class="section-title" style="color: var(--text-gold); text-align: center; font-size: 1.8rem; margin-bottom: 1.5rem;">CATÁLOGO DE PRODUCTOS</h2>
+            <div class="grid-cards" id="products-grid"></div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN REMEDIOS NATURALES -->
+    <div id="remedios-sec" style="display: none;">
+        <div class="main-container">
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <span class="hero-tag">✦ HERBOLARIA BOTÁNICA ✦</span>
+                <h2 class="section-title" style="color: var(--text-gold); font-size: 1.8rem;">REMEDIOS NATURALES</h2>
+            </div>
+            <div class="grid-cards" id="remedios-grid"></div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN SUSCRIPCIONES -->
+    <div id="suscripciones-sec" style="display: none;">
+        <div class="main-container">
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <span class="hero-tag">✦ CÍRCULO VIP DE MAGIA ✦</span>
+                <h2 class="section-title" style="color: var(--text-gold); font-size: 1.8rem;">MEMBRESÍAS & SUSCRIPCIONES</h2>
+            </div>
+            <div class="grid-cards" id="suscripciones-grid"></div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN FORO SEMANAL -->
+    <div id="foro-sec" style="display: none;">
+        <div class="main-container">
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <span class="hero-tag">✦ DIÁLOGOS DE LA GUARDIA ✦</span>
+                <h2 class="section-title" style="color: var(--text-gold); font-size: 1.8rem;">FORO SEMANAL DE DISCUSIÓN</h2>
+            </div>
+            <div id="foro-container"></div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN TAROT -->
+    <div id="tarot-sec" style="display: none;">
+        <div class="main-container">
+            <div class="tarot-box">
+                <span class="hero-tag">✦ ORÁCULO DEL DRAGÓN ✦</span>
+                <h2 class="section-title" style="color: var(--text-gold); font-size: 1.8rem; margin-bottom: 8px;">TIRADA SAGRADA DE CARTAS</h2>
+                <div class="tarot-grid" id="tarot-slots"></div>
+                <button class="btn-outline" onclick="reiniciarLectura()"><i class="fa-solid fa-rotate-right"></i> BARAJARA DE NUEVO</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN PANEL -->
+    <div id="admin-sec" style="display: none;">
+        <div class="main-container">
+            <div id="admin-login-box" class="admin-form-wrap">
+                <h2 class="section-title" style="color: var(--text-gold); text-align: center; margin-bottom: 1rem; font-size: 1.5rem;"><i class="fa-solid fa-shield-halved"></i> PANEL GUARDIÁN</h2>
+                <form onsubmit="procesarLoginAdmin(event)">
+                    <div class="form-group"><label>USUARIO</label><input type="text" id="a-user" class="form-input" required placeholder="Ingresa usuario admin"></div>
+                    <div class="form-group"><label>CONTRASEÑA</label><input type="password" id="a-pass" class="form-input" required placeholder="Ingresa contraseña admin"></div>
+                    <button type="submit" class="btn-purple" style="width: 100%; margin-top: 10px;">ENTRAR</button>
+                </form>
+            </div>
+
+            <div id="admin-panel-control" class="admin-form-wrap" style="display: none;">
+                <button onclick="cerrarSesionAdmin()" style="float: right; background: #dc3545; color: white; border: none; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem;">Cerrar Sesión</button>
+                <h2 class="section-title" style="color: var(--text-gold); margin-bottom: 1rem; font-size: 1.4rem;">GESTIÓN PANEL</h2>
+
+                <div class="admin-tabs-btn" style="display: flex; gap: 8px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px;">
+                    <button class="btn-outline" onclick="switchAdminTab('citas')">Ver Citas (<span id="citas-count">0</span>)</button>
+                    <button class="btn-outline" onclick="switchAdminTab('personalizado')">Personalizado</button>
+                    <button class="btn-outline" onclick="switchAdminTab('ritual')">Ritual</button>
+                    <button class="btn-outline" onclick="switchAdminTab('producto')">Producto</button>
+                    <button class="btn-outline" onclick="switchAdminTab('remedio')">Remedio</button>
+                    <button class="btn-outline" onclick="switchAdminTab('suscripcion')">Suscripción</button>
+                    <button class="btn-outline" onclick="switchAdminTab('foro')">Foro</button>
+                </div>
+
+                <!-- Lista Citas -->
+                <div id="tab-admin-citas">
+                    <h3 style="color: var(--text-gold); margin-bottom: 10px; font-size: 1.1rem;"><i class="fa-solid fa-calendar-days"></i> Citas Agendadas por Clientes</h3>
+                    <div id="admin-citas-list"></div>
+                </div>
+
+                <!-- Form Personalizado -->
+                <form id="form-admin-personalizado" onsubmit="guardarNuevoPersonalizado(event)" style="display: none;">
+                    <h3 style="color: var(--text-gold); margin-bottom: 8px; font-size: 1.1rem;">Nuevo Modelo Personalizado</h3>
+                    <div class="form-group"><label>Nombre del Elemento</label><input type="text" id="pers-nombre" class="form-input" required placeholder="Ej: Amuleto de Protección Personal"></div>
+                    <div class="form-group"><label>Tipo</label><input type="text" id="pers-tipo" class="form-input" placeholder="Ej: Amuleto / Velón / Saquito Ritual"></div>
+                    <div class="form-group"><label>Precio Base ($ COP)</label><input type="number" id="pers-precio" class="form-input" required placeholder="60000"></div>
+                    
+                    <div class="form-group">
+                        <label>Subir Imagen (.jpg, .png, .webp)</label>
+                        <input type="file" id="pers-file" class="form-input" accept=".jpg,.jpeg,.png,.webp,.gif">
+                    </div>
+                    <p style="text-align: center; color: var(--text-gold); font-size: 0.8rem; margin: -5px 0 10px 0;">— O si prefieres —</p>
+                    <div class="form-group">
+                        <label>URL de Imagen Web</label>
+                        <input type="url" id="pers-url" class="form-input" placeholder="https://...">
+                    </div>
+
+                    <div class="form-group"><label>Descripción</label><textarea id="pers-desc" class="form-input" rows="2" placeholder="Explicación del producto personalizado..."></textarea></div>
+                    <div class="form-group"><label>Opciones o Piedras/Aromas Sugeridos</label><textarea id="pers-opc" class="form-input" rows="2" placeholder="Opciones: Cuarzo Rosa, Salvia, Amatista..."></textarea></div>
+                    <button type="submit" class="btn-purple" style="width: 100%;">GUARDAR PERSONALIZADO</button>
+                </form>
+
+                <!-- Form Ritual -->
+                <form id="form-admin-ritual" onsubmit="guardarNuevoRitual(event)" style="display: none;">
+                    <h3 style="color: var(--text-gold); margin-bottom: 8px; font-size: 1.1rem;">Nuevo Ritual Ofrecido</h3>
+                    <div class="form-group"><label>Nombre del Ritual</label><input type="text" id="rit-nombre" class="form-input" required placeholder="Ej: Ritual de Abrecaminos"></div>
+                    <div class="form-group"><label>Categoría</label><input type="text" id="rit-cat" class="form-input" placeholder="Ej: Protección / Abundancia / Amor"></div>
+                    <div class="form-group"><label>Precio ($ COP)</label><input type="number" id="rit-precio" class="form-input" required placeholder="75000"></div>
+                    <div class="form-group"><label>Duración / Modalidad</label><input type="text" id="rit-dur" class="form-input" placeholder="Ej: 1 Sesión / Presencial o Distancia"></div>
+                    
+                    <div class="form-group">
+                        <label>Subir Imagen (.jpg, .png, .webp)</label>
+                        <input type="file" id="rit-file" class="form-input" accept=".jpg,.jpeg,.png,.webp,.gif">
+                    </div>
+                    <p style="text-align: center; color: var(--text-gold); font-size: 0.8rem; margin: -5px 0 10px 0;">— O si prefieres —</p>
+                    <div class="form-group">
+                        <label>URL de Imagen Web</label>
+                        <input type="url" id="rit-url" class="form-input" placeholder="https://...">
+                    </div>
+
+                    <div class="form-group"><label>Propósito / Objetivo del Ritual</label><textarea id="rit-prop" class="form-input" rows="2" placeholder="Desbloqueo de energías, prosperidad..."></textarea></div>
+                    <div class="form-group"><label>¿Qué Incluye?</label><textarea id="rit-inc" class="form-input" rows="2" placeholder="Vela consagrada, lectura previa, reporte de canalización..."></textarea></div>
+                    <button type="submit" class="btn-purple" style="width: 100%;">GUARDAR RITUAL</button>
+                </form>
+
+                <!-- Form Producto -->
+                <form id="form-admin-producto" onsubmit="guardarNuevoProducto(event)" style="display: none;">
+                    <h3 style="color: var(--text-gold); margin-bottom: 8px; font-size: 1.1rem;">Nuevo Producto</h3>
+                    <div class="form-group"><label>Nombre</label><input type="text" id="p-nombre" class="form-input" required></div>
+                    <div class="form-group"><label>Precio ($ COP)</label><input type="number" id="p-precio" class="form-input" required></div>
+                    
+                    <div class="form-group">
+                        <label>Subir Imagen (.jpg, .png, .webp)</label>
+                        <input type="file" id="p-file" class="form-input" accept=".jpg,.jpeg,.png,.webp,.gif">
+                    </div>
+                    <p style="text-align: center; color: var(--text-gold); font-size: 0.8rem; margin: -5px 0 10px 0;">— O si prefieres —</p>
+                    <div class="form-group">
+                        <label>URL de Imagen Web</label>
+                        <input type="url" id="p-url" class="form-input" placeholder="https://...">
+                    </div>
+
+                    <div class="form-group"><label>Descripción</label><textarea id="p-desc" class="form-input" rows="2"></textarea></div>
+                    <button type="submit" class="btn-purple" style="width: 100%;">GUARDAR PRODUCTO</button>
+                </form>
+
+                <!-- Form Remedio -->
+                <form id="form-admin-remedio" onsubmit="guardarNuevoRemedio(event)" style="display: none;">
+                    <h3 style="color: var(--text-gold); margin-bottom: 8px; font-size: 1.1rem;">Nuevo Remedio Natural</h3>
+                    <div class="form-group"><label>Nombre del Remedio</label><input type="text" id="r-nombre" class="form-input" required></div>
+                    <div class="form-group"><label>Precio ($ COP)</label><input type="number" id="r-precio" class="form-input" required></div>
+                    
+                    <div class="form-group">
+                        <label>Subir Imagen (.jpg, .png, etc.)</label>
+                        <input type="file" id="r-file" class="form-input" accept=".jpg,.jpeg,.png,.webp,.gif">
+                    </div>
+                    <p style="text-align: center; color: var(--text-gold); font-size: 0.8rem; margin: -5px 0 10px 0;">— O —</p>
+                    <div class="form-group">
+                        <label>URL Imagen Web</label>
+                        <input type="url" id="r-url" class="form-input" placeholder="https://...">
+                    </div>
+
+                    <div class="form-group"><label>Preparación</label><textarea id="r-prep" class="form-input" rows="2"></textarea></div>
+                    <div class="form-group"><label>Propiedades</label><textarea id="r-prop" class="form-input" rows="2"></textarea></div>
+                    <button type="submit" class="btn-purple" style="width: 100%;">GUARDAR REMEDIO</button>
+                </form>
+
+                <!-- Form Suscripcion -->
+                <form id="form-admin-suscripcion" onsubmit="guardarNuevaSuscripcion(event)" style="display: none;">
+                    <h3 style="color: var(--text-gold); margin-bottom: 8px; font-size: 1.1rem;">Nueva Suscripción</h3>
+                    <div class="form-group"><label>Nombre</label><input type="text" id="s-nombre" class="form-input" required></div>
+                    <div class="form-group"><label>Precio ($ COP)</label><input type="number" id="s-precio" class="form-input" required></div>
+                    <div class="form-group"><label>Frecuencia</label><input type="text" id="s-frec" class="form-input" placeholder="Mensual"></div>
+                    <div class="form-group"><label>Descripción</label><textarea id="s-desc" class="form-input" rows="2"></textarea></div>
+                    <div class="form-group"><label>Beneficios</label><textarea id="s-ben" class="form-input" rows="2"></textarea></div>
+                    <button type="submit" class="btn-purple" style="width: 100%;">GUARDAR</button>
+                </form>
+
+                <!-- Form Foro -->
+                <form id="form-admin-foro" onsubmit="guardarNuevoForo(event)" style="display: none;">
+                    <h3 style="color: var(--text-gold); margin-bottom: 8px; font-size: 1.1rem;">Publicar Tema Semanal</h3>
+                    <div class="form-group"><label>Título</label><input type="text" id="f-titulo" class="form-input" required></div>
+                    <div class="form-group"><label>Semana</label><input type="text" id="f-semana" class="form-input" placeholder="Semana 43"></div>
+                    
+                    <div class="form-group">
+                        <label>Subir Imagen (.jpg, .png, .webp)</label>
+                        <input type="file" id="f-file" class="form-input" accept=".jpg,.jpeg,.png,.webp,.gif">
+                    </div>
+                    <p style="text-align: center; color: var(--text-gold); font-size: 0.8rem; margin: -5px 0 10px 0;">— O —</p>
+                    <div class="form-group">
+                        <label>URL de Imagen Web</label>
+                        <input type="url" id="f-url" class="form-input" placeholder="https://...">
+                    </div>
+
+                    <div class="form-group"><label>Contenido</label><textarea id="f-contenido" class="form-input" rows="4" required></textarea></div>
+                    <button type="submit" class="btn-purple" style="width: 100%;">PUBLICAR EN FORO</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL POPUP PARA CUSTOMIZACIÓN -->
+    <div class="modal-overlay" id="modal-custom">
+        <div class="modal-content">
+            <button onclick="cerrarModalCustom()" style="position: absolute; top: 12px; right: 15px; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">&times;</button>
+            <h3 style="color: var(--text-gold); margin-bottom: 6px; font-size: 1.2rem;" id="modal-item-title">PERSONALIZAR ELEMENTO</h3>
+            <p style="color: #c4b5fd; font-size: 0.8rem; margin-bottom: 12px;" id="modal-item-desc"></p>
+            
+            <form onsubmit="confirmarAgregarCustom(event)">
+                <input type="hidden" id="custom-base-nombre">
+                <input type="hidden" id="custom-base-precio">
+
+                <div class="form-group">
+                    <label>Tu Nombre Completo (Para la Consagración) *</label>
+                    <input type="text" id="custom-nombre-persona" class="form-input" required placeholder="Ej: Carolina Pérez">
+                </div>
+
+                <div class="form-group">
+                    <label>Fecha de Nacimiento *</label>
+                    <input type="date" id="custom-fecha-nac" class="form-input" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Intención Principal *</label>
+                    <select id="custom-intencion" class="form-input" style="background:#05020a;">
+                        <option value="Protección y Escudo Energético">🛡️ Protección y Escudo Energético</option>
+                        <option value="Abrecaminos y Prosperidad">💰 Abrecaminos y Prosperidad</option>
+                        <option value="Amor Propio y Endulzamiento">💖 Amor Propio y Endulzamiento</option>
+                        <option value="Salud y Tranquilidad Mental">🌿 Salud y Tranquilidad Mental</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Detalles o Piedra Preferida (Opcional)</label>
+                    <input type="text" id="custom-detalles" class="form-input" placeholder="Ej: Añadir Ojo de Tigre o Hierba Romero">
+                </div>
+
+                <button type="submit" class="btn-purple" style="width: 100%; padding: 12px; margin-top: 5px;"><i class="fa-solid fa-cauldron"></i> AÑADIR PERSONALIZADO AL CALDERO</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- CALDERO CARRITO -->
+    <div class="cart-drawer" id="cart-drawer">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-glow); padding-bottom: 0.8rem; margin-bottom: 1rem;">
+            <h3>CALDERO DE COMPRAS</h3>
+            <button onclick="toggleCart()" style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">&times;</button>
+        </div>
+        <div id="cart-list" style="flex-grow: 1; overflow-y: auto;"></div>
+        <div style="border-top: 1px solid var(--border-glow); padding-top: 1rem;">
+            <div style="display: flex; justify-content: space-between; color: var(--text-gold); font-size: 1.1rem; font-weight: bold;">
+                <span>TOTAL:</span><span id="cart-total">$0</span>
+            </div>
+            <button class="btn-wa-checkout" onclick="checkoutWA()"><i class="fa-brands fa-whatsapp"></i> PEDIR POR WHATSAPP</button>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        let estaAutenticado = false;
+        let carrito = [];
+        const WA_NUM = '573218259526';
+
+        async function cargarTodo() {
+            verificarSesion();
+            cargarPersonalizados();
+            cargarRituales();
+            cargarProductos();
+            cargarRemedios();
+            cargarSuscripciones();
+            cargarForo();
+            if(estaAutenticado) cargarCitasAdmin();
+        }
+
+        async function verificarSesion() {
+            const res = await fetch('/api/check-auth');
+            const d = await res.json();
+            estaAutenticado = d.authenticated;
+            document.getElementById('admin-login-box').style.display = estaAutenticado ? 'none' : 'block';
+            document.getElementById('admin-panel-control').style.display = estaAutenticado ? 'block' : 'none';
+            if(estaAutenticado) cargarCitasAdmin();
+        }
+
+        async function cargarPersonalizados() {
+            const res = await fetch('/api/personalizados');
+            const data = await res.json();
+            const grid = document.getElementById('personalizados-grid');
+            grid.innerHTML = '';
+            data.forEach(p => {
+                let del = estaAutenticado ? `<button class="delete-btn" onclick="eliminarItem('personalizados', ${p.id})"><i class="fa-solid fa-trash"></i></button>` : '';
+                grid.innerHTML += `
+                    <div class="custom-card" style="border-color: var(--text-gold);">
+                        ${del}
+                        <img src="${p.imagen}" style="width:100%; height:190px; object-fit:cover;">
+                        <div class="card-body">
+                            <span style="color:var(--text-gold); font-size:0.7rem; font-weight:bold; text-transform:uppercase;">✨ ${p.tipo}</span>
+                            <h3 style="color:white; margin:6px 0; font-size:1.15rem;">${p.nombre}</h3>
+                            <p style="color:#e2d8f3; font-size:0.82rem; margin-bottom:8px;">${p.descripcion}</p>
+                            ${p.opciones ? `<p style="color:#a496c4; font-size:0.78rem; margin-bottom:12px; flex-grow:1;"><strong>🔮 Opciones Sugeridas:</strong> ${p.opciones}</p>` : ''}
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <span class="card-price">$${p.precio_base.toLocaleString('es-CO')}</span>
+                                <button class="btn-purple" onclick="abrirModalCustom('${p.nombre}', ${p.precio_base}, '${p.descripcion}')"><i class="fa-solid fa-wand-sparkles"></i> PERSONALIZAR</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function abrirModalCustom(nombre, precio, desc) {
+            document.getElementById('modal-item-title').innerText = `PERSONALIZAR: ${nombre}`;
+            document.getElementById('modal-item-desc').innerText = desc || 'Ingresa tus datos para la consagración mística.';
+            document.getElementById('custom-base-nombre').value = nombre;
+            document.getElementById('custom-base-precio').value = precio;
+            document.getElementById('modal-custom').style.display = 'flex';
+        }
+
+        function cerrarModalCustom() {
+            document.getElementById('modal-custom').style.display = 'none';
+        }
+
+        function confirmarAgregarCustom(e) {
+            e.preventDefault();
+            const baseNombre = document.getElementById('custom-base-nombre').value;
+            const precio = parseFloat(document.getElementById('custom-base-precio').value);
+            const cliente = document.getElementById('custom-nombre-persona').value;
+            const fechaNac = document.getElementById('custom-fecha-nac').value;
+            const intencion = document.getElementById('custom-intencion').value;
+            const detalles = document.getElementById('custom-detalles').value;
+
+            let descCustom = `${baseNombre} [Para: ${cliente} | Nac: ${fechaNac} | Intención: ${intencion}${detalles ? ' | Nota: ' + detalles : ''}]`;
+
+            carrito.push({ nombre: descCustom, precio: precio });
+            updateCart();
+            cerrarModalCustom();
+            showToast("✨ Personalizado añadido al caldero");
+        }
+
+        async function solicitarCitaCliente(e) {
+            e.preventDefault();
+            const nom = document.getElementById('c-nombre').value;
+            const tel = document.getElementById('c-telefono').value;
+            const serv = document.getElementById('c-servicio').value;
+            const mod = document.getElementById('c-modalidad').value;
+            const fec = document.getElementById('c-fecha').value;
+            const hor = document.getElementById('c-hora').value;
+            const not = document.getElementById('c-notas').value;
+
+            const payload = {
+                nombre_cliente: nom,
+                telefono: tel,
+                tipo_servicio: serv,
+                modalidad: mod,
+                fecha: fec,
+                hora: hor,
+                notas: not
+            };
+
+            await fetch('/api/citas', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+
+            showToast("📅 Cita Agendada Correctamente");
+
+            let waMsg = `*SOLICITUD DE CITA - SUSURROS DEL DRAGÓN*%0A%0A`;
+            waMsg += `👤 *Cliente:* ${nom}%0A`;
+            waMsg += `📞 *Teléfono:* ${tel}%0A`;
+            waMsg += `🔮 *Servicio:* ${serv}%0A`;
+            waMsg += `📍 *Modalidad:* ${mod}%0A`;
+            waMsg += `📅 *Fecha:* ${fec}%0A`;
+            waMsg += `⏰ *Hora:* ${hor}%0A`;
+            if(not) waMsg += `📝 *Detalles:* ${not}%0A`;
+
+            window.open(`https://wa.me/${WA_NUM}?text=${waMsg}`, '_blank');
+            document.getElementById('form-publico-cita').reset();
+        }
+
+        async function cargarCitasAdmin() {
+            const res = await fetch('/api/citas');
+            if(!res.ok) return;
+            const data = await res.json();
+            const countEl = document.getElementById('citas-count');
+            if(countEl) countEl.innerText = data.length;
+
+            const list = document.getElementById('admin-citas-list');
+            list.innerHTML = '';
+            if(data.length === 0) {
+                list.innerHTML = '<p style="color:#a496c4; font-size:0.85rem;">No hay citas agendadas por el momento.</p>';
+                return;
+            }
+
+            data.forEach(c => {
+                list.innerHTML += `
+                    <div class="cita-card-admin">
+                        <button class="delete-btn" style="top:8px; right:8px;" onclick="eliminarCita(${c.id})"><i class="fa-solid fa-trash"></i></button>
+                        <h4 style="color:var(--text-gold); font-size:1rem; margin-bottom:4px;">${c.nombre_cliente} (${c.telefono})</h4>
+                        <span style="background:var(--purple-main); color:white; padding:2px 8px; border-radius:10px; font-size:0.7rem; font-weight:bold;">${c.tipo_servicio}</span>
+                        <p style="color:#e2d8f3; font-size:0.82rem; margin-top:6px;"><strong>📅 Fecha/Hora:</strong> ${c.fecha} a las ${c.hora} (${c.modalidad})</p>
+                        ${c.notas ? `<p style="color:#a496c4; font-size:0.78rem; margin-top:4px;"><strong>📝 Notas:</strong> ${c.notas}</p>` : ''}
+                    </div>
+                `;
+            });
+        }
+
+        async function eliminarCita(id) {
+            if(!confirm("¿Eliminar esta cita agendada?")) return;
+            await fetch(`/api/citas/${id}`, { method: 'DELETE' });
+            showToast("Cita eliminada");
+            cargarCitasAdmin();
+        }
+
+        async function cargarRituales() {
+            const res = await fetch('/api/rituales');
+            const data = await res.json();
+            const grid = document.getElementById('rituales-grid');
+            grid.innerHTML = '';
+            data.forEach(r => {
+                let del = estaAutenticado ? `<button class="delete-btn" onclick="eliminarItem('rituales', ${r.id})"><i class="fa-solid fa-trash"></i></button>` : '';
+                grid.innerHTML += `
+                    <div class="custom-card" style="border-color: var(--purple-glow);">
+                        ${del}
+                        <img src="${r.imagen}" style="width:100%; height:190px; object-fit:cover;">
+                        <div class="card-body">
+                            <span style="color:var(--text-gold); font-size:0.7rem; font-weight:bold; text-transform:uppercase; letter-spacing:1px;">✨ ${r.categoria} | ${r.duracion}</span>
+                            <h3 style="color:white; margin:6px 0; font-size:1.15rem;">${r.nombre}</h3>
+                            <p style="color:#e2d8f3; font-size:0.82rem; margin-bottom:8px;"><strong>🔮 Propósito:</strong> ${r.proposito}</p>
+                            <p style="color:#a496c4; font-size:0.78rem; margin-bottom:12px; flex-grow:1;"><strong>🕯️ Incluye:</strong> ${r.incluye}</p>
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <span class="card-price">$${r.precio.toLocaleString('es-CO')}</span>
+                                <button class="btn-purple" onclick="agregarAlCaldero('Ritual: ${r.nombre}', ${r.precio})"><i class="fa-solid fa-wand-magic-sparkles"></i> SOLICITAR</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        async function cargarProductos() {
+            const res = await fetch('/api/productos');
+            const data = await res.json();
+            const grid = document.getElementById('products-grid');
+            grid.innerHTML = '';
+            data.forEach(p => {
+                let del = estaAutenticado ? `<button class="delete-btn" onclick="eliminarItem('productos', ${p.id})"><i class="fa-solid fa-trash"></i></button>` : '';
+                grid.innerHTML += `
+                    <div class="custom-card">
+                        ${del}
+                        <img src="${p.imagen}" style="width:100%; height:180px; object-fit:cover;">
+                        <div class="card-body">
+                            <h3 style="color:white; margin-bottom:6px; font-size:1.1rem;">${p.nombre}</h3>
+                            <p style="color:#a496c4; font-size:0.8rem; margin-bottom:12px; flex-grow:1;">${p.descripcion}</p>
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <span class="card-price">$${p.precio.toLocaleString('es-CO')}</span>
+                                <button class="btn-purple" onclick="agregarAlCaldero('${p.nombre}', ${p.precio})">+ AÑADIR</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        async function cargarRemedios() {
+            const res = await fetch('/api/remedios');
+            const data = await res.json();
+            const grid = document.getElementById('remedios-grid');
+            grid.innerHTML = '';
+            data.forEach(r => {
+                let del = estaAutenticado ? `<button class="delete-btn" onclick="eliminarItem('remedios', ${r.id})"><i class="fa-solid fa-trash"></i></button>` : '';
+                grid.innerHTML += `
+                    <div class="custom-card">
+                        ${del}
+                        <img src="${r.imagen}" style="width:100%; height:180px; object-fit:cover;">
+                        <div class="card-body">
+                            <span style="color:var(--purple-glow); font-size:0.7rem; font-weight:bold; text-transform:uppercase;">${r.categoria}</span>
+                            <h3 style="color:white; margin:4px 0; font-size:1.1rem;">${r.nombre}</h3>
+                            <p style="color:#e2d8f3; font-size:0.8rem; margin-bottom:6px;"><strong>🌿 Propiedades:</strong> ${r.propiedades}</p>
+                            <p style="color:#a496c4; font-size:0.75rem; margin-bottom:12px; flex-grow:1;"><strong>☕ Preparación:</strong> ${r.preparacion}</p>
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <span class="card-price">$${r.precio.toLocaleString('es-CO')}</span>
+                                <button class="btn-purple" onclick="agregarAlCaldero('${r.nombre}', ${r.precio})">+ PEDIR</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        async function cargarSuscripciones() {
+            const res = await fetch('/api/suscripciones');
+            const data = await res.json();
+            const grid = document.getElementById('suscripciones-grid');
+            grid.innerHTML = '';
+            data.forEach(s => {
+                let del = estaAutenticado ? `<button class="delete-btn" onclick="eliminarItem('suscripciones', ${s.id})"><i class="fa-solid fa-trash"></i></button>` : '';
+                grid.innerHTML += `
+                    <div class="custom-card" style="border-color: var(--text-gold);">
+                        ${del}
+                        <div class="card-body" style="text-align:center;">
+                            <i class="fa-solid fa-crown" style="font-size:2rem; color:var(--text-gold); margin-bottom:10px;"></i>
+                            <h3 style="color:white; margin-bottom:6px; font-size:1.1rem;">${s.nombre}</h3>
+                            <span class="card-price" style="display:block; margin-bottom:10px;">$${s.precio.toLocaleString('es-CO')} / ${s.frecuencia}</span>
+                            <p style="color:#a496c4; font-size:0.85rem; margin-bottom:12px;">${s.descripcion}</p>
+                            <div style="background:rgba(0,0,0,0.4); padding:8px; border-radius:8px; font-size:0.8rem; color:var(--text-gold); margin-bottom:15px;">
+                                ${s.beneficios}
+                            </div>
+                            <button class="btn-purple" style="width:100%;" onclick="agregarAlCaldero('Suscripción: ${s.nombre}', ${s.precio})">UNIRME AL CÍRCULO</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        async function cargarForo() {
+            const res = await fetch('/api/foro');
+            const data = await res.json();
+            const container = document.getElementById('foro-container');
+            container.innerHTML = '';
+            data.forEach(f => {
+                let del = estaAutenticado ? `<button class="delete-btn" onclick="eliminarItem('foro', ${f.id})"><i class="fa-solid fa-trash"></i></button>` : '';
+                let imgHtml = f.imagen ? `<img src="${f.imagen}" style="width:100%; max-height:300px; object-fit:cover; border-radius:12px; margin-bottom:12px; border:1px solid var(--border-glow);">` : '';
+                
+                container.innerHTML += `
+                    <div class="foro-item">
+                        ${del}
+                        <span class="foro-badge">${f.semana}</span>
+                        <span style="float:right; color:#a496c4; font-size:0.75rem;">${f.fecha}</span>
+                        <h3 style="color:var(--text-gold); font-size:1.25rem; margin-bottom:10px;">${f.titulo}</h3>
+                        ${imgHtml}
+                        <p style="color:#e2d8f3; font-size:0.9rem; line-height:1.6; white-space:pre-line;">${f.contenido}</p>
+                    </div>
+                `;
+            });
+        }
+
+        function switchAdminTab(tab) {
+            document.getElementById('tab-admin-citas').style.display = tab === 'citas' ? 'block' : 'none';
+            document.getElementById('form-admin-personalizado').style.display = tab === 'personalizado' ? 'block' : 'none';
+            document.getElementById('form-admin-ritual').style.display = tab === 'ritual' ? 'block' : 'none';
+            document.getElementById('form-admin-producto').style.display = tab === 'producto' ? 'block' : 'none';
+            document.getElementById('form-admin-remedio').style.display = tab === 'remedio' ? 'block' : 'none';
+            document.getElementById('form-admin-suscripcion').style.display = tab === 'suscripcion' ? 'block' : 'none';
+            document.getElementById('form-admin-foro').style.display = tab === 'foro' ? 'block' : 'none';
+        }
+
+        async function guardarNuevoPersonalizado(e) {
+            e.preventDefault();
+            const fd = new FormData();
+            fd.append('nombre', document.getElementById('pers-nombre').value);
+            fd.append('tipo', document.getElementById('pers-tipo').value);
+            fd.append('precio_base', document.getElementById('pers-precio').value);
+            fd.append('descripcion', document.getElementById('pers-desc').value);
+            fd.append('opciones', document.getElementById('pers-opc').value);
+            fd.append('imagen_url', document.getElementById('pers-url').value);
+
+            const fileInput = document.getElementById('pers-file');
+            if (fileInput.files.length > 0) {
+                fd.append('imagen_archivo', fileInput.files[0]);
+            }
+
+            await fetch('/api/personalizados', { method: 'POST', body: fd });
+            showToast("✨ Personalizado Creado");
+            document.getElementById('form-admin-personalizado').reset();
+            cargarPersonalizados();
+        }
+
+        async function guardarNuevoRitual(e) {
+            e.preventDefault();
+            const fd = new FormData();
+            fd.append('nombre', document.getElementById('rit-nombre').value);
+            fd.append('categoria', document.getElementById('rit-cat').value);
+            fd.append('precio', document.getElementById('rit-precio').value);
+            fd.append('duracion', document.getElementById('rit-dur').value);
+            fd.append('proposito', document.getElementById('rit-prop').value);
+            fd.append('incluye', document.getElementById('rit-inc').value);
+            fd.append('imagen_url', document.getElementById('rit-url').value);
+
+            const fileInput = document.getElementById('rit-file');
+            if (fileInput.files.length > 0) {
+                fd.append('imagen_archivo', fileInput.files[0]);
+            }
+
+            await fetch('/api/rituales', { method: 'POST', body: fd });
+            showToast("✨ Ritual Guardado con Éxito");
+            document.getElementById('form-admin-ritual').reset();
+            cargarRituales();
+        }
+
+        async function guardarNuevoProducto(e) {
+            e.preventDefault();
+            const fd = new FormData();
+            fd.append('nombre', document.getElementById('p-nombre').value);
+            fd.append('precio', document.getElementById('p-precio').value);
+            fd.append('descripcion', document.getElementById('p-desc').value);
+            fd.append('imagen_url', document.getElementById('p-url').value);
+
+            const fileInput = document.getElementById('p-file');
+            if (fileInput.files.length > 0) {
+                fd.append('imagen_archivo', fileInput.files[0]);
+            }
+
+            await fetch('/api/productos', { method: 'POST', body: fd });
+            showToast("✨ Producto Guardado");
+            document.getElementById('form-admin-producto').reset();
+            cargarProductos();
+        }
+
+        async function guardarNuevoRemedio(e) {
+            e.preventDefault();
+            const fd = new FormData();
+            fd.append('nombre', document.getElementById('r-nombre').value);
+            fd.append('precio', document.getElementById('r-precio').value);
+            fd.append('preparacion', document.getElementById('r-prep').value);
+            fd.append('propiedades', document.getElementById('r-prop').value);
+            fd.append('imagen_url', document.getElementById('r-url').value);
+
+            const fileInput = document.getElementById('r-file');
+            if (fileInput.files.length > 0) {
+                fd.append('imagen_archivo', fileInput.files[0]);
+            }
+
+            await fetch('/api/remedios', { method: 'POST', body: fd });
+            showToast("🌿 Remedio Guardado");
+            document.getElementById('form-admin-remedio').reset();
+            cargarRemedios();
+        }
+
+        async function guardarNuevaSuscripcion(e) {
+            e.preventDefault();
+            const payload = {
+                nombre: document.getElementById('s-nombre').value,
+                precio: document.getElementById('s-precio').value,
+                frecuencia: document.getElementById('s-frec').value,
+                descripcion: document.getElementById('s-desc').value,
+                beneficios: document.getElementById('s-ben').value
+            };
+            await fetch('/api/suscripciones', { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+            showToast("⭐ Suscripción Creada");
+            document.getElementById('form-admin-suscripcion').reset();
+            cargarSuscripciones();
+        }
+
+        async function guardarNuevoForo(e) {
+            e.preventDefault();
+            const fd = new FormData();
+            fd.append('titulo', document.getElementById('f-titulo').value);
+            fd.append('semana', document.getElementById('f-semana').value);
+            fd.append('contenido', document.getElementById('f-contenido').value);
+            fd.append('imagen_url', document.getElementById('f-url').value);
+
+            const fileInput = document.getElementById('f-file');
+            if (fileInput.files.length > 0) {
+                fd.append('imagen_archivo', fileInput.files[0]);
+            }
+
+            await fetch('/api/foro', { method: 'POST', body: fd });
+            showToast("📜 Publicado en Foro con Imagen");
+            document.getElementById('form-admin-foro').reset();
+            cargarForo();
+        }
+
+        async function eliminarItem(modulo, id) {
+            if(!confirm("¿Eliminar este elemento?")) return;
+            await fetch(`/api/${modulo}/${id}`, { method: 'DELETE' });
+            showToast("Eliminado con éxito");
+            cargarTodo();
+        }
+
+        function agregarAlCaldero(nombre, precio) {
+            carrito.push({nombre, precio});
+            updateCart();
+            showToast(`Añadido: ${nombre}`);
+        }
+
+        function updateCart() {
+            document.getElementById('cart-badge').innerText = carrito.length;
+            const list = document.getElementById('cart-list');
+            list.innerHTML = '';
+            let total = 0;
+            carrito.forEach((i, idx) => {
+                total += i.precio;
+                list.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:8px; color:white; font-size:0.85rem;"><span>${i.nombre}</span><span>$${i.precio.toLocaleString('es-CO')}</span></div>`;
+            });
+            document.getElementById('cart-total').innerText = `$${total.toLocaleString('es-CO')}`;
+        }
+
+        function toggleCart() { document.getElementById('cart-drawer').classList.toggle('open'); }
+
+        function checkoutWA() {
+            if(carrito.length===0) return alert("El caldero está vacío");
+            let text = "Hola Susurros del Dragón, quiero solicitar:%0A%0A";
+            carrito.forEach(p => text += `- ${p.nombre} ($${p.precio.toLocaleString('es-CO')})%0A`);
+            const total = carrito.reduce((a,b)=>a+b.precio,0);
+            text += `%0ATotal: $${total.toLocaleString('es-CO')}`;
+            window.open(`https://wa.me/${WA_NUM}?text=${text}`, '_blank');
+        }
+
+        async function procesarLoginAdmin(e) {
+            e.preventDefault();
+            const u = document.getElementById('a-user').value;
+            const p = document.getElementById('a-pass').value;
+            const res = await fetch('/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({usuario:u, password:p}) });
+            if(res.ok) { showToast("Acceso Concedido"); cargarTodo(); } else alert("Error de ingreso");
+        }
+
+        async function cerrarSesionAdmin() {
+            await fetch('/api/logout', {method:'POST'});
+            cargarTodo();
+        }
+
+        function showSection(sec) {
+            ['inicio', 'personalizados', 'citas', 'rituales', 'catalogo', 'remedios', 'suscripciones', 'foro', 'tarot', 'admin'].forEach(s => {
+                const el = document.getElementById(`${s}-sec`);
+                if(el) el.style.display = (s === sec) ? 'block' : 'none';
+                
+                const n = document.getElementById(`nav-${s}`);
+                if(n) n.classList.toggle('active', s === sec);
+            });
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg; t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 2500);
+        }
+
+        const arcanosTarot = [
+            { nombre: "El Loco", desc: "Nuevos comienzos, espontaneidad, fe ciega en el camino.", invertido: "Imprudencia, riesgos innecesarios, temor a dar el salto." },
+            { nombre: "El Mago", desc: "Manifestación, poder personal, habilidad, recursos a tu disposición.", invertido: "Manipulación, talentos desaprovechados, ilusiones." },
+            { nombre: "La Sacerdotisa", desc: "Intuición profunda, misterios ocultos, sabiduría interior, quietud.", invertido: "Secretos revelados, desconexión de la intuición, superficialidad." },
+            { nombre: "La Emperatriz", desc: "Fertilidad, abundancia, naturaleza, creatividad desbordante, nutrición.", invertido: "Dependencia emocional, bloqueo creativo, sobreprotección." },
+            { nombre: "El Emperador", desc: "Autoridad, estructura, liderazgo, estabilidad, orden y disciplina.", invertido: "Tiranía, rigidez extrema, falta de control, abuso de poder." },
+            { nombre: "El Hierofante", desc: "Tradición, guía espiritual, mentoría, instituciones y valores compartidos.", invertido: "Dogmatismo, rebeldía ciega, romper esquemas necesarios." },
+            { nombre: "Los Amantes", desc: "Unión de almas, elecciones cruciales desde el corazón, armonía y pactos.", invertido: "Desarmonía, decisiones divididas, conflicto de valores." },
+            { nombre: "El Carro", desc: "Victoria, determinación, avance incontenible, enfoque y triunfo sobre obstáculos.", invertido: "Falta de dirección, agresividad, pérdida de control en el camino." },
+            { nombre: "La Fuerza", desc: "Coraje interior, dominio de las pasiones con paciencia y compasión.", invertido: "Dudas de uno mismo, debilidad, impulsividad descontrolada." },
+            { nombre: "El Ermitaño", desc: "Búsqueda interior, introspección, sabiduría en la soledad, guía propia.", invertido: "Aislamiento excesivo, soledad no deseada, rechazo de consejos." },
+            { nombre: "La Rueda de la Fortuna", desc: "Ciclos kármicos, golpes de buena suerte, destino en movimiento, giros inesperados.", invertido: "Mala racha temporal, resistencia al cambio natural." },
+            { nombre: "La Justicia", desc: "Equilibrio, verdad, causa y efecto, claridad mental, decisiones justas.", invertido: "Injusticia, deshonestidad, evitar asumir responsabilidades." },
+            { nombre: "El Colgado", desc: "Nueva perspectiva, pausa obligatoria, entrega, soltar el control para avanzar.", invertido: "Estancamiento, sacrificio inútil, victimismo." },
+            { nombre: "La Muerte", desc: "Transformación radical, fin de un ciclo, renacimiento inevitable y liberación.", invertido: "Resistencia al cambio, miedo al cierre de etapas, estancamiento." },
+            { nombre: "La Templanza", desc: "Alquimia interior, moderación, paciencia, armonía y sanación de oposiciones.", invertido: "Desequilibrio, excesos, falta de paciencia y prisa destructiva." },
+            { nombre: "El Diablo", desc: "Ataduras materiales, pasiones terrenales, sombras inconscientes, dependencia.", invertido: "Liberación de cadenas, superación de vicios, toma de conciencia." },
+            { nombre: "La Torre", desc: "Revelación repentina, ruptura de estructuras falsas, liberación por el rayo.", invertido: "Evitar un colapso inminente, miedo a la catastrofe." },
+            { nombre: "La Estrella", desc: "Esperanza renovada, inspiración divina, fe en el futuro, bendiciones y paz.", invertido: "Desaliento, pérdida de fe, pesimismo y dudas." },
+            { nombre: "La Luna", desc: "Sueños, intuición nocturna, ilusiones, miedos subconscientes y misterio.", invertido: "Claridad emergiendo de la confusión, superación de miedos y engaños." },
+            { nombre: "El Sol", desc: "Alegría radiante, éxito rotundo, vitalidad, claridad y felicidad plena.", invertido: "Felicidad retrasada, brillo disminuido temporalmente, optimismo forzado." },
+            { nombre: "El Juicio", desc: "Renacimiento espiritual, llamado interior, absolución, despertar definitivo.", invertido: "Duda de sí mismo, autocrítica destructiva, ignorar el llamado." },
+            { nombre: "El Mundo", desc: "Culminación exitosa de un gran ciclo, integración, realización y plenitud total.", invertido: "Falta de cierre, metas incompletas a un paso de la gloria." }
+        ];
+
+        let tiradaActual = [];
+
+        function inicializarTarot() {
+            const grid = document.getElementById('tarot-slots');
+            if(!grid) return;
+            grid.innerHTML = '';
+            
+            const posiciones = ["PASADO / RAÍZ", "PRESENTE / ENERGÍA", "FUTURO / DESTINO"];
+            
+            for(let i=0; i<3; i++) {
+                grid.innerHTML += `
+                    <div class="card-slot" id="slot-${i}" onclick="revelarCarta(${i})" style="background: linear-gradient(145deg, #140a26, #220d42); border: 1px solid rgba(189,95,255,0.4); border-radius: 16px; padding: 1.8rem 1rem; cursor: pointer; min-height: 230px; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: all 0.3s;">
+                        <i class="fa-solid fa-moon" style="font-size: 2.2rem; color: #bd5fff; margin-bottom: 12px;"></i>
+                        <h4 style="color:#f0c674; font-family:'Cinzel',serif; margin-bottom:4px; font-size:1rem;">CARTA ${i+1}</h4>
+                        <span style="color:#a496c4; font-size:0.75rem; text-transform:uppercase;">${posiciones[i]}</span>
+                        <p style="color:#d8b4fe; font-size:0.8rem; margin-top:8px; font-style:italic;">(Toca para revelar)</p>
+                    </div>
+                `;
+            }
+            tiradaActual = [null, null, null];
+        }
+
+        function revelarCarta(idx) {
+            if(tiradaActual[idx] !== null) return;
+            
+            const arcano = arcanosTarot[Math.floor(Math.random() * arcanosTarot.length)];
+            const invertida = Math.random() < 0.35;
+            
+            tiradaActual[idx] = { arcano, invertida };
+            
+            const slot = document.getElementById(`slot-${idx}`);
+            slot.style.background = "rgba(30, 12, 60, 0.95)";
+            slot.style.borderColor = "#f0c674";
+            slot.innerHTML = `
+                <h4 style="color:#f0c674; font-family:'Cinzel',serif; font-size:1rem; margin-bottom:6px;">${arcano.nombre}</h4>
+                <span style="background:#7b1fa2; color:white; padding:2px 8px; border-radius:10px; font-size:0.7rem; font-weight:bold; margin-bottom:8px; display:inline-block;">${invertida ? 'INVERTIDA 🔄' : 'AL DERECHO ✦'}</span>
+                <p style="color:#e2d8f3; font-size:0.8rem; line-height:1.35;">${invertida ? arcano.invertido : arcano.desc}</p>
+            `;
+            showToast(`✨ Revelado: ${arcano.nombre}`);
+        }
+
+        function reiniciarLectura() {
+            inicializarTarot();
+            showToast("🔮 Mazo barajado de nuevo");
+        }
+
+        window.onload = function() { cargarTodo(); inicializarTarot(); };
+    </script>
+</body>
+</html>
+
