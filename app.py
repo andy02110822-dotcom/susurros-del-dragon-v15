@@ -2,6 +2,7 @@ import os
 import hmac
 from flask import Flask, render_template, request, jsonify, session, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import inspect, text
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
@@ -123,6 +124,7 @@ class Suscripcion(db.Model):
     frecuencia = db.Column(db.String(50), default="Mensual")
     descripcion = db.Column(db.Text, nullable=True)
     beneficios = db.Column(db.Text, nullable=True)
+    imagen = db.Column(db.Text, nullable=True)
 
     def to_dict(self):
         return {
@@ -131,7 +133,8 @@ class Suscripcion(db.Model):
             'precio': self.precio,
             'frecuencia': self.frecuencia,
             'descripcion': self.descripcion,
-            'beneficios': self.beneficios
+            'beneficios': self.beneficios,
+            'imagen': self.imagen
         }
 
 class Remedio(db.Model):
@@ -178,6 +181,15 @@ def allowed_file(filename):
 def init_db():
     with app.app_context():
         db.create_all()
+        suscripcion_columns = {column['name'] for column in inspect(db.engine).get_columns(Suscripcion.__tablename__)}
+        if 'imagen' not in suscripcion_columns:
+            try:
+                with db.engine.begin() as connection:
+                    connection.execute(text(f'ALTER TABLE {Suscripcion.__tablename__} ADD COLUMN imagen TEXT'))
+            except Exception:
+                updated_columns = {column['name'] for column in inspect(db.engine).get_columns(Suscripcion.__tablename__)}
+                if 'imagen' not in updated_columns:
+                    raise
         if Producto.query.count() == 0:
             prods = [
                 Producto(nombre="TALISMAN DE VIDA", categoria="amuletos", precio=45000, imagen="https://images.unsplash.com/photo-1567653418876-5bb0e566e1c2?auto=format&fit=crop&w=600&q=80", descripcion="Artículo ritual consagrado."),
@@ -463,13 +475,26 @@ def get_suscripciones():
 def add_suscripcion():
     if not session.get('logged_in'):
         return jsonify({'error': 'No autorizado'}), 403
-    data = request.get_json() or {}
+
+    imagen_final = request.form.get('imagen_url', '').strip()
+    if 'imagen_archivo' in request.files:
+        file = request.files['imagen_archivo']
+        if file and file.filename and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            base, ext = os.path.splitext(filename)
+            import time
+            filename = f"{base}_{int(time.time())}{ext}"
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(filepath)
+            imagen_final = f"/static/uploads/{filename}"
+
     nueva = Suscripcion(
-        nombre=data.get('nombre'),
-        precio=float(data.get('precio', 0)),
-        frecuencia=data.get('frecuencia', 'Mensual'),
-        descripcion=data.get('descripcion', ''),
-        beneficios=data.get('beneficios', '')
+        nombre=request.form.get('nombre'),
+        precio=float(request.form.get('precio', 0)),
+        frecuencia=request.form.get('frecuencia', 'Mensual'),
+        descripcion=request.form.get('descripcion', ''),
+        beneficios=request.form.get('beneficios', ''),
+        imagen=imagen_final or None
     )
     db.session.add(nueva)
     db.session.commit()
