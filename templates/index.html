@@ -347,6 +347,15 @@
         .admin-content .form-input { background: rgba(6,10,26,.82); }
         .admin-content .form-group label { color: #c9b9ff; }
         #admin-login-box { margin-top: 3rem; }
+        .admin-inventory { max-width: 920px; margin: 1.5rem auto 0; padding-top: 1.2rem; border-top: 1px solid rgba(168,220,255,.18); }
+        .admin-inventory h4 { color: #b8edff; font-size: .98rem; margin-bottom: .75rem; }
+        .admin-inventory-list { display: grid; gap: .6rem; }
+        .admin-inventory-item { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .8rem .9rem; background: rgba(8,13,34,.72); border: 1px solid rgba(168,220,255,.16); border-radius: 12px; }
+        .admin-inventory-item strong { display: block; color: #fff; font-size: .88rem; }
+        .admin-inventory-item small { display: block; color: #aebbd4; margin-top: 3px; font-size: .74rem; }
+        .admin-inventory-empty { color: #a496c4; font-size: .84rem; padding: .75rem 0; }
+        .admin-inventory-delete { flex: 0 0 auto; border: 1px solid rgba(255,151,184,.38); border-radius: 9px; background: rgba(153,45,91,.28); color: #ffe8ef; padding: .55rem .7rem; cursor: pointer; }
+        .admin-inventory-delete:hover { background: rgba(190,54,108,.52); }
         @media (max-width: 860px) {
             .admin-dashboard { grid-template-columns: 205px minmax(0,1fr); gap: .75rem; }
             .admin-sidebar { padding: 13px 9px; }
@@ -617,6 +626,7 @@
                     <div class="form-group"><label>Descripción</label><textarea id="pers-desc" class="form-input" rows="2" placeholder="Explicación del producto personalizado..."></textarea></div>
                     <div class="form-group"><label>Opciones o Piedras/Aromas Sugeridos</label><textarea id="pers-opc" class="form-input" rows="2" placeholder="Opciones: Cuarzo Rosa, Salvia, Amatista..."></textarea></div>
                     <button type="submit" class="btn-purple" style="width: 100%;">GUARDAR PERSONALIZADO</button>
+                    <div class="admin-inventory"><h4><i class="fa-solid fa-boxes-stacked"></i> Modelos personalizados publicados</h4><div class="admin-inventory-list" id="admin-list-personalizados"></div></div>
                 </form>
 
                 <!-- Form Ritual -->
@@ -640,12 +650,14 @@
                     <div class="form-group"><label>Propósito / Objetivo del Ritual</label><textarea id="rit-prop" class="form-input" rows="2" placeholder="Desbloqueo de energías, prosperidad..."></textarea></div>
                     <div class="form-group"><label>¿Qué Incluye?</label><textarea id="rit-inc" class="form-input" rows="2" placeholder="Vela consagrada, lectura previa, reporte de canalización..."></textarea></div>
                     <button type="submit" class="btn-purple" style="width: 100%;">GUARDAR RITUAL</button>
+                    <div class="admin-inventory"><h4><i class="fa-solid fa-boxes-stacked"></i> Rituales publicados</h4><div class="admin-inventory-list" id="admin-list-rituales"></div></div>
                 </form>
 
                 <!-- Form Producto -->
                 <form id="form-admin-producto" onsubmit="guardarNuevoProducto(event)" style="display: none;">
                     <h3 style="color: var(--text-gold); margin-bottom: 8px; font-size: 1.1rem;">Nuevo Producto</h3>
                     <div class="form-group"><label>Nombre</label><input type="text" id="p-nombre" class="form-input" required></div>
+                    <div class="form-group"><label>Sección del catálogo</label><select id="p-cat" class="form-input"><option value="amuletos">Amuletos</option><option value="tarot">Tarot</option><option value="cristales">Cristales</option><option value="inciensos">Inciensos</option><option value="otros">Otros</option></select></div>
                     <div class="form-group"><label>Precio ($ COP)</label><input type="number" id="p-precio" class="form-input" required></div>
 
                     <div class="form-group">
@@ -660,12 +672,14 @@
 
                     <div class="form-group"><label>Descripción</label><textarea id="p-desc" class="form-input" rows="2"></textarea></div>
                     <button type="submit" class="btn-purple" style="width: 100%;">GUARDAR PRODUCTO</button>
+                    <div class="admin-inventory"><h4><i class="fa-solid fa-boxes-stacked"></i> Productos publicados</h4><div class="admin-inventory-list" id="admin-list-productos"></div></div>
                 </form>
 
                 <!-- Form Remedio -->
                 <form id="form-admin-remedio" onsubmit="guardarNuevoRemedio(event)" style="display: none;">
                     <h3 style="color: var(--text-gold); margin-bottom: 8px; font-size: 1.1rem;">Nuevo Remedio Natural</h3>
                     <div class="form-group"><label>Nombre del Remedio</label><input type="text" id="r-nombre" class="form-input" required></div>
+                    <div class="form-group"><label>Categoría</label><select id="r-cat" class="form-input"><option>Infusiones</option><option>Tónicos</option><option>Ungüentos</option><option>Baños</option><option>Otros</option></select></div>
                     <div class="form-group"><label>Precio ($ COP)</label><input type="number" id="r-precio" class="form-input" required></div>
 
                     <div class="form-group">
@@ -681,6 +695,7 @@
                     <div class="form-group"><label>Preparación</label><textarea id="r-prep" class="form-input" rows="2"></textarea></div>
                     <div class="form-group"><label>Propiedades</label><textarea id="r-prop" class="form-input" rows="2"></textarea></div>
                     <button type="submit" class="btn-purple" style="width: 100%;">GUARDAR REMEDIO</button>
+                    <div class="admin-inventory"><h4><i class="fa-solid fa-boxes-stacked"></i> Remedios publicados</h4><div class="admin-inventory-list" id="admin-list-remedios"></div></div>
                 </form>
 
                 <!-- Form Suscripcion -->
@@ -692,6 +707,7 @@
                     <div class="form-group"><label>Descripción</label><textarea id="s-desc" class="form-input" rows="2"></textarea></div>
                     <div class="form-group"><label>Beneficios</label><textarea id="s-ben" class="form-input" rows="2"></textarea></div>
                     <button type="submit" class="btn-purple" style="width: 100%;">GUARDAR</button>
+                    <div class="admin-inventory"><h4><i class="fa-solid fa-boxes-stacked"></i> Suscripciones publicadas</h4><div class="admin-inventory-list" id="admin-list-suscripciones"></div></div>
                 </form>
 
                 <!-- Form Foro -->
@@ -712,6 +728,7 @@
 
                     <div class="form-group"><label>Contenido</label><textarea id="f-contenido" class="form-input" rows="4" required></textarea></div>
                     <button type="submit" class="btn-purple" style="width: 100%;">PUBLICAR EN FORO</button>
+                    <div class="admin-inventory"><h4><i class="fa-solid fa-boxes-stacked"></i> Publicaciones del foro</h4><div class="admin-inventory-list" id="admin-list-foro"></div></div>
                 </form>
                     </div>
                 </section>
@@ -827,9 +844,44 @@
             if(estaAutenticado) cargarCitasAdmin();
         }
 
+        function renderAdminInventory(containerId, items, modulo, getDetails) {
+            const list = document.getElementById(containerId);
+            if (!list) return;
+            list.replaceChildren();
+
+            if (!items.length) {
+                const empty = document.createElement('p');
+                empty.className = 'admin-inventory-empty';
+                empty.textContent = 'Aún no hay elementos en esta sección. Agrega uno con el formulario de arriba.';
+                list.appendChild(empty);
+                return;
+            }
+
+            items.forEach(item => {
+                const row = document.createElement('div');
+                row.className = 'admin-inventory-item';
+                const details = document.createElement('div');
+                const name = document.createElement('strong');
+                name.textContent = item.nombre || item.titulo || 'Elemento sin nombre';
+                const summary = document.createElement('small');
+                summary.textContent = getDetails(item);
+                details.append(name, summary);
+
+                const remove = document.createElement('button');
+                remove.type = 'button';
+                remove.className = 'admin-inventory-delete';
+                remove.setAttribute('aria-label', `Eliminar ${name.textContent}`);
+                remove.innerHTML = '<i class="fa-solid fa-trash" aria-hidden="true"></i> Eliminar';
+                remove.addEventListener('click', () => eliminarItem(modulo, item.id));
+                row.append(details, remove);
+                list.appendChild(row);
+            });
+        }
+
         async function cargarPersonalizados() {
             const res = await fetch('/api/personalizados');
             const data = await res.json();
+            renderAdminInventory('admin-list-personalizados', data, 'personalizados', p => `${p.tipo || 'Personalizado'} · $${Number(p.precio_base || 0).toLocaleString('es-CO')} COP`);
             const grid = document.getElementById('personalizados-grid');
             grid.innerHTML = '';
             data.forEach(p => {
@@ -960,6 +1012,7 @@
         async function cargarRituales() {
             const res = await fetch('/api/rituales');
             const data = await res.json();
+            renderAdminInventory('admin-list-rituales', data, 'rituales', r => `${r.categoria || 'Ritual'} · $${Number(r.precio || 0).toLocaleString('es-CO')} COP`);
             const grid = document.getElementById('rituales-grid');
             grid.innerHTML = '';
             data.forEach(r => {
@@ -986,6 +1039,7 @@
         async function cargarProductos() {
             const res = await fetch('/api/productos');
             const data = await res.json();
+            renderAdminInventory('admin-list-productos', data, 'productos', p => `${p.categoria || 'Producto'} · $${Number(p.precio || 0).toLocaleString('es-CO')} COP`);
             const grid = document.getElementById('products-grid');
             grid.innerHTML = '';
             data.forEach(p => {
@@ -1010,6 +1064,7 @@
         async function cargarRemedios() {
             const res = await fetch('/api/remedios');
             const data = await res.json();
+            renderAdminInventory('admin-list-remedios', data, 'remedios', r => `${r.categoria || 'Remedio'} · $${Number(r.precio || 0).toLocaleString('es-CO')} COP`);
             const grid = document.getElementById('remedios-grid');
             grid.innerHTML = '';
             data.forEach(r => {
@@ -1036,6 +1091,7 @@
         async function cargarSuscripciones() {
             const res = await fetch('/api/suscripciones');
             const data = await res.json();
+            renderAdminInventory('admin-list-suscripciones', data, 'suscripciones', s => `${s.frecuencia || 'Suscripción'} · $${Number(s.precio || 0).toLocaleString('es-CO')} COP`);
             const grid = document.getElementById('suscripciones-grid');
             grid.innerHTML = '';
             data.forEach(s => {
@@ -1061,6 +1117,7 @@
         async function cargarForo() {
             const res = await fetch('/api/foro');
             const data = await res.json();
+            renderAdminInventory('admin-list-foro', data, 'foro', f => `${f.semana || 'Foro'} · ${f.fecha || 'Sin fecha'}`);
             const container = document.getElementById('foro-container');
             container.innerHTML = '';
             data.forEach(f => {
@@ -1140,6 +1197,7 @@
             e.preventDefault();
             const fd = new FormData();
             fd.append('nombre', document.getElementById('p-nombre').value);
+            fd.append('categoria', document.getElementById('p-cat').value);
             fd.append('precio', document.getElementById('p-precio').value);
             fd.append('descripcion', document.getElementById('p-desc').value);
             fd.append('imagen_url', document.getElementById('p-url').value);
@@ -1159,6 +1217,7 @@
             e.preventDefault();
             const fd = new FormData();
             fd.append('nombre', document.getElementById('r-nombre').value);
+            fd.append('categoria', document.getElementById('r-cat').value);
             fd.append('precio', document.getElementById('r-precio').value);
             fd.append('preparacion', document.getElementById('r-prep').value);
             fd.append('propiedades', document.getElementById('r-prop').value);
