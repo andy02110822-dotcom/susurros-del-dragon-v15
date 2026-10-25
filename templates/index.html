@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Susurros del Dragón | Santuario, Personalizados & Ritualística</title>
+    <meta name="theme-color" content="#190033">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Susurros">
+    <link rel="manifest" href="/static/manifest.webmanifest">
+    <link rel="apple-touch-icon" href="/static/images/logo-dragon.jpeg">
     <link rel="icon" type="image/jpeg" href="/static/images/logo-dragon.jpeg">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -241,6 +246,7 @@
                 <button class="btn-purple" onclick="showSection('personalizados')"><i class="fa-solid fa-wand-sparkles"></i> CREAR PERSONALIZADO</button>
                 <button class="btn-outline" onclick="showSection('citas')"><i class="fa-solid fa-calendar-check"></i> AGENDAR CITA</button>
                 <button class="btn-purple" onclick="showSection('catalogo')"><i class="fa-solid fa-gem"></i> CATÁLOGO</button>
+                <button class="btn-outline" type="button" onclick="instalarAplicacion()"><i class="fa-solid fa-download"></i> INSTALAR APP</button>
             </div>
         </div>
     </div>
@@ -593,6 +599,31 @@
     <div class="toast" id="toast"></div>
 
     <script>
+        let installPromptEvent = null;
+        window.addEventListener('beforeinstallprompt', (event) => {
+            event.preventDefault();
+            installPromptEvent = event;
+        });
+        window.addEventListener('appinstalled', () => {
+            installPromptEvent = null;
+            showToast('✨ Susurros del Dragón quedó instalada');
+        });
+        async function instalarAplicacion() {
+            if (!installPromptEvent) {
+                showToast('Abre el menú del navegador y elige Instalar app o Añadir a pantalla de inicio');
+                return;
+            }
+            installPromptEvent.prompt();
+            const choice = await installPromptEvent.userChoice;
+            installPromptEvent = null;
+            if (choice.outcome === 'accepted') showToast('✨ Instalación iniciada');
+        }
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+            });
+        }
+
         let estaAutenticado = false;
         let carrito = [];
         const WA_NUM = '573218259526';
