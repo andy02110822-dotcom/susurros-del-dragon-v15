@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Susurros del Dragón | Santuario, Personalizados & Ritualística</title>
+    <link rel="icon" type="image/jpeg" href="/static/images/logo-dragon.jpeg">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -50,6 +51,17 @@
             text-transform: uppercase;
             border-bottom: 1px solid var(--border-glow);
             box-shadow: 0 0 15px rgba(189, 95, 255, 0.25);
+        }
+
+        .top-banner { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        .brand-logo {
+            width: 30px; height: 30px; flex: 0 0 auto; object-fit: cover; border-radius: 50%;
+            border: 1px solid var(--purple-glow); box-shadow: 0 0 10px rgba(189, 95, 255, 0.55);
+        }
+        .hero-logo {
+            display: block; width: 112px; height: 112px; margin: 0 auto 0.9rem; object-fit: cover;
+            border-radius: 50%; border: 2px solid var(--purple-glow);
+            box-shadow: 0 0 24px rgba(189, 95, 255, 0.55);
         }
 
         /* HEADER / BARRA DE NAVEGACIÓN FIJA EN LA PARTE INFERIOR */
@@ -180,6 +192,8 @@
         @media (max-width: 768px) {
             body { background-attachment: scroll, scroll, scroll; }
             .hero-portal h1 { font-size: 1.8rem; }
+            .hero-logo { width: 88px; height: 88px; }
+            .brand-logo { width: 26px; height: 26px; }
             .cart-trigger { top: 12px; right: 10px; padding: 6px 10px; font-size: 0.72rem; }
             .main-container { padding: 1rem 0.8rem; }
             .grid-cards { grid-template-columns: 1fr; }
@@ -192,7 +206,7 @@
 </head>
 <body>
 
-    <div class="top-banner">✦ ENVÍOS MÍSTICOS A TODO EL REINO | RITUALES & PERSONALIZADOS ✦</div>
+    <div class="top-banner"><img class="brand-logo" src="/static/images/logo-dragon.jpeg" alt="Logo de Susurros del Dragón"><span>✦ ENVÍOS MÍSTICOS A TODO EL REINO | RITUALES & PERSONALIZADOS ✦</span></div>
 
     <!-- BARRA DE NAVEGACIÓN FIJA EN LA PARTE INFERIOR -->
     <header>
@@ -220,6 +234,7 @@
     <!-- SECCIÓN INICIO -->
     <div id="inicio-sec">
         <div class="hero-portal">
+            <img class="hero-logo" src="/static/images/logo-dragon.jpeg" alt="Emblema de Susurros del Dragón">
             <span class="hero-tag">✦ ALQUIMIA, RITUALES & SABIDURÍA ✦</span>
             <h1>SUSURROS DEL DRAGÓN</h1>
             <p>Diseña amuletos, velas y trabajos totalmente personalizados con tu nombre, intenciones y piedras rituales preparadas a medida.</p>
