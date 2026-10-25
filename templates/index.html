@@ -221,7 +221,6 @@
             <a onclick="showSection('suscripciones')" id="nav-suscripciones"><i class="fa-solid fa-crown"></i>VIP</a>
             <a onclick="showSection('foro')" id="nav-foro"><i class="fa-solid fa-comments"></i>Foro</a>
             <a onclick="showSection('tarot')" id="nav-tarot"><i class="fa-solid fa-moon"></i>Tarot</a>
-            <a onclick="showSection('admin')" id="nav-admin" class="btn-admin-nav"><i class="fa-solid fa-lock"></i>Admin</a>
         </nav>
     </header>
 
@@ -1134,7 +1133,11 @@
             showToast("🔮 Mazo barajado de nuevo");
         }
 
-        window.onload = function() { cargarTodo(); inicializarTarot(); };
+        window.onload = function() {
+            cargarTodo();
+            inicializarTarot();
+            if (window.location.pathname.replace(/\/+$/, '') === '/admin') showSection('admin');
+        };
     </script>
 </body>
 </html>
