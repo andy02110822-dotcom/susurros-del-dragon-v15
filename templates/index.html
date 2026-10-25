@@ -2,11 +2,12 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Susurros del Dragón | Santuario, Personalizados & Ritualística</title>
     <meta name="theme-color" content="#190033">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Susurros">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="/static/manifest.webmanifest">
     <link rel="apple-touch-icon" href="/static/images/logo-dragon.jpeg">
     <link rel="icon" type="image/jpeg" href="/static/images/logo-dragon.jpeg">
@@ -38,9 +39,10 @@
             background-repeat: no-repeat, no-repeat, no-repeat;
             background-attachment: scroll, scroll, fixed;
             min-height: 100vh;
+            min-height: 100dvh;
             overflow-x: hidden;
             /* Margen inferior para que la barra fija no tape contenido */
-            padding-bottom: 80px;
+            padding-bottom: calc(92px + env(safe-area-inset-bottom));
         }
 
         h1, h2, h3, .brand-title, .section-title { font-family: 'Cinzel', serif; letter-spacing: 1.5px; }
@@ -161,7 +163,7 @@
 
         .main-container { max-width: 1200px; margin: 0 auto; padding: 1.5rem 1rem; }
 
-        .grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
+        .grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 20px; }
         .custom-card {
             background: var(--bg-card); border: 1px solid var(--border-glow); border-radius: 16px; overflow: hidden;
             display: flex; flex-direction: column; position: relative;
@@ -176,7 +178,7 @@
         .foro-badge { background: var(--purple-main); color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; display: inline-block; margin-bottom: 8px; }
 
         .tarot-box { background: var(--bg-card); border: 1px solid var(--purple-glow); border-radius: 20px; padding: 2rem 1rem; text-align: center; }
-        .tarot-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin: 1.5rem 0; }
+        .tarot-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: 15px; margin: 1.5rem 0; }
         .card-slot { position: relative; overflow: hidden; perspective: 1100px; transform-style: preserve-3d; }
         .tarot-card-back { display: block; width: min(100%, 150px); aspect-ratio: 2 / 3; object-fit: cover; border-radius: 10px; border: 1px solid rgba(240,198,116,.7); box-shadow: 0 8px 22px rgba(0,0,0,.42); margin-bottom: 10px; transition: transform .25s ease, box-shadow .25s ease; backface-visibility: hidden; }
         .card-slot:hover .tarot-card-back { transform: translateY(-4px) rotate(-1deg); box-shadow: 0 12px 28px rgba(189,95,255,.28); }
@@ -207,7 +209,7 @@
         .tarot-deck-card h3 { color: var(--text-gold); font-family: 'Cinzel', serif; font-size: .8rem; line-height: 1.3; margin: .65rem .15rem .2rem; }
         .tarot-revealed-image { width: min(100%, 185px); margin: 0 auto 12px; box-shadow: 0 10px 30px rgba(0,0,0,.45); }
 
-        .cart-drawer { position: fixed; top: 0; right: -100%; width: 100%; max-width: 380px; height: 100vh; background: #090314; border-left: 1px solid var(--purple-glow); z-index: 3000; transition: right 0.4s; display: flex; flex-direction: column; padding: 1.5rem; }
+        .cart-drawer { position: fixed; top: 0; right: -100%; width: 100%; max-width: 380px; height: 100vh; height: 100dvh; background: #090314; border-left: 1px solid var(--purple-glow); z-index: 3000; transition: right 0.4s; display: flex; flex-direction: column; padding: max(1rem, env(safe-area-inset-top)) 1rem max(1rem, env(safe-area-inset-bottom)); }
         .cart-drawer.open { right: 0; }
         .btn-wa-checkout { background: #25d366; color: white; width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: 800; font-size: 0.95rem; cursor: pointer; margin-top: 1rem; display: flex; align-items: center; justify-content: center; gap: 10px; }
 
@@ -216,26 +218,27 @@
         .form-group label { display: block; margin-bottom: 5px; color: var(--text-gold); font-weight: 600; font-size: 0.85rem; }
         .form-input { width: 100%; padding: 10px; background: rgba(5, 2, 10, 0.9); border: 1px solid var(--border-glow); border-radius: 8px; color: white; font-size: 0.95rem; }
 
-        .toast { position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #4a148c, #7b1fa2); border: 1px solid var(--purple-glow); color: white; padding: 12px 20px; border-radius: 25px; display: none; z-index: 3500; font-weight: 600; font-size: 0.85rem; text-align: center; white-space: nowrap; box-shadow: 0 5px 20px rgba(0,0,0,0.8); }
+        .toast { position: fixed; bottom: calc(92px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #4a148c, #7b1fa2); border: 1px solid var(--purple-glow); color: white; max-width: calc(100vw - 24px); padding: 12px 20px; border-radius: 25px; display: none; z-index: 3500; font-weight: 600; font-size: 0.85rem; text-align: center; white-space: normal; overflow-wrap: anywhere; box-shadow: 0 5px 20px rgba(0,0,0,0.8); }
 
         .cita-card-admin { background: rgba(10, 5, 25, 0.9); border: 1px solid var(--border-glow); padding: 12px; border-radius: 12px; margin-bottom: 10px; position: relative; }
 
         /* MODAL PERSONALIZAR */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 3500; display: none; justify-content: center; align-items: center; padding: 15px; }
-        .modal-content { background: #0c051a; border: 1px solid var(--purple-glow); width: 100%; max-width: 500px; border-radius: 20px; padding: 1.5rem; position: relative; box-shadow: 0 0 30px rgba(189,95,255,0.4); }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh; background: rgba(0,0,0,0.85); z-index: 3500; display: none; justify-content: center; align-items: center; padding: max(15px, env(safe-area-inset-top)) 15px max(15px, env(safe-area-inset-bottom)); overflow-y: auto; }
+        .modal-content { background: #0c051a; border: 1px solid var(--purple-glow); width: 100%; max-width: 500px; max-height: calc(100dvh - 30px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); overflow-y: auto; border-radius: 20px; padding: 1.5rem; position: relative; box-shadow: 0 0 30px rgba(189,95,255,0.4); }
 
         @media (max-width: 768px) {
             body { background-attachment: scroll, scroll, scroll; }
             .hero-portal h1 { font-size: 1.8rem; }
             .hero-logo { width: 88px; height: 88px; }
             .brand-logo { width: 26px; height: 26px; }
-            .cart-trigger { top: 12px; right: 10px; padding: 6px 10px; font-size: 0.72rem; }
+            .cart-trigger { top: calc(12px + env(safe-area-inset-top)); right: max(10px, env(safe-area-inset-right)); padding: 6px 10px; font-size: 0.72rem; }
             .main-container { padding: 1rem 0.8rem; }
-            .grid-cards { grid-template-columns: 1fr; }
+            .grid-cards { grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 14px; }
             .admin-tabs-btn { flex-wrap: wrap; }
             .admin-tabs-btn button { font-size: 0.72rem; padding: 6px 10px; }
             nav.desktop-nav a { font-size: 0.5rem; padding: 3px 1px; }
             nav.desktop-nav a i { font-size: 1rem; }
+            .form-input { font-size: 16px; }
         }
 
         /* Navegación flotante de cristal, integrada con el nuevo fondo */
@@ -292,7 +295,7 @@
             50% { transform: translateY(-5px); }
         }
         @media (max-width: 768px) {
-            header { bottom: 7px; height: 72px; padding: 4px 5px; }
+            header { bottom: calc(7px + env(safe-area-inset-bottom)); height: 72px; padding: 4px 5px; }
             nav.desktop-nav { gap: 4px; }
             nav.desktop-nav a {
                 min-height: 54px;
@@ -400,6 +403,10 @@
             .admin-eyebrow { font-size: .57rem; }
             .admin-logout { padding: 8px 9px; font-size: .68rem; }
             .admin-content { min-height: 320px; padding: 12px; }
+            .admin-header { flex-wrap: wrap; }
+            .admin-inventory-item { align-items: flex-start; gap: .5rem; padding: .7rem; }
+            .admin-inventory-item > div { min-width: 0; overflow-wrap: anywhere; }
+            .admin-inventory-delete { padding: .5rem .55rem; font-size: .74rem; }
         }
 
     </style>
