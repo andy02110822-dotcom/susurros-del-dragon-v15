@@ -23,9 +23,14 @@
             background-color: var(--bg-dark);
             color: var(--text-light);
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background-image: 
-                radial-gradient(circle at 50% 0%, rgba(123, 31, 162, 0.35), transparent 70%),
-                radial-gradient(circle at 80% 60%, rgba(42, 0, 78, 0.3), transparent 50%);
+            background-image:
+                linear-gradient(rgba(5, 2, 10, 0.52), rgba(5, 2, 10, 0.76)),
+                radial-gradient(circle at 50% 0%, rgba(123, 31, 162, 0.18), transparent 70%),
+                url('/static/images/Gemini_Generated_Image_we3nw5we3nw5we3n.jpg');
+            background-size: auto, auto, cover;
+            background-position: center, center top, center;
+            background-repeat: no-repeat, no-repeat, no-repeat;
+            background-attachment: scroll, scroll, fixed;
             min-height: 100vh;
             overflow-x: hidden;
             /* Margen inferior para que la barra fija no tape contenido */
@@ -173,6 +178,7 @@
         .modal-content { background: #0c051a; border: 1px solid var(--purple-glow); width: 100%; max-width: 500px; border-radius: 20px; padding: 1.5rem; position: relative; box-shadow: 0 0 30px rgba(189,95,255,0.4); }
 
         @media (max-width: 768px) {
+            body { background-attachment: scroll, scroll, scroll; }
             .hero-portal h1 { font-size: 1.8rem; }
             .cart-trigger { top: 12px; right: 10px; padding: 6px 10px; font-size: 0.72rem; }
             .main-container { padding: 1rem 0.8rem; }
