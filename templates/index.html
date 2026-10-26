@@ -476,6 +476,21 @@
             .admin-logout { padding: 7px; }
         }
 
+        .paypal-card-panel { margin-top: 14px; padding: 16px; border: 1px solid rgba(200,160,255,.32); border-radius: 14px; background: rgba(17,8,30,.72); color: #f8f3ff; }
+        .paypal-card-panel[hidden] { display: none; }
+        .paypal-card-panel h3 { margin: 0 0 6px; color: #e4caff; font-size: 1rem; }
+        .paypal-card-help { margin: 0 0 14px; color: #c9b9df; font-size: .78rem; line-height: 1.5; }
+        .paypal-card-grid { display: grid; gap: 11px; }
+        .paypal-card-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .paypal-card-field { display: grid; gap: 6px; min-width: 0; color: #eadcfb; font-size: .78rem; }
+        .paypal-card-field small { color: #bdaed0; font-weight: 400; }
+        .paypal-hosted-field, .paypal-card-field input, .paypal-card-field select { box-sizing: border-box; width: 100%; min-height: 46px; padding: 11px 12px; border: 1px solid #76618f; border-radius: 9px; background: #fff; color: #241632; font: inherit; font-size: 16px; }
+        .paypal-hosted-field { display: flex; align-items: center; padding: 0 10px; }
+        .paypal-card-field input:focus, .paypal-card-field select:focus, .paypal-hosted-field:focus-within { outline: 2px solid #c89aff; outline-offset: 2px; border-color: #c89aff; }
+        .paypal-card-submit { width: 100%; min-height: 48px; border: 0; border-radius: 10px; background: linear-gradient(135deg,#7a3bb0,#b86dd1); color: white; font-weight: 700; font-size: .94rem; cursor: pointer; }
+        .paypal-card-submit:disabled { cursor: wait; opacity: .65; }
+        .paypal-card-error { min-height: 1em; margin: 0; color: #ffb8c0; font-size: .8rem; }
+        @media (max-width: 420px) { .paypal-card-panel { padding: 12px; } .paypal-card-row { gap: 8px; } }
     </style>
 </head>
 <body>
@@ -915,6 +930,30 @@
             <div id="paypal-checkout-wrap" style="display:none; margin-top:12px;">
                 <p style="color:#c9b9df; font-size:.72rem; line-height:1.4; margin-bottom:8px;">PayPal mostrará el cobro final en USD. El envío se coordina aparte por WhatsApp y no está incluido en este total.</p>
                 <div id="paypal-button-container"></div>
+                <section id="paypal-card-panel" class="paypal-card-panel" hidden aria-labelledby="paypal-card-title">
+                    <h3 id="paypal-card-title"><i class="fa-regular fa-credit-card"></i> Pagar con tarjeta</h3>
+                    <p class="paypal-card-help">Completa tus datos de facturación. PayPal protege y procesa los datos de tu tarjeta; esta tienda no los recibe ni los guarda.</p>
+                    <div class="paypal-card-grid">
+                        <label class="paypal-card-field"><span>Nombre en la tarjeta</span><div id="card-name-field-container" class="paypal-hosted-field"></div></label>
+                        <label class="paypal-card-field"><span>Número de tarjeta</span><div id="card-number-field-container" class="paypal-hosted-field"></div></label>
+                        <div class="paypal-card-row">
+                            <label class="paypal-card-field"><span>Vencimiento</span><div id="card-expiry-field-container" class="paypal-hosted-field"></div></label>
+                            <label class="paypal-card-field"><span>CVV</span><div id="card-cvv-field-container" class="paypal-hosted-field"></div></label>
+                        </div>
+                        <label class="paypal-card-field"><span>Dirección de facturación</span><input id="card-billing-address-line-1" autocomplete="billing address-line1" placeholder="Calle y número" required></label>
+                        <label class="paypal-card-field"><span>Apartamento, piso o complemento <small>(opcional)</small></span><input id="card-billing-address-line-2" autocomplete="billing address-line2" placeholder="Complemento"></label>
+                        <div class="paypal-card-row">
+                            <label class="paypal-card-field"><span>Ciudad</span><input id="card-billing-city" autocomplete="billing address-level2" placeholder="Ciudad" required></label>
+                            <label class="paypal-card-field"><span>Departamento / Estado</span><input id="card-billing-state" autocomplete="billing address-level1" placeholder="Departamento" required></label>
+                        </div>
+                        <div class="paypal-card-row">
+                            <label class="paypal-card-field"><span>Código postal</span><input id="card-billing-postal-code" autocomplete="billing postal-code" placeholder="Código postal" required></label>
+                            <label class="paypal-card-field"><span>País (código de 2 letras)</span><input id="card-billing-country" autocomplete="billing country" value="CO" maxlength="2" pattern="[A-Za-z]{2}" placeholder="CO" required></label>
+                        </div>
+                        <button id="card-field-submit-button" class="paypal-card-submit" type="button"><i class="fa-solid fa-lock"></i> Pagar con tarjeta</button>
+                        <p id="paypal-card-error" class="paypal-card-error" role="alert" aria-live="polite"></p>
+                    </div>
+                </section>
             </div>
         </div>
     </div>
@@ -971,42 +1010,124 @@
             }
         }
 
+        async function crearOrdenPayPal() {
+            if (!carrito.length) throw new Error('El caldero está vacío');
+            const response = await fetch('/api/paypal/orders', {
+                method: 'POST',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({items: carrito.map(item => ({
+                    tipo: item.tipo,
+                    id: item.id,
+                    personalizacion: item.personalizacion || null
+                }))})
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.error || 'No se pudo iniciar PayPal');
+            return result.id;
+        }
+
+        async function confirmarOrdenPayPal(data) {
+            const orderId = data.orderID || data.orderId;
+            const response = await fetch(`/api/paypal/orders/${encodeURIComponent(orderId)}/capture`, {method:'POST'});
+            const result = await response.json();
+            if (!response.ok || !result.success) throw new Error(result.error || 'El pago no quedó confirmado');
+            carrito = [];
+            updateCart();
+            showToast(`Pago confirmado · Pedido ${result.reference}`);
+        }
+
+        async function enviarPagoTarjeta(cardField) {
+            const fields = {
+                addressLine1: 'card-billing-address-line-1',
+                addressLine2: 'card-billing-address-line-2',
+                adminArea1: 'card-billing-state',
+                adminArea2: 'card-billing-city',
+                postalCode: 'card-billing-postal-code',
+                countryCode: 'card-billing-country'
+            };
+            const required = ['addressLine1', 'adminArea1', 'adminArea2', 'postalCode', 'countryCode'];
+            const values = Object.fromEntries(Object.entries(fields).map(([key, id]) => [key, document.getElementById(id).value.trim()]));
+            const error = document.getElementById('paypal-card-error');
+            values.countryCode = values.countryCode.toUpperCase();
+            for (const key of required) {
+                if (!values[key] || (key === 'countryCode' && !/^[A-Z]{2}$/.test(values[key]))) {
+                    error.textContent = 'Completa los datos de facturación para continuar.';
+                    document.getElementById(fields[key]).focus();
+                    return;
+                }
+            }
+            error.textContent = '';
+            const button = document.getElementById('card-field-submit-button');
+            button.disabled = true;
+            try {
+                await cardField.submit({billingAddress: values});
+            } catch (err) {
+                error.textContent = err?.message || 'No se pudo procesar la tarjeta. Revisa los datos e inténtalo de nuevo.';
+            } finally {
+                button.disabled = false;
+            }
+        }
+
         async function cargarPayPal() {
             try {
                 const response = await fetch('/api/paypal/config');
                 paypalConfig = await response.json();
                 if (!paypalConfig.enabled || paypalButtonRendered) return;
+
+                let clientToken = null;
+                try {
+                    const tokenResponse = await fetch('/api/paypal/client-token', {cache:'no-store'});
+                    if (tokenResponse.ok) clientToken = (await tokenResponse.json()).client_token || null;
+                } catch (_) {
+                    clientToken = null;
+                }
+
                 const script = document.createElement('script');
-                script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(paypalConfig.client_id)}&currency=USD&intent=capture&components=buttons`;
+                const sdkUrl = new URL('https://www.paypal.com/sdk/js');
+                sdkUrl.search = new URLSearchParams({
+                    'client-id': paypalConfig.client_id,
+                    currency: 'USD',
+                    intent: 'capture',
+                    components: 'buttons,card-fields'
+                }).toString();
+                script.src = sdkUrl.toString();
+                if (clientToken) script.dataset.clientToken = clientToken;
                 script.onload = () => {
                     if (!window.paypal || paypalButtonRendered) return;
                     window.paypal.Buttons({
-                        createOrder: async () => {
-                            if (!carrito.length) throw new Error('El caldero está vacío');
-                            const response = await fetch('/api/paypal/orders', {
-                                method: 'POST',
-                                headers: {'Content-Type':'application/json'},
-                                body: JSON.stringify({items: carrito.map(item => ({
-                                    tipo: item.tipo,
-                                    id: item.id,
-                                    personalizacion: item.personalizacion || null
-                                }))})
-                            });
-                            const result = await response.json();
-                            if (!response.ok) throw new Error(result.error || 'No se pudo iniciar PayPal');
-                            return result.id;
-                        },
-                        onApprove: async data => {
-                            const response = await fetch(`/api/paypal/orders/${encodeURIComponent(data.orderID)}/capture`, {method:'POST'});
-                            const result = await response.json();
-                            if (!response.ok || !result.success) throw new Error(result.error || 'El pago no quedó confirmado');
-                            carrito = [];
-                            updateCart();
-                            showToast(`Pago confirmado · Pedido ${result.reference}`);
-                        },
+                        createOrder: crearOrdenPayPal,
+                        onApprove: confirmarOrdenPayPal,
                         onCancel: () => showToast('Pago cancelado. El caldero sigue guardado.'),
                         onError: error => showToast(error.message || 'No se pudo procesar el pago con PayPal')
                     }).render('#paypal-button-container');
+
+                    if (clientToken && window.paypal.CardFields) {
+                        try {
+                            const cardField = window.paypal.CardFields({
+                                createOrder: crearOrdenPayPal,
+                                onApprove: confirmarOrdenPayPal,
+                                onError: error => {
+                                    const target = document.getElementById('paypal-card-error');
+                                    if (target) target.textContent = error?.message || 'No se pudo procesar la tarjeta. Inténtalo de nuevo.';
+                                },
+                                style: {
+                                    input: {'font-size':'16px', color:'#241632', 'font-family':'Arial, sans-serif'},
+                                    '.invalid': {color:'#b42318'}
+                                }
+                            });
+                            if (cardField.isEligible()) {
+                                cardField.NameField({style:{input:{color:'#241632','font-size':'16px'}}}).render('#card-name-field-container');
+                                cardField.NumberField({style:{input:{color:'#241632','font-size':'16px'}}}).render('#card-number-field-container');
+                                cardField.ExpiryField({style:{input:{color:'#241632','font-size':'16px'}}}).render('#card-expiry-field-container');
+                                cardField.CVVField({style:{input:{color:'#241632','font-size':'16px'}}}).render('#card-cvv-field-container');
+                                document.getElementById('paypal-card-panel').hidden = false;
+                                document.getElementById('card-field-submit-button').addEventListener('click', () => enviarPagoTarjeta(cardField));
+                            }
+                        } catch (error) {
+                            console.warn('PayPal Card Fields no está disponible para esta cuenta o región.');
+                        }
+                    }
+
                     paypalButtonRendered = true;
                     updateCart();
                 };
