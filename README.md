@@ -23,7 +23,9 @@ En producción usa HTTPS y configura `SESSION_COOKIE_SECURE=true`. La aplicació
 3. Crea el servicio y espera a que termine el primer deploy. Render mostrará una dirección pública `onrender.com`.
 4. El inicio del panel administrativo queda deshabilitado en esta vista previa. Si necesitas administrarlo, añade `ADMIN_USER` y `ADMIN_PASS` como variables secretas en Render, con valores nuevos y únicos.
 
-La primera visita puede tardar aproximadamente un minuto si el servicio gratuito se ha detenido por inactividad. En el plan gratuito el sistema de archivos es temporal: los cambios en SQLite y los archivos de imagen cargados pueden perderse al reiniciarse o redeplegarse. Usa almacenamiento persistente antes de utilizar la app con datos reales.
+La configuración de Render usa un disco persistente montado en `/var/data` para guardar la base SQLite y las imágenes que se suben desde el panel. Render no permite discos persistentes en el plan gratuito; esta configuración usa el plan Starter y un disco de 1 GB, por lo que el servicio y el almacenamiento tienen un costo según las tarifas vigentes de Render. Revisa el costo en Render antes de sincronizar o desplegar el Blueprint. En instalaciones propias, define `DATA_DIR` como una carpeta persistente y con permisos de escritura. `DATABASE_URL` puede sustituir a SQLite para la base de datos; las imágenes siguen guardándose en `DATA_DIR/uploads`.
+
+Los cambios hechos desde el panel que ya se perdieron cuando el servidor gratuito se detuvo no se pueden reconstruir desde el disco efímero. La versión del sitio y del panel del 25 de octubre sí está en el código del repositorio; se recuperará al desplegar esa revisión.
 
 ## Publicación
 

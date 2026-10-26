@@ -10,20 +10,21 @@ secret_key = os.environ.get('SECRET_KEY')
 if not secret_key:
     raise RuntimeError('Define the SECRET_KEY environment variable before starting the app.')
 app.config['SECRET_KEY'] = secret_key
+DATA_DIR = os.path.abspath(os.environ.get('DATA_DIR', app.instance_path))
+os.makedirs(DATA_DIR, exist_ok=True)
+
 database_url = os.environ.get('DATABASE_URL')
 if database_url and database_url.startswith('postgres://'):
     database_url = database_url.replace('postgres://', 'postgresql://', 1)
 if not database_url:
-    database_url = f"sqlite:///{os.path.join(app.instance_path, 'susurros_dragon.db')}"
+    database_url = f"sqlite:///{os.path.join(DATA_DIR, 'susurros_dragon.db')}"
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_SECURE'] = os.environ.get('SESSION_COOKIE_SECURE', '').lower() in {'1', 'true', 'yes'}
 
-os.makedirs(app.instance_path, exist_ok=True)
-
-UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'uploads')
+UPLOAD_FOLDER = os.path.join(DATA_DIR, 'uploads')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)

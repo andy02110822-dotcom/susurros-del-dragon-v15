@@ -2,13 +2,20 @@ services:
   - type: web
     name: susurros-del-dragon-v15
     runtime: python
-    plan: free
+    # Persistent disks are unavailable on Render's Free compute plan.
+    plan: starter
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app
     healthCheckPath: /
     autoDeploy: true
+    disk:
+      name: susurros-data
+      mountPath: /var/data
+      sizeGB: 1
     envVars:
       - key: SECRET_KEY
         generateValue: true
       - key: SESSION_COOKIE_SECURE
         value: "true"
+      - key: DATA_DIR
+        value: /var/data
