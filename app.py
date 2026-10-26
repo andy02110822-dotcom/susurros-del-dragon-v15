@@ -544,6 +544,22 @@ def paypal_is_configured():
 def paypal_order_amount(total_cop, rate):
     return (Decimal(total_cop) / rate).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
+@app.route('/api/paypal/client-token', methods=['GET'])
+def paypal_client_token():
+    """Return a short-lived PayPal client token for PayPal-hosted card fields."""
+    if not paypal_is_configured():
+        return jsonify({'error': 'PayPal aún no está configurado'}), 503
+    try:
+        token_data = paypal_api_request('/v1/identity/generate-token', 'POST')
+        client_token = token_data.get('client_token')
+        if not client_token:
+            raise RuntimeError('PayPal no devolvió un token de cliente')
+        response = jsonify({'client_token': client_token})
+        response.headers['Cache-Control'] = 'no-store'
+        return response
+    except RuntimeError:
+        return jsonify({'error': 'No se pudieron habilitar los campos de tarjeta'}), 502
+
 @app.route('/api/paypal/config', methods=['GET'])
 def paypal_config():
     return jsonify({
