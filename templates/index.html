@@ -209,8 +209,20 @@
         .tarot-deck-card h3 { color: var(--text-gold); font-family: 'Cinzel', serif; font-size: .8rem; line-height: 1.3; margin: .65rem .15rem .2rem; }
         .tarot-revealed-image { width: min(100%, 185px); margin: 0 auto 12px; box-shadow: 0 10px 30px rgba(0,0,0,.45); }
 
-        .cart-drawer { position: fixed; top: 0; right: -100%; width: 100%; max-width: 380px; height: 100vh; height: 100dvh; background: #090314; border-left: 1px solid var(--purple-glow); z-index: 3000; transition: right 0.4s; display: flex; flex-direction: column; padding: max(1rem, env(safe-area-inset-top)) 1rem max(1rem, env(safe-area-inset-bottom)); }
-        .cart-drawer.open { right: 0; }
+        .cart-overlay { position: fixed; inset: 0; z-index: 2998; display: none; align-items: center; justify-content: center; padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom)); background: radial-gradient(ellipse at center, rgba(42,11,74,.52), rgba(3,2,10,.86)); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); opacity: 0; transition: opacity .32s ease; }
+        .cart-overlay.open { display: flex; opacity: 1; animation: cauldron-veil .38s ease both; }
+        @keyframes cauldron-veil { from { opacity: 0; } to { opacity: 1; } }
+        .cart-drawer { position: fixed; z-index: 3000; top: 50%; left: 50%; right: auto; width: min(560px, calc(100vw - 28px)); max-width: 560px; height: min(82dvh, 760px); min-height: min(420px, calc(100dvh - 40px)); background: radial-gradient(ellipse at 50% -10%, rgba(107,42,148,.42), transparent 46%), linear-gradient(160deg, rgba(16,7,31,.98), rgba(7,4,16,.985)); border: 1px solid rgba(207,151,255,.78); border-radius: 28px; box-shadow: 0 0 0 1px rgba(240,198,116,.2), 0 24px 90px rgba(0,0,0,.78), 0 0 46px rgba(160,76,226,.38), inset 0 0 34px rgba(189,95,255,.08); display: flex; flex-direction: column; padding: max(1.1rem, env(safe-area-inset-top)) 1.2rem max(1rem, env(safe-area-inset-bottom)); overflow: hidden; visibility: hidden; opacity: 0; transform: translate(-50%,-46%) scale(.91); transition: transform .42s cubic-bezier(.18,.85,.22,1), opacity .3s ease, visibility .3s; }
+        .cart-drawer::before { content: ''; position: absolute; inset: 8px; border: 1px solid rgba(240,198,116,.24); border-radius: 21px; pointer-events: none; }
+        .cart-drawer.open { visibility: visible; opacity: 1; transform: translate(-50%,-50%) scale(1); }
+        .cart-drawer > * { position: relative; z-index: 1; }
+        .cart-drawer h3 { text-shadow: 0 0 16px rgba(189,95,255,.62); }
+        .cart-open { overflow: hidden; }
+        .btn-nequi-checkout { width: 100%; min-height: 50px; margin-top: 10px; padding: 13px; border: 1px solid rgba(230,190,255,.88); border-radius: 12px; color: #fff; background: linear-gradient(135deg,#32105f,#731caf 55%,#a950df); box-shadow: 0 0 20px rgba(161,72,217,.3), inset 0 0 12px rgba(255,255,255,.08); cursor: pointer; font-weight: 800; font-size: .92rem; letter-spacing: .04em; display: flex; align-items: center; justify-content: center; gap: 10px; transition: transform .2s, box-shadow .2s; }
+        .btn-nequi-checkout:hover { transform: translateY(-2px); box-shadow: 0 0 25px rgba(189,95,255,.58); }
+        .nequi-checkout-note { color: #c9b9df; font-size: .7rem; line-height: 1.45; margin-top: 7px; text-align: center; }
+        @media (max-width: 520px) { .cart-drawer { width: calc(100vw - 20px); height: min(84dvh,700px); border-radius: 22px; padding-left: .95rem; padding-right: .95rem; } }
+        @media (prefers-reduced-motion: reduce) { .cart-overlay, .cart-drawer { transition: none; } }
         .cart-item { display: grid; grid-template-columns: minmax(0,1fr) auto auto; align-items: center; gap: 8px; margin-bottom: 8px; padding: 9px; border: 1px solid rgba(168,220,255,.16); border-radius: 10px; background: rgba(17,8,35,.72); color: white; }
         .cart-item-name { min-width: 0; font-size: .84rem; overflow-wrap: anywhere; }
         .cart-item-price { color: var(--text-gold); font-size: .82rem; white-space: nowrap; }
@@ -513,10 +525,10 @@
         </nav>
     </header>
 
-    <div class="cart-trigger" onclick="toggleCart()">
-        <svg class="cauldron-icon" viewBox="0 0 32 32" role="img" aria-label="Caldero" xmlns="http://www.w3.org/2000/svg"><path d="M9 12c0-2 2-3 3-3s2 1 2 3m4 0c0-2 2-3 3-3s2 1 2 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M6 14h20l-2 10a9 9 0 0 1-16 0L6 14Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M4 15h3m18 0h3M11 26l-1 3m11-3 1 3M12 18h8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+    <button type="button" class="cart-trigger" onclick="toggleCart()" aria-label="Abrir caldero de compras" aria-haspopup="dialog" aria-controls="cart-drawer" aria-expanded="false">
+        <svg class="cauldron-icon" viewBox="0 0 40 40" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><path d="M14 11c-4-4 3-5 0-9M24 10c-3-4 4-5 1-9M31 11c-3-3 2-4 1-6" fill="none" stroke="#e4c2ff" stroke-width="1.8" stroke-linecap="round"/><path d="M8 15h24l-2.4 12a11 11 0 0 1-19.2 0L8 15Z" fill="rgba(189,95,255,.22)" stroke="#dfb7ff" stroke-width="2.2" stroke-linejoin="round"/><path d="M6 14h28M10 18c4 2 7-2 11 0s7 2 10 0M12 29l-2 5m18-5 2 5M7 15l-3-2m29 2 3-2" fill="none" stroke="#f5d990" stroke-width="1.8" stroke-linecap="round"/><circle cx="15" cy="20" r="1.1" fill="#f8d574"/><circle cx="25" cy="21" r="1.1" fill="#d7a6ff"/></svg>
         <span id="cart-badge" style="background: var(--text-gold); color: black; border-radius: 50%; padding: 2px 7px; font-size: 0.75rem;">0</span>
-    </div>
+    </button>
 
     <!-- SECCIÓN INICIO -->
     <div id="inicio-sec">
@@ -914,10 +926,11 @@
         </div>
     </div>
 
-    <!-- CALDERO CARRITO -->
-    <div class="cart-drawer" id="cart-drawer">
+    <!-- Velo místico y caldero central de compras -->
+    <div class="cart-overlay" id="cart-overlay" aria-hidden="true" onclick="if(event.target === this) toggleCart(false)"></div>
+    <div class="cart-drawer" id="cart-drawer" role="dialog" aria-modal="true" aria-labelledby="cart-title" aria-hidden="true" tabindex="-1">
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-glow); padding-bottom: 0.8rem; margin-bottom: 1rem;">
-            <h3>CALDERO DE COMPRAS</h3>
+            <h3 id="cart-title">CALDERO DE COMPRAS</h3>
             <button onclick="toggleCart()" style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">&times;</button>
         </div>
         <div id="cart-list" style="flex-grow: 1; overflow-y: auto;"></div>
@@ -927,6 +940,8 @@
             </div>
             <div id="cart-total-usd" class="price-card-usd" style="text-align:right; margin-top:4px;">Equivalente USD: cargando TRM…</div>
             <button class="btn-wa-checkout" onclick="checkoutWA()"><i class="fa-brands fa-whatsapp"></i> PEDIR POR WHATSAPP</button>
+            <button class="btn-nequi-checkout" onclick="checkoutNequi()"><span aria-hidden="true">N</span> SOLICITAR PAGO CON NEQUI</button>
+            <p class="nequi-checkout-note">Te contactaremos para coordinar el cobro. El pedido solo se confirma cuando verifiquemos el pago recibido.</p>
             <div id="paypal-checkout-wrap" style="display:none; margin-top:12px;">
                 <p style="color:#c9b9df; font-size:.72rem; line-height:1.4; margin-bottom:8px;">PayPal mostrará el cobro final en USD. El envío se coordina aparte por WhatsApp y no está incluido en este total.</p>
                 <div id="paypal-button-container"></div>
@@ -1894,7 +1909,336 @@
             showToast(`Eliminado del caldero: ${producto.nombre}`);
         }
 
-        function toggleCart() { document.getElementById('cart-drawer').classList.toggle('open'); }
+        function toggleCart(forceOpen) {
+            const drawer = document.getElementById('cart-drawer');
+            const overlay = document.getElementById('cart-overlay');
+            const trigger = document.querySelector('.cart-trigger');
+            const open = typeof forceOpen === 'boolean' ? forceOpen : !drawer.classList.contains('open');
+            drawer.classList.toggle('open', open); overlay.classList.toggle('open', open);
+            drawer.setAttribute('aria-hidden', String(!open)); overlay.setAttribute('aria-hidden', String(!open));
+            trigger?.setAttribute('aria-expanded', String(open)); document.body.classList.toggle('cart-open', open);
+            if (open) { trigger?.classList.remove('is-bubbling'); void trigger?.offsetWidth; trigger?.classList.add('is-bubbling'); window.setTimeout(() => trigger?.classList.remove('is-bubbling'), 750); window.setTimeout(() => drawer.focus(), 40); }
+            else trigger?.focus();
+        }
+        document.addEventListener('keydown', event => { if (event.key === 'Escape' && document.getElementById('cart-drawer').classList.contains('open')) toggleCart(false); });
+        function checkoutNequi() {
+            if (carrito.length === 0) return alert('El caldero está vacío');
+            let text = 'Hola Susurros del Dragón, quiero pagar este pedido por Nequi:%0A%0A';
+            carrito.forEach(item => text += '- ' + item.nombre + ' (
+
+        function checkoutWA() {
+            if(carrito.length===0) return alert("El caldero está vacío");
+            let text = "Hola Susurros del Dragón, quiero solicitar:%0A%0A";
+            carrito.forEach(p => text += `- ${p.nombre} ($${p.precio.toLocaleString('es-CO')})%0A`);
+            const total = carrito.reduce((a,b)=>a+b.precio,0);
+            text += `%0ATotal: $${total.toLocaleString('es-CO')}`;
+            window.open(`https://wa.me/${WA_NUM}?text=${text}`, '_blank');
+        }
+
+        async function procesarLoginAdmin(e) {
+            e.preventDefault();
+            const u = document.getElementById('a-user').value;
+            const p = document.getElementById('a-pass').value;
+            const res = await fetch('/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({usuario:u, password:p}) });
+            if(res.ok) { showToast("Acceso Concedido"); cargarTodo(); } else alert("Error de ingreso");
+        }
+
+        async function cerrarSesionAdmin() {
+            await fetch('/api/logout', {method:'POST'});
+            cargarTodo();
+        }
+
+        function showSection(sec) {
+            document.body.classList.toggle('admin-mode', sec === 'admin');
+            ['inicio', 'personalizados', 'citas', 'rituales', 'catalogo', 'remedios', 'suscripciones', 'foro', 'tarot', 'admin'].forEach(s => {
+                const el = document.getElementById(`${s}-sec`);
+                if(el) el.style.display = (s === sec) ? 'block' : 'none';
+
+                const n = document.getElementById(`nav-${s}`);
+                if(n) n.classList.toggle('active', s === sec);
+            });
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg; t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 2500);
+        }
+
+        const arcanosTarot = [
+            { nombre: "El Loco", desc: "Nuevos comienzos, espontaneidad, fe ciega en el camino.", invertido: "Imprudencia, riesgos innecesarios, temor a dar el salto." },
+            { nombre: "El Mago", desc: "Manifestación, poder personal, habilidad, recursos a tu disposición.", invertido: "Manipulación, talentos desaprovechados, ilusiones." },
+            { nombre: "La Sacerdotisa", desc: "Intuición profunda, misterios ocultos, sabiduría interior, quietud.", invertido: "Secretos revelados, desconexión de la intuición, superficialidad." },
+            { nombre: "La Emperatriz", desc: "Fertilidad, abundancia, naturaleza, creatividad desbordante, nutrición.", invertido: "Dependencia emocional, bloqueo creativo, sobreprotección." },
+            { nombre: "El Emperador", desc: "Autoridad, estructura, liderazgo, estabilidad, orden y disciplina.", invertido: "Tiranía, rigidez extrema, falta de control, abuso de poder." },
+            { nombre: "El Hierofante", desc: "Tradición, guía espiritual, mentoría, instituciones y valores compartidos.", invertido: "Dogmatismo, rebeldía ciega, romper esquemas necesarios." },
+            { nombre: "Los Amantes", desc: "Unión de almas, elecciones cruciales desde el corazón, armonía y pactos.", invertido: "Desarmonía, decisiones divididas, conflicto de valores." },
+            { nombre: "El Carro", desc: "Victoria, determinación, avance incontenible, enfoque y triunfo sobre obstáculos.", invertido: "Falta de dirección, agresividad, pérdida de control en el camino." },
+            { nombre: "La Fuerza", desc: "Coraje interior, dominio de las pasiones con paciencia y compasión.", invertido: "Dudas de uno mismo, debilidad, impulsividad descontrolada." },
+            { nombre: "El Ermitaño", desc: "Búsqueda interior, introspección, sabiduría en la soledad, guía propia.", invertido: "Aislamiento excesivo, soledad no deseada, rechazo de consejos." },
+            { nombre: "La Rueda de la Fortuna", desc: "Ciclos kármicos, golpes de buena suerte, destino en movimiento, giros inesperados.", invertido: "Mala racha temporal, resistencia al cambio natural." },
+            { nombre: "La Justicia", desc: "Equilibrio, verdad, causa y efecto, claridad mental, decisiones justas.", invertido: "Injusticia, deshonestidad, evitar asumir responsabilidades." },
+            { nombre: "El Colgado", desc: "Nueva perspectiva, pausa obligatoria, entrega, soltar el control para avanzar.", invertido: "Estancamiento, sacrificio inútil, victimismo." },
+            { nombre: "La Muerte", desc: "Transformación radical, fin de un ciclo, renacimiento inevitable y liberación.", invertido: "Resistencia al cambio, miedo al cierre de etapas, estancamiento." },
+            { nombre: "La Templanza", desc: "Alquimia interior, moderación, paciencia, armonía y sanación de oposiciones.", invertido: "Desequilibrio, excesos, falta de paciencia y prisa destructiva." },
+            { nombre: "El Diablo", desc: "Ataduras materiales, pasiones terrenales, sombras inconscientes, dependencia.", invertido: "Liberación de cadenas, superación de vicios, toma de conciencia." },
+            { nombre: "La Torre", desc: "Revelación repentina, ruptura de estructuras falsas, liberación por el rayo.", invertido: "Evitar un colapso inminente, miedo a la catastrofe." },
+            { nombre: "La Estrella", desc: "Esperanza renovada, inspiración divina, fe en el futuro, bendiciones y paz.", invertido: "Desaliento, pérdida de fe, pesimismo y dudas." },
+            { nombre: "La Luna", desc: "Sueños, intuición nocturna, ilusiones, miedos subconscientes y misterio.", invertido: "Claridad emergiendo de la confusión, superación de miedos y engaños." },
+            { nombre: "El Sol", desc: "Alegría radiante, éxito rotundo, vitalidad, claridad y felicidad plena.", invertido: "Felicidad retrasada, brillo disminuido temporalmente, optimismo forzado." },
+            { nombre: "El Juicio", desc: "Renacimiento espiritual, llamado interior, absolución, despertar definitivo.", invertido: "Duda de sí mismo, autocrítica destructiva, ignorar el llamado." },
+            { nombre: "El Mundo", desc: "Culminación exitosa de un gran ciclo, integración, realización y plenitud total.", invertido: "Falta de cierre, metas incompletas a un paso de la gloria." }
+        ];
+
+        const imagenesArcanosTarot = [
+            "00-el-loco.webp", "01-el-mago.webp", "02-la-sacerdotisa.webp", "03-la-emperatriz.webp",
+            "04-el-emperador.webp", "05-el-hierofante.webp", "06-los-amantes.webp", "07-el-carro.webp",
+            "08-la-fuerza.webp", "09-el-ermitano.webp", "10-la-rueda-de-la-fortuna.webp", "11-la-justicia.webp",
+            "12-el-colgado.webp", "13-la-muerte.webp", "14-la-templanza.webp", "15-el-diablo.webp",
+            "16-la-torre.webp", "17-la-estrella.webp", "18-la-luna.webp", "19-el-sol.webp",
+            "20-el-juicio.webp", "21-el-mundo.webp"
+        ];
+        arcanosTarot.forEach((arcano, index) => { arcano.imagen = `/static/images/tarot/${imagenesArcanosTarot[index]}`; });
+
+        let tiradaActual = [];
+
+        function inicializarTarot() {
+            const grid = document.getElementById('tarot-slots');
+            if(!grid) return;
+            grid.innerHTML = '';
+
+            const mazo = document.getElementById('tarot-deck-grid');
+            if (mazo && !mazo.dataset.loaded) {
+                mazo.innerHTML = arcanosTarot.map(arcano => `
+                    <article class="tarot-deck-card">
+                        <img src="${arcano.imagen}" alt="Carta ${arcano.nombre}" loading="lazy">
+                        <h3>${arcano.nombre}</h3>
+                    </article>
+                `).join('');
+                mazo.dataset.loaded = 'true';
+            }
+
+            const posiciones = ["PASADO / RAÍZ", "PRESENTE / ENERGÍA", "FUTURO / DESTINO"];
+
+            for(let i=0; i<3; i++) {
+                grid.innerHTML += `
+                    <div class="card-slot" id="slot-${i}" onclick="revelarCarta(${i})" style="background: linear-gradient(145deg, #140a26, #220d42); border: 1px solid rgba(189,95,255,0.4); border-radius: 16px; padding: 1rem; cursor: pointer; min-height: 320px; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: all 0.3s;">
+                        <img class="tarot-card-back" src="/static/images/tarot/reverso.webp" alt="Reverso de una carta del tarot">
+                        <h4 style="color:#f0c674; font-family:'Cinzel',serif; margin-bottom:4px; font-size:1rem;">CARTA ${i+1}</h4>
+                        <span style="color:#a496c4; font-size:0.75rem; text-transform:uppercase;">${posiciones[i]}</span>
+                        <p style="color:#d8b4fe; font-size:0.8rem; margin-top:8px; font-style:italic;">(Toca para revelar)</p>
+                    </div>
+                `;
+            }
+            tiradaActual = [null, null, null];
+        }
+
+        function revelarCarta(idx) {
+            if(tiradaActual[idx] !== null) return;
+
+            const arcano = arcanosTarot[Math.floor(Math.random() * arcanosTarot.length)];
+            const invertida = Math.random() < 0.35;
+            tiradaActual[idx] = { arcano, invertida };
+
+            const slot = document.getElementById(`slot-${idx}`);
+            const revelarFrente = () => {
+                slot.classList.remove('is-flipping');
+                slot.style.background = "rgba(30, 12, 60, 0.95)";
+                slot.style.borderColor = "#f0c674";
+                slot.innerHTML = `
+                    <img class="tarot-revealed-image tarot-front-reveal" src="${arcano.imagen}" alt="Carta ${arcano.nombre}">
+                    <h4 style="color:#f0c674; font-family:'Cinzel',serif; font-size:1rem; margin-bottom:6px;">${arcano.nombre}</h4>
+                    <span style="background:#7b1fa2; color:white; padding:2px 8px; border-radius:10px; font-size:0.7rem; font-weight:bold; margin-bottom:8px; display:inline-block;">${invertida ? 'INVERTIDA 🔄' : 'AL DERECHO ✦'}</span>
+                    <p style="color:#e2d8f3; font-size:0.8rem; line-height:1.35;">${invertida ? arcano.invertido : arcano.desc}</p>
+                `;
+                showToast(`✨ Revelado: ${arcano.nombre}`);
+            };
+
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                revelarFrente();
+                return;
+            }
+
+            slot.classList.add('is-flipping');
+            window.setTimeout(revelarFrente, 720);
+        }
+
+        function reiniciarLectura() {
+            inicializarTarot();
+            showToast("🔮 Mazo barajado de nuevo");
+        }
+
+        window.onload = function() {
+            cargarTodo();
+            cargarPayPal();
+            inicializarTarot();
+            if (window.location.pathname.replace(/\/+$/, '') === '/admin') showSection('admin');
+        };
+    </script>
+</body>
+</html>
+
+ + item.precio.toLocaleString('es-CO') + ' COP)%0A');
+            const total = carrito.reduce((sum, item) => sum + item.precio, 0);
+            text += '%0ATotal: 
+
+        function checkoutWA() {
+            if(carrito.length===0) return alert("El caldero está vacío");
+            let text = "Hola Susurros del Dragón, quiero solicitar:%0A%0A";
+            carrito.forEach(p => text += `- ${p.nombre} ($${p.precio.toLocaleString('es-CO')})%0A`);
+            const total = carrito.reduce((a,b)=>a+b.precio,0);
+            text += `%0ATotal: $${total.toLocaleString('es-CO')}`;
+            window.open(`https://wa.me/${WA_NUM}?text=${text}`, '_blank');
+        }
+
+        async function procesarLoginAdmin(e) {
+            e.preventDefault();
+            const u = document.getElementById('a-user').value;
+            const p = document.getElementById('a-pass').value;
+            const res = await fetch('/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({usuario:u, password:p}) });
+            if(res.ok) { showToast("Acceso Concedido"); cargarTodo(); } else alert("Error de ingreso");
+        }
+
+        async function cerrarSesionAdmin() {
+            await fetch('/api/logout', {method:'POST'});
+            cargarTodo();
+        }
+
+        function showSection(sec) {
+            document.body.classList.toggle('admin-mode', sec === 'admin');
+            ['inicio', 'personalizados', 'citas', 'rituales', 'catalogo', 'remedios', 'suscripciones', 'foro', 'tarot', 'admin'].forEach(s => {
+                const el = document.getElementById(`${s}-sec`);
+                if(el) el.style.display = (s === sec) ? 'block' : 'none';
+
+                const n = document.getElementById(`nav-${s}`);
+                if(n) n.classList.toggle('active', s === sec);
+            });
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg; t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 2500);
+        }
+
+        const arcanosTarot = [
+            { nombre: "El Loco", desc: "Nuevos comienzos, espontaneidad, fe ciega en el camino.", invertido: "Imprudencia, riesgos innecesarios, temor a dar el salto." },
+            { nombre: "El Mago", desc: "Manifestación, poder personal, habilidad, recursos a tu disposición.", invertido: "Manipulación, talentos desaprovechados, ilusiones." },
+            { nombre: "La Sacerdotisa", desc: "Intuición profunda, misterios ocultos, sabiduría interior, quietud.", invertido: "Secretos revelados, desconexión de la intuición, superficialidad." },
+            { nombre: "La Emperatriz", desc: "Fertilidad, abundancia, naturaleza, creatividad desbordante, nutrición.", invertido: "Dependencia emocional, bloqueo creativo, sobreprotección." },
+            { nombre: "El Emperador", desc: "Autoridad, estructura, liderazgo, estabilidad, orden y disciplina.", invertido: "Tiranía, rigidez extrema, falta de control, abuso de poder." },
+            { nombre: "El Hierofante", desc: "Tradición, guía espiritual, mentoría, instituciones y valores compartidos.", invertido: "Dogmatismo, rebeldía ciega, romper esquemas necesarios." },
+            { nombre: "Los Amantes", desc: "Unión de almas, elecciones cruciales desde el corazón, armonía y pactos.", invertido: "Desarmonía, decisiones divididas, conflicto de valores." },
+            { nombre: "El Carro", desc: "Victoria, determinación, avance incontenible, enfoque y triunfo sobre obstáculos.", invertido: "Falta de dirección, agresividad, pérdida de control en el camino." },
+            { nombre: "La Fuerza", desc: "Coraje interior, dominio de las pasiones con paciencia y compasión.", invertido: "Dudas de uno mismo, debilidad, impulsividad descontrolada." },
+            { nombre: "El Ermitaño", desc: "Búsqueda interior, introspección, sabiduría en la soledad, guía propia.", invertido: "Aislamiento excesivo, soledad no deseada, rechazo de consejos." },
+            { nombre: "La Rueda de la Fortuna", desc: "Ciclos kármicos, golpes de buena suerte, destino en movimiento, giros inesperados.", invertido: "Mala racha temporal, resistencia al cambio natural." },
+            { nombre: "La Justicia", desc: "Equilibrio, verdad, causa y efecto, claridad mental, decisiones justas.", invertido: "Injusticia, deshonestidad, evitar asumir responsabilidades." },
+            { nombre: "El Colgado", desc: "Nueva perspectiva, pausa obligatoria, entrega, soltar el control para avanzar.", invertido: "Estancamiento, sacrificio inútil, victimismo." },
+            { nombre: "La Muerte", desc: "Transformación radical, fin de un ciclo, renacimiento inevitable y liberación.", invertido: "Resistencia al cambio, miedo al cierre de etapas, estancamiento." },
+            { nombre: "La Templanza", desc: "Alquimia interior, moderación, paciencia, armonía y sanación de oposiciones.", invertido: "Desequilibrio, excesos, falta de paciencia y prisa destructiva." },
+            { nombre: "El Diablo", desc: "Ataduras materiales, pasiones terrenales, sombras inconscientes, dependencia.", invertido: "Liberación de cadenas, superación de vicios, toma de conciencia." },
+            { nombre: "La Torre", desc: "Revelación repentina, ruptura de estructuras falsas, liberación por el rayo.", invertido: "Evitar un colapso inminente, miedo a la catastrofe." },
+            { nombre: "La Estrella", desc: "Esperanza renovada, inspiración divina, fe en el futuro, bendiciones y paz.", invertido: "Desaliento, pérdida de fe, pesimismo y dudas." },
+            { nombre: "La Luna", desc: "Sueños, intuición nocturna, ilusiones, miedos subconscientes y misterio.", invertido: "Claridad emergiendo de la confusión, superación de miedos y engaños." },
+            { nombre: "El Sol", desc: "Alegría radiante, éxito rotundo, vitalidad, claridad y felicidad plena.", invertido: "Felicidad retrasada, brillo disminuido temporalmente, optimismo forzado." },
+            { nombre: "El Juicio", desc: "Renacimiento espiritual, llamado interior, absolución, despertar definitivo.", invertido: "Duda de sí mismo, autocrítica destructiva, ignorar el llamado." },
+            { nombre: "El Mundo", desc: "Culminación exitosa de un gran ciclo, integración, realización y plenitud total.", invertido: "Falta de cierre, metas incompletas a un paso de la gloria." }
+        ];
+
+        const imagenesArcanosTarot = [
+            "00-el-loco.webp", "01-el-mago.webp", "02-la-sacerdotisa.webp", "03-la-emperatriz.webp",
+            "04-el-emperador.webp", "05-el-hierofante.webp", "06-los-amantes.webp", "07-el-carro.webp",
+            "08-la-fuerza.webp", "09-el-ermitano.webp", "10-la-rueda-de-la-fortuna.webp", "11-la-justicia.webp",
+            "12-el-colgado.webp", "13-la-muerte.webp", "14-la-templanza.webp", "15-el-diablo.webp",
+            "16-la-torre.webp", "17-la-estrella.webp", "18-la-luna.webp", "19-el-sol.webp",
+            "20-el-juicio.webp", "21-el-mundo.webp"
+        ];
+        arcanosTarot.forEach((arcano, index) => { arcano.imagen = `/static/images/tarot/${imagenesArcanosTarot[index]}`; });
+
+        let tiradaActual = [];
+
+        function inicializarTarot() {
+            const grid = document.getElementById('tarot-slots');
+            if(!grid) return;
+            grid.innerHTML = '';
+
+            const mazo = document.getElementById('tarot-deck-grid');
+            if (mazo && !mazo.dataset.loaded) {
+                mazo.innerHTML = arcanosTarot.map(arcano => `
+                    <article class="tarot-deck-card">
+                        <img src="${arcano.imagen}" alt="Carta ${arcano.nombre}" loading="lazy">
+                        <h3>${arcano.nombre}</h3>
+                    </article>
+                `).join('');
+                mazo.dataset.loaded = 'true';
+            }
+
+            const posiciones = ["PASADO / RAÍZ", "PRESENTE / ENERGÍA", "FUTURO / DESTINO"];
+
+            for(let i=0; i<3; i++) {
+                grid.innerHTML += `
+                    <div class="card-slot" id="slot-${i}" onclick="revelarCarta(${i})" style="background: linear-gradient(145deg, #140a26, #220d42); border: 1px solid rgba(189,95,255,0.4); border-radius: 16px; padding: 1rem; cursor: pointer; min-height: 320px; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: all 0.3s;">
+                        <img class="tarot-card-back" src="/static/images/tarot/reverso.webp" alt="Reverso de una carta del tarot">
+                        <h4 style="color:#f0c674; font-family:'Cinzel',serif; margin-bottom:4px; font-size:1rem;">CARTA ${i+1}</h4>
+                        <span style="color:#a496c4; font-size:0.75rem; text-transform:uppercase;">${posiciones[i]}</span>
+                        <p style="color:#d8b4fe; font-size:0.8rem; margin-top:8px; font-style:italic;">(Toca para revelar)</p>
+                    </div>
+                `;
+            }
+            tiradaActual = [null, null, null];
+        }
+
+        function revelarCarta(idx) {
+            if(tiradaActual[idx] !== null) return;
+
+            const arcano = arcanosTarot[Math.floor(Math.random() * arcanosTarot.length)];
+            const invertida = Math.random() < 0.35;
+            tiradaActual[idx] = { arcano, invertida };
+
+            const slot = document.getElementById(`slot-${idx}`);
+            const revelarFrente = () => {
+                slot.classList.remove('is-flipping');
+                slot.style.background = "rgba(30, 12, 60, 0.95)";
+                slot.style.borderColor = "#f0c674";
+                slot.innerHTML = `
+                    <img class="tarot-revealed-image tarot-front-reveal" src="${arcano.imagen}" alt="Carta ${arcano.nombre}">
+                    <h4 style="color:#f0c674; font-family:'Cinzel',serif; font-size:1rem; margin-bottom:6px;">${arcano.nombre}</h4>
+                    <span style="background:#7b1fa2; color:white; padding:2px 8px; border-radius:10px; font-size:0.7rem; font-weight:bold; margin-bottom:8px; display:inline-block;">${invertida ? 'INVERTIDA 🔄' : 'AL DERECHO ✦'}</span>
+                    <p style="color:#e2d8f3; font-size:0.8rem; line-height:1.35;">${invertida ? arcano.invertido : arcano.desc}</p>
+                `;
+                showToast(`✨ Revelado: ${arcano.nombre}`);
+            };
+
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                revelarFrente();
+                return;
+            }
+
+            slot.classList.add('is-flipping');
+            window.setTimeout(revelarFrente, 720);
+        }
+
+        function reiniciarLectura() {
+            inicializarTarot();
+            showToast("🔮 Mazo barajado de nuevo");
+        }
+
+        window.onload = function() {
+            cargarTodo();
+            cargarPayPal();
+            inicializarTarot();
+            if (window.location.pathname.replace(/\/+$/, '') === '/admin') showSection('admin');
+        };
+    </script>
+</body>
+</html>
+
+ + total.toLocaleString('es-CO') + ' COP%0A%0APor favor, indíquenme el siguiente paso para completar el pago.';
+            window.open('https://wa.me/' + WA_NUM + '?text=' + text, '_blank', 'noopener,noreferrer');
+        }
 
         function checkoutWA() {
             if(carrito.length===0) return alert("El caldero está vacío");
