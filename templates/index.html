@@ -214,7 +214,7 @@
         .cart-item { display: grid; grid-template-columns: minmax(0,1fr) auto auto; align-items: center; gap: 8px; margin-bottom: 8px; padding: 9px; border: 1px solid rgba(168,220,255,.16); border-radius: 10px; background: rgba(17,8,35,.72); color: white; }
         .cart-item-name { min-width: 0; font-size: .84rem; overflow-wrap: anywhere; }
         .cart-item-price { color: var(--text-gold); font-size: .82rem; white-space: nowrap; }
-        .cart-item-remove { min-height: 36px; padding: 6px 9px; border: 1px solid rgba(255,151,184,.38); border-radius: 8px; background: rgba(153,45,91,.28); color: #ffe8ef; font-size: .74rem; cursor: pointer; }
+        .cart-item-remove { width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid rgba(255,151,184,.38); border-radius: 8px; background: rgba(153,45,91,.28); color: #ffe8ef; font-size: .95rem; cursor: pointer; }
         .cart-item-remove:hover { background: rgba(190,54,108,.52); }
         .btn-wa-checkout { background: #25d366; color: white; width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: 800; font-size: 0.95rem; cursor: pointer; margin-top: 1rem; display: flex; align-items: center; justify-content: center; gap: 10px; }
 
@@ -1569,8 +1569,9 @@
                 const remove = document.createElement('button');
                 remove.type = 'button';
                 remove.className = 'cart-item-remove';
-                remove.textContent = 'Eliminar';
                 remove.setAttribute('aria-label', `Eliminar ${i.nombre} del caldero`);
+                remove.title = `Eliminar ${i.nombre} del caldero`;
+                remove.innerHTML = '<i class="fa-solid fa-trash" aria-hidden="true"></i>';
                 remove.addEventListener('click', () => quitarDelCaldero(idx));
                 row.append(name, price, remove);
                 list.appendChild(row);
