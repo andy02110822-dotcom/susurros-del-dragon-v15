@@ -409,8 +409,18 @@
         .admin-inventory-item strong { display: block; color: #fff; font-size: .88rem; }
         .admin-inventory-item small { display: block; color: #aebbd4; margin-top: 3px; font-size: .74rem; }
         .admin-inventory-empty { color: #a496c4; font-size: .84rem; padding: .75rem 0; }
+        .admin-inventory-actions { display: flex; flex: 0 0 auto; align-items: center; gap: .45rem; }
+        .admin-inventory-edit, .admin-inventory-delete { border: 1px solid rgba(168,220,255,.32); border-radius: 9px; background: rgba(30,87,126,.28); color: #e6f8ff; padding: .55rem .7rem; cursor: pointer; }
+        .admin-inventory-edit:hover { background: rgba(49,133,177,.5); }
         .admin-inventory-delete { flex: 0 0 auto; border: 1px solid rgba(255,151,184,.38); border-radius: 9px; background: rgba(153,45,91,.28); color: #ffe8ef; padding: .55rem .7rem; cursor: pointer; }
         .admin-inventory-delete:hover { background: rgba(190,54,108,.52); }
+        .admin-record-actions { position: absolute; top: 8px; right: 8px; display: flex; gap: 6px; z-index: 11; }
+        .admin-record-action { border: 1px solid rgba(168,220,255,.36); border-radius: 9px; background: rgba(13,45,69,.92); color: #e6f8ff; padding: 7px 9px; cursor: pointer; font-size: .74rem; }
+        .admin-record-action.delete { background: rgba(120,27,61,.92); border-color: rgba(255,151,184,.38); color: #ffe8ef; }
+        #modal-admin-edit .modal-content { max-width: 620px; }
+        #admin-edit-fields { display: grid; gap: .65rem; }
+        .admin-edit-actions { display: flex; gap: .65rem; margin-top: 1rem; }
+        .admin-edit-actions button { flex: 1; }
         @media (max-width: 860px) {
             .admin-dashboard { grid-template-columns: 205px minmax(0,1fr); gap: .75rem; }
             .admin-sidebar { padding: 13px 9px; }
@@ -443,7 +453,8 @@
             .admin-header { flex-wrap: wrap; }
             .admin-inventory-item { align-items: flex-start; gap: .5rem; padding: .7rem; }
             .admin-inventory-item > div { min-width: 0; overflow-wrap: anywhere; }
-            .admin-inventory-delete { min-height: 40px; padding: .5rem .55rem; font-size: .74rem; }
+            .admin-inventory-actions { flex-wrap: wrap; justify-content: flex-end; }
+            .admin-inventory-edit, .admin-inventory-delete { min-height: 40px; padding: .5rem .55rem; font-size: .74rem; }
             #admin-login-box { margin-top: .5rem; }
         }
         @media (max-width: 380px) {
@@ -451,7 +462,7 @@
             .admin-sidebar, .admin-content { padding: 9px; }
             .admin-nav-item { min-width: 96px; }
             .admin-inventory-item { flex-direction: column; }
-            .admin-inventory-delete { align-self: flex-end; }
+            .admin-inventory-actions { align-self: flex-end; }
             .admin-logout { padding: 7px; }
         }
 
@@ -815,6 +826,21 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="modal-admin-edit" role="dialog" aria-modal="true" aria-labelledby="admin-edit-title">
+        <div class="modal-content">
+            <button type="button" onclick="cerrarEdicionAdmin()" aria-label="Cerrar" style="position:absolute; top:12px; right:15px; background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;">&times;</button>
+            <h3 id="admin-edit-title" style="color:var(--text-gold); margin-bottom:8px; font-size:1.2rem;">Editar elemento</h3>
+            <p style="color:#c4b5fd; font-size:.8rem; margin-bottom:12px;">Deja la imagen vacía para conservar la actual.</p>
+            <form id="admin-edit-form" onsubmit="guardarEdicionAdmin(event)">
+                <div id="admin-edit-fields"></div>
+                <div class="admin-edit-actions">
+                    <button type="button" class="btn-outline" onclick="cerrarEdicionAdmin()">Cancelar</button>
+                    <button type="submit" class="btn-purple">GUARDAR CAMBIOS</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- MODAL POPUP PARA CUSTOMIZACIÓN -->
     <div class="modal-overlay" id="modal-custom">
         <div class="modal-content">
@@ -901,10 +927,47 @@
 
         let estaAutenticado = false;
         let carrito = [];
+        const adminRecords = Object.create(null);
+        let adminEditing = null;
         const WA_NUM = '573218259526';
+        const ADMIN_EDIT_CONFIG = {
+            personalizados: { title: 'Editar personalizado', fields: [
+                {key:'nombre', label:'Nombre', required:true}, {key:'tipo', label:'Tipo'}, {key:'precio_base', label:'Precio base ($ COP)', type:'number', required:true},
+                {key:'descripcion', label:'Descripción', type:'textarea'}, {key:'opciones', label:'Opciones sugeridas', type:'textarea'}, {key:'imagen_url', label:'URL de imagen (opcional)', type:'url'}, {key:'imagen_archivo', label:'Cambiar imagen', type:'file'}
+            ]},
+            citas: { title: 'Editar cita', fields: [
+                {key:'nombre_cliente', label:'Nombre del cliente', required:true}, {key:'telefono', label:'Teléfono', type:'tel', required:true},
+                {key:'tipo_servicio', label:'Servicio', required:true}, {key:'modalidad', label:'Modalidad', type:'select', options:['Virtual','Presencial']},
+                {key:'fecha', label:'Fecha', type:'date', required:true}, {key:'hora', label:'Hora', type:'time', required:true}, {key:'notas', label:'Notas', type:'textarea'}
+            ]},
+            productos: { title: 'Editar producto', fields: [
+                {key:'nombre', label:'Nombre', required:true}, {key:'categoria', label:'Sección', type:'select', options:['amuletos','tarot','cristales','inciensos','otros']},
+                {key:'precio', label:'Precio ($ COP)', type:'number', required:true}, {key:'descripcion', label:'Descripción', type:'textarea'},
+                {key:'imagen_url', label:'URL de imagen (opcional)', type:'url'}, {key:'imagen_archivo', label:'Cambiar imagen', type:'file'}
+            ]},
+            rituales: { title: 'Editar ritual', fields: [
+                {key:'nombre', label:'Nombre', required:true}, {key:'categoria', label:'Categoría'}, {key:'precio', label:'Precio ($ COP)', type:'number', required:true},
+                {key:'duracion', label:'Duración / modalidad'}, {key:'proposito', label:'Propósito', type:'textarea'}, {key:'incluye', label:'Incluye', type:'textarea'},
+                {key:'imagen_url', label:'URL de imagen (opcional)', type:'url'}, {key:'imagen_archivo', label:'Cambiar imagen', type:'file'}
+            ]},
+            remedios: { title: 'Editar remedio', fields: [
+                {key:'nombre', label:'Nombre', required:true}, {key:'categoria', label:'Categoría', type:'select', options:['Infusiones','Tónicos','Ungüentos','Baños','Otros']},
+                {key:'precio', label:'Precio ($ COP)', type:'number', required:true}, {key:'preparacion', label:'Preparación', type:'textarea'},
+                {key:'propiedades', label:'Propiedades', type:'textarea'}, {key:'imagen_url', label:'URL de imagen (opcional)', type:'url'}, {key:'imagen_archivo', label:'Cambiar imagen', type:'file'}
+            ]},
+            suscripciones: { title: 'Editar suscripción', fields: [
+                {key:'nombre', label:'Nombre', required:true}, {key:'precio', label:'Precio ($ COP)', type:'number', required:true}, {key:'frecuencia', label:'Frecuencia'},
+                {key:'descripcion', label:'Descripción', type:'textarea'}, {key:'beneficios', label:'Beneficios', type:'textarea'},
+                {key:'imagen_url', label:'URL de imagen (opcional)', type:'url'}, {key:'imagen_archivo', label:'Cambiar imagen', type:'file'}
+            ]},
+            foro: { title: 'Editar publicación del foro', fields: [
+                {key:'titulo', label:'Título', required:true}, {key:'semana', label:'Semana'}, {key:'contenido', label:'Contenido', type:'textarea', required:true},
+                {key:'imagen_url', label:'URL de imagen (opcional)', type:'url'}, {key:'imagen_archivo', label:'Cambiar imagen', type:'file'}
+            ]}
+        };
 
         async function cargarTodo() {
-            verificarSesion();
+            await verificarSesion();
             cargarPersonalizados();
             cargarRituales();
             cargarProductos();
@@ -920,12 +983,12 @@
             estaAutenticado = d.authenticated;
             document.getElementById('admin-login-box').style.display = estaAutenticado ? 'none' : 'block';
             document.getElementById('admin-panel-control').style.display = estaAutenticado ? 'grid' : 'none';
-            if(estaAutenticado) cargarCitasAdmin();
         }
 
         function renderAdminInventory(containerId, items, modulo, getDetails) {
             const list = document.getElementById(containerId);
             if (!list) return;
+            adminRecords[modulo] = items;
             list.replaceChildren();
 
             if (!items.length) {
@@ -946,15 +1009,125 @@
                 summary.textContent = getDetails(item);
                 details.append(name, summary);
 
-                const remove = document.createElement('button');
-                remove.type = 'button';
-                remove.className = 'admin-inventory-delete';
-                remove.setAttribute('aria-label', `Eliminar ${name.textContent}`);
-                remove.innerHTML = '<i class="fa-solid fa-trash" aria-hidden="true"></i> Eliminar';
-                remove.addEventListener('click', () => eliminarItem(modulo, item.id));
-                row.append(details, remove);
+                const actions = document.createElement('div');
+                actions.className = 'admin-inventory-actions';
+                if (estaAutenticado) {
+                    const edit = document.createElement('button');
+                    edit.type = 'button';
+                    edit.className = 'admin-inventory-edit';
+                    edit.setAttribute('aria-label', `Editar ${name.textContent}`);
+                    edit.innerHTML = '<i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> Editar';
+                    edit.addEventListener('click', () => editarItemAdmin(modulo, item.id));
+                    actions.appendChild(edit);
+
+                    const remove = document.createElement('button');
+                    remove.type = 'button';
+                    remove.className = 'admin-inventory-delete';
+                    remove.setAttribute('aria-label', `Eliminar ${name.textContent}`);
+                    remove.innerHTML = '<i class="fa-solid fa-trash" aria-hidden="true"></i> Eliminar';
+                    remove.addEventListener('click', () => eliminarItem(modulo, item.id));
+                    actions.appendChild(remove);
+                }
+                row.append(details, actions);
                 list.appendChild(row);
             });
+        }
+
+        function editarItemAdmin(modulo, id) {
+            if (!estaAutenticado) return;
+            const config = ADMIN_EDIT_CONFIG[modulo];
+            const item = (adminRecords[modulo] || []).find(record => record.id === id);
+            if (!config || !item) return;
+
+            adminEditing = { modulo, id };
+            document.getElementById('admin-edit-title').textContent = config.title;
+            const fields = document.getElementById('admin-edit-fields');
+            fields.replaceChildren();
+
+            config.fields.forEach(def => {
+                const group = document.createElement('div');
+                group.className = 'form-group';
+                const label = document.createElement('label');
+                label.textContent = def.label;
+                const input = def.type === 'textarea' ? document.createElement('textarea') :
+                    def.type === 'select' ? document.createElement('select') : document.createElement('input');
+                input.className = 'form-input';
+                input.name = def.key;
+                if (def.type === 'textarea') input.rows = 3;
+                else if (def.type === 'select') {
+                    const options = [...def.options];
+                    if (item[def.key] && !options.includes(item[def.key])) options.push(item[def.key]);
+                    options.forEach(optionValue => {
+                        const option = document.createElement('option');
+                        option.value = optionValue;
+                        option.textContent = optionValue;
+                        input.appendChild(option);
+                    });
+                } else input.type = def.type || 'text';
+                if (def.required) input.required = true;
+
+                if (def.type === 'file') {
+                    input.accept = '.jpg,.jpeg,.png,.webp,.gif';
+                } else if (def.key === 'imagen_url') {
+                    input.placeholder = 'Deja vacío para conservar la imagen actual';
+                    if (item.imagen && !item.imagen.startsWith('/static/uploads/')) input.value = item.imagen;
+                } else {
+                    input.value = item[def.key] ?? '';
+                }
+                group.append(label, input);
+                fields.appendChild(group);
+            });
+            document.getElementById('modal-admin-edit').style.display = 'flex';
+        }
+
+        function cerrarEdicionAdmin() {
+            document.getElementById('modal-admin-edit').style.display = 'none';
+            document.getElementById('admin-edit-form').reset();
+            document.getElementById('admin-edit-fields').replaceChildren();
+            adminEditing = null;
+        }
+
+        async function guardarEdicionAdmin(event) {
+            event.preventDefault();
+            if (!adminEditing || !estaAutenticado) return;
+            const { modulo, id } = adminEditing;
+            const config = ADMIN_EDIT_CONFIG[modulo];
+            const submit = event.currentTarget.querySelector('button[type="submit"]');
+            submit.disabled = true;
+
+            let options;
+            if (modulo === 'citas') {
+                const payload = {};
+                config.fields.forEach(def => { payload[def.key] = event.currentTarget.elements[def.key].value; });
+                options = { method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) };
+            } else {
+                const payload = new FormData();
+                config.fields.forEach(def => {
+                    const field = event.currentTarget.elements[def.key];
+                    if (def.type === 'file') {
+                        if (field.files.length) payload.append('imagen_archivo', field.files[0]);
+                    } else if (def.key !== 'imagen_url' || field.value.trim()) {
+                        payload.append(def.key, field.value);
+                    }
+                });
+                options = { method: 'PUT', body: payload };
+            }
+
+            try {
+                const res = await fetch(`/api/${modulo}/${id}`, options);
+                const result = await res.json();
+                if (!res.ok) throw new Error(result.error || 'No se pudieron guardar los cambios');
+                cerrarEdicionAdmin();
+                await ({
+                    personalizados: cargarPersonalizados, citas: cargarCitasAdmin, productos: cargarProductos,
+                    rituales: cargarRituales, remedios: cargarRemedios, suscripciones: cargarSuscripciones, foro: cargarForo
+                }[modulo])();
+                showToast('Cambios guardados');
+            } catch (error) {
+                showToast(error.message || 'No se pudieron guardar los cambios');
+            } finally {
+                submit.disabled = false;
+            }
         }
 
         async function cargarPersonalizados() {
@@ -1058,6 +1231,7 @@
             const res = await fetch('/api/citas');
             if(!res.ok) return;
             const data = await res.json();
+            adminRecords.citas = data;
             const countEl = document.getElementById('citas-count');
             if(countEl) countEl.innerText = data.length;
 
@@ -1071,7 +1245,10 @@
             data.forEach(c => {
                 list.innerHTML += `
                     <div class="cita-card-admin">
-                        <button class="delete-btn" style="top:8px; right:8px;" onclick="eliminarCita(${c.id})"><i class="fa-solid fa-trash"></i></button>
+                        <div class="admin-record-actions">
+                            <button type="button" class="admin-record-action" onclick="editarItemAdmin('citas', ${c.id})"><i class="fa-solid fa-pen-to-square"></i> Editar</button>
+                            <button type="button" class="admin-record-action delete" onclick="eliminarCita(${c.id})"><i class="fa-solid fa-trash"></i> Eliminar</button>
+                        </div>
                         <h4 style="color:var(--text-gold); font-size:1rem; margin-bottom:4px;">${c.nombre_cliente} (${c.telefono})</h4>
                         <span style="background:var(--purple-main); color:white; padding:2px 8px; border-radius:10px; font-size:0.7rem; font-weight:bold;">${c.tipo_servicio}</span>
                         <p style="color:#e2d8f3; font-size:0.82rem; margin-top:6px;"><strong>📅 Fecha/Hora:</strong> ${c.fecha} a las ${c.hora} (${c.modalidad})</p>

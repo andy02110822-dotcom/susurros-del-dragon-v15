@@ -179,6 +179,65 @@ class ForoTema(db.Model):
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+ADMIN_EDIT_FIELDS = {
+    'personalizados': (Personalizado, ('nombre', 'tipo', 'precio_base', 'descripcion', 'opciones', 'imagen'), {'precio_base'}),
+    'citas': (Cita, ('nombre_cliente', 'telefono', 'tipo_servicio', 'modalidad', 'fecha', 'hora', 'notas'), set()),
+    'productos': (Producto, ('nombre', 'categoria', 'precio', 'descripcion', 'imagen'), {'precio'}),
+    'rituales': (Ritual, ('nombre', 'categoria', 'precio', 'duracion', 'proposito', 'incluye', 'imagen'), {'precio'}),
+    'suscripciones': (Suscripcion, ('nombre', 'precio', 'frecuencia', 'descripcion', 'beneficios', 'imagen'), {'precio'}),
+    'remedios': (Remedio, ('nombre', 'categoria', 'precio', 'preparacion', 'propiedades', 'imagen'), {'precio'}),
+    'foro': (ForoTema, ('titulo', 'semana', 'contenido', 'imagen'), set()),
+}
+
+def save_updated_image(current_image):
+    uploaded = request.files.get('imagen_archivo')
+    if uploaded and uploaded.filename:
+        if not allowed_file(uploaded.filename):
+            return None, 'Tipo de imagen no permitido'
+        import uuid
+        filename = secure_filename(uploaded.filename)
+        filename = f"{uuid.uuid4().hex}_{filename}"
+        uploaded.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        return f"/static/uploads/{filename}", None
+
+    image_url = request.form.get('imagen_url', '').strip()
+    return image_url or current_image, None
+
+@app.route('/api/<string:modulo>/<int:registro_id>', methods=['PUT'])
+def update_admin_item(modulo, registro_id):
+    if not session.get('logged_in'):
+        return jsonify({'error': 'No autorizado'}), 403
+
+    config = ADMIN_EDIT_FIELDS.get(modulo)
+    if not config:
+        return jsonify({'error': 'Sección no válida'}), 404
+
+    model, fields, numeric_fields = config
+    item = db.session.get(model, registro_id)
+    if not item:
+        return jsonify({'error': 'No encontrado'}), 404
+
+    values = request.form if request.form else (request.get_json(silent=True) or {})
+    try:
+        for field in fields:
+            if field == 'imagen' or field not in values:
+                continue
+            value = values.get(field)
+            setattr(item, field, float(value) if field in numeric_fields else value)
+
+        if 'imagen' in fields:
+            image, error = save_updated_image(item.imagen)
+            if error:
+                db.session.rollback()
+                return jsonify({'error': error}), 400
+            item.imagen = image
+        db.session.commit()
+    except (TypeError, ValueError):
+        db.session.rollback()
+        return jsonify({'error': 'Revisa los valores numéricos'}), 400
+
+    return jsonify(item.to_dict())
+
 def init_db():
     with app.app_context():
         db.create_all()
