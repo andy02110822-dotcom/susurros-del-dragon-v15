@@ -211,6 +211,11 @@
 
         .cart-drawer { position: fixed; top: 0; right: -100%; width: 100%; max-width: 380px; height: 100vh; height: 100dvh; background: #090314; border-left: 1px solid var(--purple-glow); z-index: 3000; transition: right 0.4s; display: flex; flex-direction: column; padding: max(1rem, env(safe-area-inset-top)) 1rem max(1rem, env(safe-area-inset-bottom)); }
         .cart-drawer.open { right: 0; }
+        .cart-item { display: grid; grid-template-columns: minmax(0,1fr) auto auto; align-items: center; gap: 8px; margin-bottom: 8px; padding: 9px; border: 1px solid rgba(168,220,255,.16); border-radius: 10px; background: rgba(17,8,35,.72); color: white; }
+        .cart-item-name { min-width: 0; font-size: .84rem; overflow-wrap: anywhere; }
+        .cart-item-price { color: var(--text-gold); font-size: .82rem; white-space: nowrap; }
+        .cart-item-remove { min-height: 36px; padding: 6px 9px; border: 1px solid rgba(255,151,184,.38); border-radius: 8px; background: rgba(153,45,91,.28); color: #ffe8ef; font-size: .74rem; cursor: pointer; }
+        .cart-item-remove:hover { background: rgba(190,54,108,.52); }
         .btn-wa-checkout { background: #25d366; color: white; width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: 800; font-size: 0.95rem; cursor: pointer; margin-top: 1rem; display: flex; align-items: center; justify-content: center; gap: 10px; }
 
         .admin-form-wrap { max-width: 650px; margin: 0 auto; background: var(--bg-card); border: 1px solid var(--purple-glow); padding: 1.5rem; border-radius: 20px; }
@@ -1549,13 +1554,35 @@
         function updateCart() {
             document.getElementById('cart-badge').innerText = carrito.length;
             const list = document.getElementById('cart-list');
-            list.innerHTML = '';
+            list.replaceChildren();
             let total = 0;
             carrito.forEach((i, idx) => {
                 total += i.precio;
-                list.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:8px; color:white; font-size:0.85rem;"><span>${i.nombre}</span><span>$${i.precio.toLocaleString('es-CO')}</span></div>`;
+                const row = document.createElement('div');
+                row.className = 'cart-item';
+                const name = document.createElement('span');
+                name.className = 'cart-item-name';
+                name.textContent = i.nombre;
+                const price = document.createElement('span');
+                price.className = 'cart-item-price';
+                price.textContent = `$${i.precio.toLocaleString('es-CO')}`;
+                const remove = document.createElement('button');
+                remove.type = 'button';
+                remove.className = 'cart-item-remove';
+                remove.textContent = 'Eliminar';
+                remove.setAttribute('aria-label', `Eliminar ${i.nombre} del caldero`);
+                remove.addEventListener('click', () => quitarDelCaldero(idx));
+                row.append(name, price, remove);
+                list.appendChild(row);
             });
             document.getElementById('cart-total').innerText = `$${total.toLocaleString('es-CO')}`;
+        }
+
+        function quitarDelCaldero(index) {
+            if (index < 0 || index >= carrito.length) return;
+            const [producto] = carrito.splice(index, 1);
+            updateCart();
+            showToast(`Eliminado del caldero: ${producto.nombre}`);
         }
 
         function toggleCart() { document.getElementById('cart-drawer').classList.toggle('open'); }
