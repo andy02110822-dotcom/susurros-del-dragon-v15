@@ -268,9 +268,11 @@ def paypal_api_request(path, method='GET', payload=None, request_id=None):
         },
         method='POST',
     )
+    operation = 'oauth'
     try:
         with urlopen(token_request, timeout=15) as response:
             access_token = json.loads(response.read().decode('utf-8'))['access_token']
+        operation = 'api'
         body = json.dumps(payload).encode('utf-8') if payload is not None else None
         api_request = Request(
             f'{PAYPAL_API_BASE}{path}',
@@ -284,8 +286,23 @@ def paypal_api_request(path, method='GET', payload=None, request_id=None):
         )
         with urlopen(api_request, timeout=20) as response:
             return json.loads(response.read().decode('utf-8'))
-    except (HTTPError, URLError, TimeoutError, KeyError, json.JSONDecodeError) as error:
-        # Keep credentials and provider response bodies out of application logs.
+    except HTTPError as error:
+        # Log only allowlisted PayPal diagnostics, never credentials or the response body.
+        provider_code = 'unknown'
+        debug_id = 'unavailable'
+        try:
+            provider_error = json.loads(error.read().decode('utf-8'))
+            provider_code = str(provider_error.get('error') or provider_error.get('name') or 'unknown')[:80]
+            debug_id = str(provider_error.get('debug_id') or 'unavailable')[:80]
+        except (UnicodeDecodeError, json.JSONDecodeError, AttributeError):
+            pass
+        app.logger.warning(
+            'PayPal %s request rejected: status=%s code=%s debug_id=%s',
+            operation, error.code, provider_code, debug_id,
+        )
+        raise RuntimeError('No se pudo completar la solicitud a PayPal') from error
+    except (URLError, TimeoutError, KeyError, json.JSONDecodeError) as error:
+        app.logger.warning('PayPal %s request failed: %s', operation, type(error).__name__)
         raise RuntimeError('No se pudo completar la solicitud a PayPal') from error
 
 def resolve_payment_items(raw_items):
