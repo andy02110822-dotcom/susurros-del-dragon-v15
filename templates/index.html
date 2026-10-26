@@ -948,7 +948,7 @@
                         </div>
                         <div class="paypal-card-row">
                             <label class="paypal-card-field"><span>Código postal</span><input id="card-billing-postal-code" autocomplete="billing postal-code" placeholder="Código postal" required></label>
-                            <label class="paypal-card-field"><span>País (código de 2 letras)</span><input id="card-billing-country" autocomplete="billing country" value="CO" maxlength="2" pattern="[A-Za-z]{2}" placeholder="CO" required></label>
+                            <label class="paypal-card-field"><span>País</span><select id="card-billing-country" autocomplete="billing country" required><option value="CO" selected>Colombia</option><option value="US">Estados Unidos</option><option value="MX">México</option><option value="AR">Argentina</option><option value="BR">Brasil</option><option value="CL">Chile</option><option value="EC">Ecuador</option><option value="PE">Perú</option><option value="PA">Panamá</option><option value="ES">España</option><option value="CA">Canadá</option><option value="FR">Francia</option><option value="DE">Alemania</option></select></label>
                         </div>
                         <button id="card-field-submit-button" class="paypal-card-submit" type="button"><i class="fa-solid fa-lock"></i> Pagar con tarjeta</button>
                         <p id="paypal-card-error" class="paypal-card-error" role="alert" aria-live="polite"></p>
@@ -1050,7 +1050,7 @@
             const error = document.getElementById('paypal-card-error');
             values.countryCode = values.countryCode.toUpperCase();
             for (const key of required) {
-                if (!values[key] || (key === 'countryCode' && !/^[A-Z]{2}$/.test(values[key]))) {
+                if (!values[key]) {
                     error.textContent = 'Completa los datos de facturación para continuar.';
                     document.getElementById(fields[key]).focus();
                     return;
