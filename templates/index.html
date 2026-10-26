@@ -214,8 +214,13 @@
         .cart-item { display: grid; grid-template-columns: minmax(0,1fr) auto auto; align-items: center; gap: 8px; margin-bottom: 8px; padding: 9px; border: 1px solid rgba(168,220,255,.16); border-radius: 10px; background: rgba(17,8,35,.72); color: white; }
         .cart-item-name { min-width: 0; font-size: .84rem; overflow-wrap: anywhere; }
         .cart-item-price { color: var(--text-gold); font-size: .82rem; white-space: nowrap; }
+        .cart-item-price-usd { display: block; margin-top: 2px; color: #c9b9df; font-size: .7rem; text-align: right; white-space: nowrap; }
         .cart-item-remove { width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid rgba(255,151,184,.38); border-radius: 8px; background: rgba(153,45,91,.28); color: #ffe8ef; font-size: .95rem; cursor: pointer; }
         .cart-item-remove:hover { background: rgba(190,54,108,.52); }
+        .price-dual { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+        .price-cop { color: var(--text-gold); }
+        .price-usd-preview { display: block; margin-top: 4px; color: #c9b9df; font-size: .75rem; font-weight: 500; }
+        .price-card-usd { color: #c9b9df; font-size: .72rem; }
         .btn-wa-checkout { background: #25d366; color: white; width: 100%; padding: 14px; border: none; border-radius: 12px; font-weight: 800; font-size: 0.95rem; cursor: pointer; margin-top: 1rem; display: flex; align-items: center; justify-content: center; gap: 10px; }
 
         .admin-form-wrap { max-width: 650px; margin: 0 auto; background: var(--bg-card); border: 1px solid var(--purple-glow); padding: 1.5rem; border-radius: 20px; }
@@ -677,6 +682,7 @@
                     </div>
                     <nav class="admin-side-nav" aria-label="Secciones de administración">
                         <button type="button" class="admin-nav-item active" data-admin-tab="citas" onclick="switchAdminTab('citas')"><i class="fa-solid fa-calendar-check"></i><span>Citas <small id="citas-count">0</small></span></button>
+                        <button type="button" class="admin-nav-item" data-admin-tab="pedidos" onclick="switchAdminTab('pedidos')"><i class="fa-brands fa-paypal"></i><span>Pedidos PayPal</span></button>
                         <button type="button" class="admin-nav-item" data-admin-tab="personalizado" onclick="switchAdminTab('personalizado')"><i class="fa-solid fa-wand-sparkles"></i><span>Personalizados</span></button>
                         <button type="button" class="admin-nav-item" data-admin-tab="ritual" onclick="switchAdminTab('ritual')"><i class="fa-solid fa-moon"></i><span>Rituales</span></button>
                         <button type="button" class="admin-nav-item" data-admin-tab="producto" onclick="switchAdminTab('producto')"><i class="fa-solid fa-gem"></i><span>Productos</span></button>
@@ -697,13 +703,17 @@
                     <h3 style="color: var(--text-gold); margin-bottom: 10px; font-size: 1.1rem;"><i class="fa-solid fa-calendar-days"></i> Citas Agendadas por Clientes</h3>
                     <div id="admin-citas-list"></div>
                 </div>
+                <div id="tab-admin-pedidos" style="display:none;">
+                    <h3 style="color:var(--text-gold); margin-bottom:10px; font-size:1.1rem;"><i class="fa-brands fa-paypal"></i> Pedidos pagados con PayPal</h3>
+                    <div id="admin-paypal-orders-list" class="admin-inventory-list"></div>
+                </div>
 
                 <!-- Form Personalizado -->
                 <form id="form-admin-personalizado" onsubmit="guardarNuevoPersonalizado(event)" style="display: none;">
                     <h3 style="color: var(--text-gold); margin-bottom: 8px; font-size: 1.1rem;">Nuevo Modelo Personalizado</h3>
                     <div class="form-group"><label>Nombre del Elemento</label><input type="text" id="pers-nombre" class="form-input" required placeholder="Ej: Amuleto de Protección Personal"></div>
                     <div class="form-group"><label>Tipo</label><input type="text" id="pers-tipo" class="form-input" placeholder="Ej: Amuleto / Velón / Saquito Ritual"></div>
-                    <div class="form-group"><label>Precio Base ($ COP)</label><input type="number" id="pers-precio" class="form-input" required placeholder="60000"></div>
+                    <div class="form-group"><label>Precio Base (COP)</label><input type="number" id="pers-precio" class="form-input" data-price-cop required placeholder="60000"><small class="price-usd-preview" data-price-preview>Equivalente USD: cargando TRM…</small></div>
 
                     <div class="form-group">
                         <label>Subir Imagen (.jpg, .png, .webp)</label>
@@ -726,7 +736,7 @@
                     <h3 style="color: var(--text-gold); margin-bottom: 8px; font-size: 1.1rem;">Nuevo Ritual Ofrecido</h3>
                     <div class="form-group"><label>Nombre del Ritual</label><input type="text" id="rit-nombre" class="form-input" required placeholder="Ej: Ritual de Abrecaminos"></div>
                     <div class="form-group"><label>Categoría</label><input type="text" id="rit-cat" class="form-input" placeholder="Ej: Protección / Abundancia / Amor"></div>
-                    <div class="form-group"><label>Precio ($ COP)</label><input type="number" id="rit-precio" class="form-input" required placeholder="75000"></div>
+                    <div class="form-group"><label>Precio (COP)</label><input type="number" id="rit-precio" class="form-input" data-price-cop required placeholder="75000"><small class="price-usd-preview" data-price-preview>Equivalente USD: cargando TRM…</small></div>
                     <div class="form-group"><label>Duración / Modalidad</label><input type="text" id="rit-dur" class="form-input" placeholder="Ej: 1 Sesión / Presencial o Distancia"></div>
 
                     <div class="form-group">
@@ -750,7 +760,7 @@
                     <h3 style="color: var(--text-gold); margin-bottom: 8px; font-size: 1.1rem;">Nuevo Producto</h3>
                     <div class="form-group"><label>Nombre</label><input type="text" id="p-nombre" class="form-input" required></div>
                     <div class="form-group"><label>Sección del catálogo</label><select id="p-cat" class="form-input"><option value="amuletos">Amuletos</option><option value="tarot">Tarot</option><option value="cristales">Cristales</option><option value="inciensos">Inciensos</option><option value="otros">Otros</option></select></div>
-                    <div class="form-group"><label>Precio ($ COP)</label><input type="number" id="p-precio" class="form-input" required></div>
+                    <div class="form-group"><label>Precio (COP)</label><input type="number" id="p-precio" class="form-input" data-price-cop required><small class="price-usd-preview" data-price-preview>Equivalente USD: cargando TRM…</small></div>
 
                     <div class="form-group">
                         <label>Subir Imagen (.jpg, .png, .webp)</label>
@@ -772,7 +782,7 @@
                     <h3 style="color: var(--text-gold); margin-bottom: 8px; font-size: 1.1rem;">Nuevo Remedio Natural</h3>
                     <div class="form-group"><label>Nombre del Remedio</label><input type="text" id="r-nombre" class="form-input" required></div>
                     <div class="form-group"><label>Categoría</label><select id="r-cat" class="form-input"><option>Infusiones</option><option>Tónicos</option><option>Ungüentos</option><option>Baños</option><option>Otros</option></select></div>
-                    <div class="form-group"><label>Precio ($ COP)</label><input type="number" id="r-precio" class="form-input" required></div>
+                    <div class="form-group"><label>Precio (COP)</label><input type="number" id="r-precio" class="form-input" data-price-cop required><small class="price-usd-preview" data-price-preview>Equivalente USD: cargando TRM…</small></div>
 
                     <div class="form-group">
                         <label>Subir Imagen (.jpg, .png, etc.)</label>
@@ -794,7 +804,7 @@
                 <form id="form-admin-suscripcion" onsubmit="guardarNuevaSuscripcion(event)" style="display: none;">
                     <h3 style="color: var(--text-gold); margin-bottom: 8px; font-size: 1.1rem;">Nueva Suscripción</h3>
                     <div class="form-group"><label>Nombre</label><input type="text" id="s-nombre" class="form-input" required></div>
-                    <div class="form-group"><label>Precio ($ COP)</label><input type="number" id="s-precio" class="form-input" required></div>
+                    <div class="form-group"><label>Precio (COP)</label><input type="number" id="s-precio" class="form-input" data-price-cop required><small class="price-usd-preview" data-price-preview>Equivalente USD: cargando TRM…</small></div>
                     <div class="form-group"><label>Frecuencia</label><input type="text" id="s-frec" class="form-input" placeholder="Mensual"></div>
                     <div class="form-group"><label>Subir imagen (.jpg, .png, .webp)</label><input type="file" id="s-file" class="form-input" accept=".jpg,.jpeg,.png,.webp,.gif"></div>
                     <p style="text-align: center; color: var(--text-gold); font-size: 0.8rem; margin: -5px 0 10px 0;">— O si prefieres —</p>
@@ -856,6 +866,8 @@
             <form onsubmit="confirmarAgregarCustom(event)">
                 <input type="hidden" id="custom-base-nombre">
                 <input type="hidden" id="custom-base-precio">
+                <input type="hidden" id="custom-base-id">
+                <small id="custom-base-usd" class="price-usd-preview" style="margin:0 0 12px;"></small>
 
                 <div class="form-group">
                     <label>Tu Nombre Completo (Para la Consagración) *</label>
@@ -896,9 +908,14 @@
         <div id="cart-list" style="flex-grow: 1; overflow-y: auto;"></div>
         <div style="border-top: 1px solid var(--border-glow); padding-top: 1rem;">
             <div style="display: flex; justify-content: space-between; color: var(--text-gold); font-size: 1.1rem; font-weight: bold;">
-                <span>TOTAL:</span><span id="cart-total">$0</span>
+                <span>TOTAL COP:</span><span id="cart-total">$0</span>
             </div>
+            <div id="cart-total-usd" class="price-card-usd" style="text-align:right; margin-top:4px;">Equivalente USD: cargando TRM…</div>
             <button class="btn-wa-checkout" onclick="checkoutWA()"><i class="fa-brands fa-whatsapp"></i> PEDIR POR WHATSAPP</button>
+            <div id="paypal-checkout-wrap" style="display:none; margin-top:12px;">
+                <p style="color:#c9b9df; font-size:.72rem; line-height:1.4; margin-bottom:8px;">PayPal mostrará el cobro final en USD. El envío se coordina aparte por WhatsApp y no está incluido en este total.</p>
+                <div id="paypal-button-container"></div>
+            </div>
         </div>
     </div>
 
@@ -934,7 +951,108 @@
         let carrito = [];
         const adminRecords = Object.create(null);
         let adminEditing = null;
+        let tasaCOPPorUSD = null;
+        let paypalConfig = null;
+        let paypalButtonRendered = false;
         const WA_NUM = '573218259526';
+
+        async function cargarTasaCambio() {
+            try {
+                const res = await fetch('/api/tasa-cambio');
+                if (!res.ok) throw new Error('TRM unavailable');
+                const data = await res.json();
+                const rate = Number(data.cop_por_usd);
+                if (!Number.isFinite(rate) || rate <= 0) throw new Error('Invalid TRM');
+                tasaCOPPorUSD = rate;
+                actualizarVistasUSD();
+            } catch (error) {
+                tasaCOPPorUSD = null;
+                actualizarVistasUSD();
+            }
+        }
+
+        async function cargarPayPal() {
+            try {
+                const response = await fetch('/api/paypal/config');
+                paypalConfig = await response.json();
+                if (!paypalConfig.enabled || paypalButtonRendered) return;
+                const script = document.createElement('script');
+                script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(paypalConfig.client_id)}&currency=USD&intent=capture&components=buttons`;
+                script.onload = () => {
+                    if (!window.paypal || paypalButtonRendered) return;
+                    window.paypal.Buttons({
+                        createOrder: async () => {
+                            if (!carrito.length) throw new Error('El caldero está vacío');
+                            const response = await fetch('/api/paypal/orders', {
+                                method: 'POST',
+                                headers: {'Content-Type':'application/json'},
+                                body: JSON.stringify({items: carrito.map(item => ({
+                                    tipo: item.tipo,
+                                    id: item.id,
+                                    personalizacion: item.personalizacion || null
+                                }))})
+                            });
+                            const result = await response.json();
+                            if (!response.ok) throw new Error(result.error || 'No se pudo iniciar PayPal');
+                            return result.id;
+                        },
+                        onApprove: async data => {
+                            const response = await fetch(`/api/paypal/orders/${encodeURIComponent(data.orderID)}/capture`, {method:'POST'});
+                            const result = await response.json();
+                            if (!response.ok || !result.success) throw new Error(result.error || 'El pago no quedó confirmado');
+                            carrito = [];
+                            updateCart();
+                            showToast(`Pago confirmado · Pedido ${result.reference}`);
+                        },
+                        onCancel: () => showToast('Pago cancelado. El caldero sigue guardado.'),
+                        onError: error => showToast(error.message || 'No se pudo procesar el pago con PayPal')
+                    }).render('#paypal-button-container');
+                    paypalButtonRendered = true;
+                    updateCart();
+                };
+                script.onerror = () => showToast('No se pudo cargar PayPal. Puedes pedir por WhatsApp.');
+                document.head.appendChild(script);
+            } catch (error) {
+                paypalConfig = null;
+            }
+        }
+
+        function formatearUSD(precioCOP) {
+            const precio = Number(precioCOP);
+            if (!tasaCOPPorUSD || !Number.isFinite(precio) || precio <= 0) return 'USD no disponible';
+            return `≈ USD ${(precio / tasaCOPPorUSD).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+        }
+
+        function precioDobleHTML(precioCOP) {
+            const precio = Number(precioCOP) || 0;
+            return `<span class="price-dual"><span class="price-cop">$${precio.toLocaleString('es-CO')} COP</span><small class="price-card-usd">${formatearUSD(precio)} · TRM</small></span>`;
+        }
+
+        function precioDobleAdmin(precioCOP) {
+            const precio = Number(precioCOP) || 0;
+            return `$${precio.toLocaleString('es-CO')} COP · ${formatearUSD(precio)}`;
+        }
+
+        function actualizarVistasUSD(root = document) {
+            root.querySelectorAll('[data-price-preview]').forEach(preview => {
+                const input = preview.parentElement.querySelector('[data-price-cop]');
+                preview.textContent = input?.value
+                    ? `Equivalente aproximado: ${formatearUSD(input.value)}${tasaCOPPorUSD ? ' · TRM vigente' : ''}`
+                    : (tasaCOPPorUSD ? 'El equivalente en USD aparecerá al ingresar el precio.' : 'No se pudo cargar la TRM; el equivalente USD no está disponible.');
+            });
+            const totalUSD = document.getElementById('cart-total-usd');
+            if (totalUSD) {
+                const totalCOP = carrito.reduce((sum, item) => sum + Number(item.precio || 0), 0);
+                totalUSD.textContent = tasaCOPPorUSD
+                    ? `Equivalente aproximado: ${formatearUSD(totalCOP)} · TRM vigente`
+                    : 'Equivalente USD no disponible: no se pudo cargar la TRM';
+            }
+        }
+
+        document.addEventListener('input', event => {
+            if (event.target.matches('[data-price-cop]')) actualizarVistasUSD(event.target.parentElement);
+        });
+
         const ADMIN_EDIT_CONFIG = {
             personalizados: { title: 'Editar personalizado', fields: [
                 {key:'nombre', label:'Nombre', required:true}, {key:'tipo', label:'Tipo'}, {key:'precio_base', label:'Precio base ($ COP)', type:'number', required:true},
@@ -973,6 +1091,7 @@
 
         async function cargarTodo() {
             await verificarSesion();
+            await cargarTasaCambio();
             cargarPersonalizados();
             cargarRituales();
             cargarProductos();
@@ -1080,8 +1199,16 @@
                     input.value = item[def.key] ?? '';
                 }
                 group.append(label, input);
+                if (def.type === 'number' && ['precio', 'precio_base'].includes(def.key)) {
+                    input.dataset.priceCop = '';
+                    const preview = document.createElement('small');
+                    preview.className = 'price-usd-preview';
+                    preview.dataset.pricePreview = '';
+                    group.appendChild(preview);
+                }
                 fields.appendChild(group);
             });
+            actualizarVistasUSD(fields);
             document.getElementById('modal-admin-edit').style.display = 'flex';
         }
 
@@ -1138,7 +1265,7 @@
         async function cargarPersonalizados() {
             const res = await fetch('/api/personalizados');
             const data = await res.json();
-            renderAdminInventory('admin-list-personalizados', data, 'personalizados', p => `${p.tipo || 'Personalizado'} · $${Number(p.precio_base || 0).toLocaleString('es-CO')} COP`);
+            renderAdminInventory('admin-list-personalizados', data, 'personalizados', p => `${p.tipo || 'Personalizado'} · ${precioDobleAdmin(p.precio_base)}`);
             const grid = document.getElementById('personalizados-grid');
             grid.innerHTML = '';
             data.forEach(p => {
@@ -1153,8 +1280,8 @@
                             <p style="color:#e2d8f3; font-size:0.82rem; margin-bottom:8px;">${p.descripcion}</p>
                             ${p.opciones ? `<p style="color:#a496c4; font-size:0.78rem; margin-bottom:12px; flex-grow:1;"><strong>🔮 Opciones Sugeridas:</strong> ${p.opciones}</p>` : ''}
                             <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <span class="card-price">$${p.precio_base.toLocaleString('es-CO')}</span>
-                                <button class="btn-purple" onclick="abrirModalCustom('${p.nombre}', ${p.precio_base}, '${p.descripcion}')"><i class="fa-solid fa-wand-sparkles"></i> PERSONALIZAR</button>
+                                <span class="card-price">${precioDobleHTML(p.precio_base)}</span>
+                                <button class="btn-purple" onclick="abrirModalCustom(${p.id}, '${p.nombre}', ${p.precio_base}, '${p.descripcion}')"><i class="fa-solid fa-wand-sparkles"></i> PERSONALIZAR</button>
                             </div>
                         </div>
                     </div>
@@ -1162,11 +1289,13 @@
             });
         }
 
-        function abrirModalCustom(nombre, precio, desc) {
+        function abrirModalCustom(id, nombre, precio, desc) {
             document.getElementById('modal-item-title').innerText = `PERSONALIZAR: ${nombre}`;
             document.getElementById('modal-item-desc').innerText = desc || 'Ingresa tus datos para la consagración mística.';
             document.getElementById('custom-base-nombre').value = nombre;
             document.getElementById('custom-base-precio').value = precio;
+            document.getElementById('custom-base-id').value = id;
+            document.getElementById('custom-base-usd').textContent = `Precio base: $${Number(precio).toLocaleString('es-CO')} COP · ${formatearUSD(precio)} al valor TRM actual.`;
             document.getElementById('modal-custom').style.display = 'flex';
         }
 
@@ -1185,7 +1314,13 @@
 
             let descCustom = `${baseNombre} [Para: ${cliente} | Nac: ${fechaNac} | Intención: ${intencion}${detalles ? ' | Nota: ' + detalles : ''}]`;
 
-            carrito.push({ nombre: descCustom, precio: precio });
+            carrito.push({
+                nombre: descCustom,
+                precio,
+                tipo: 'personalizados',
+                id: Number(document.getElementById('custom-base-id').value),
+                personalizacion: { cliente, fecha_nac: fechaNac, intencion, detalles }
+            });
             updateCart();
             cerrarModalCustom();
             showToast("✨ Personalizado añadido al caldero");
@@ -1273,7 +1408,7 @@
         async function cargarRituales() {
             const res = await fetch('/api/rituales');
             const data = await res.json();
-            renderAdminInventory('admin-list-rituales', data, 'rituales', r => `${r.categoria || 'Ritual'} · $${Number(r.precio || 0).toLocaleString('es-CO')} COP`);
+            renderAdminInventory('admin-list-rituales', data, 'rituales', r => `${r.categoria || 'Ritual'} · ${precioDobleAdmin(r.precio)}`);
             const grid = document.getElementById('rituales-grid');
             grid.innerHTML = '';
             data.forEach(r => {
@@ -1288,8 +1423,8 @@
                             <p style="color:#e2d8f3; font-size:0.82rem; margin-bottom:8px;"><strong>🔮 Propósito:</strong> ${r.proposito}</p>
                             <p style="color:#a496c4; font-size:0.78rem; margin-bottom:12px; flex-grow:1;"><strong>🕯️ Incluye:</strong> ${r.incluye}</p>
                             <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <span class="card-price">$${r.precio.toLocaleString('es-CO')}</span>
-                                <button class="btn-purple" onclick="agregarAlCaldero('Ritual: ${r.nombre}', ${r.precio})"><i class="fa-solid fa-wand-magic-sparkles"></i> SOLICITAR</button>
+                                <span class="card-price">${precioDobleHTML(r.precio)}</span>
+                                <button class="btn-purple" onclick="agregarAlCaldero('Ritual: ${r.nombre}', ${r.precio}, 'rituales', ${r.id})"><i class="fa-solid fa-wand-magic-sparkles"></i> SOLICITAR</button>
                             </div>
                         </div>
                     </div>
@@ -1300,7 +1435,7 @@
         async function cargarProductos() {
             const res = await fetch('/api/productos');
             const data = await res.json();
-            renderAdminInventory('admin-list-productos', data, 'productos', p => `${p.categoria || 'Producto'} · $${Number(p.precio || 0).toLocaleString('es-CO')} COP`);
+            renderAdminInventory('admin-list-productos', data, 'productos', p => `${p.categoria || 'Producto'} · ${precioDobleAdmin(p.precio)}`);
             const grid = document.getElementById('products-grid');
             grid.innerHTML = '';
             data.forEach(p => {
@@ -1313,8 +1448,8 @@
                             <h3 style="color:white; margin-bottom:6px; font-size:1.1rem;">${p.nombre}</h3>
                             <p style="color:#a496c4; font-size:0.8rem; margin-bottom:12px; flex-grow:1;">${p.descripcion}</p>
                             <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <span class="card-price">$${p.precio.toLocaleString('es-CO')}</span>
-                                <button class="btn-purple" onclick="agregarAlCaldero('${p.nombre}', ${p.precio})">+ AÑADIR</button>
+                                <span class="card-price">${precioDobleHTML(p.precio)}</span>
+                                <button class="btn-purple" onclick="agregarAlCaldero('${p.nombre}', ${p.precio}, 'productos', ${p.id})">+ AÑADIR</button>
                             </div>
                         </div>
                     </div>
@@ -1325,7 +1460,7 @@
         async function cargarRemedios() {
             const res = await fetch('/api/remedios');
             const data = await res.json();
-            renderAdminInventory('admin-list-remedios', data, 'remedios', r => `${r.categoria || 'Remedio'} · $${Number(r.precio || 0).toLocaleString('es-CO')} COP`);
+            renderAdminInventory('admin-list-remedios', data, 'remedios', r => `${r.categoria || 'Remedio'} · ${precioDobleAdmin(r.precio)}`);
             const grid = document.getElementById('remedios-grid');
             grid.innerHTML = '';
             data.forEach(r => {
@@ -1340,8 +1475,8 @@
                             <p style="color:#e2d8f3; font-size:0.8rem; margin-bottom:6px;"><strong>🌿 Propiedades:</strong> ${r.propiedades}</p>
                             <p style="color:#a496c4; font-size:0.75rem; margin-bottom:12px; flex-grow:1;"><strong>☕ Preparación:</strong> ${r.preparacion}</p>
                             <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <span class="card-price">$${r.precio.toLocaleString('es-CO')}</span>
-                                <button class="btn-purple" onclick="agregarAlCaldero('${r.nombre}', ${r.precio})">+ PEDIR</button>
+                                <span class="card-price">${precioDobleHTML(r.precio)}</span>
+                                <button class="btn-purple" onclick="agregarAlCaldero('${r.nombre}', ${r.precio}, 'remedios', ${r.id})">+ PEDIR</button>
                             </div>
                         </div>
                     </div>
@@ -1352,7 +1487,7 @@
         async function cargarSuscripciones() {
             const res = await fetch('/api/suscripciones');
             const data = await res.json();
-            renderAdminInventory('admin-list-suscripciones', data, 'suscripciones', s => `${s.frecuencia || 'Suscripción'} · $${Number(s.precio || 0).toLocaleString('es-CO')} COP`);
+            renderAdminInventory('admin-list-suscripciones', data, 'suscripciones', s => `${s.frecuencia || 'Suscripción'} · ${precioDobleAdmin(s.precio)}`);
             const grid = document.getElementById('suscripciones-grid');
             grid.innerHTML = '';
             data.forEach(s => {
@@ -1364,12 +1499,12 @@
                         <div class="card-body" style="text-align:center;">
                             ${s.imagen ? '' : '<i class="fa-solid fa-crown" style="font-size:2rem; color:var(--text-gold); margin-bottom:10px;"></i>'}
                             <h3 style="color:white; margin-bottom:6px; font-size:1.1rem;">${s.nombre}</h3>
-                            <span class="card-price" style="display:block; margin-bottom:10px;">$${s.precio.toLocaleString('es-CO')} / ${s.frecuencia}</span>
+                            <span class="card-price" style="display:block; margin-bottom:10px;">${precioDobleHTML(s.precio)} / ${s.frecuencia}</span>
                             <p style="color:#a496c4; font-size:0.85rem; margin-bottom:12px;">${s.descripcion}</p>
                             <div style="background:rgba(0,0,0,0.4); padding:8px; border-radius:8px; font-size:0.8rem; color:var(--text-gold); margin-bottom:15px;">
                                 ${s.beneficios}
                             </div>
-                            <button class="btn-purple" style="width:100%;" onclick="agregarAlCaldero('Suscripción: ${s.nombre}', ${s.precio})">UNIRME AL CÍRCULO</button>
+                            <button class="btn-purple" style="width:100%;" onclick="agregarAlCaldero('Suscripción: ${s.nombre}', ${s.precio}, 'suscripciones', ${s.id})">UNIRME AL CÍRCULO</button>
                         </div>
                     </div>
                 `;
@@ -1404,12 +1539,53 @@
                 item.classList.toggle('active', item.dataset.adminTab === tab);
             });
             document.getElementById('tab-admin-citas').style.display = tab === 'citas' ? 'block' : 'none';
+            document.getElementById('tab-admin-pedidos').style.display = tab === 'pedidos' ? 'block' : 'none';
             document.getElementById('form-admin-personalizado').style.display = tab === 'personalizado' ? 'block' : 'none';
             document.getElementById('form-admin-ritual').style.display = tab === 'ritual' ? 'block' : 'none';
             document.getElementById('form-admin-producto').style.display = tab === 'producto' ? 'block' : 'none';
             document.getElementById('form-admin-remedio').style.display = tab === 'remedio' ? 'block' : 'none';
             document.getElementById('form-admin-suscripcion').style.display = tab === 'suscripcion' ? 'block' : 'none';
             document.getElementById('form-admin-foro').style.display = tab === 'foro' ? 'block' : 'none';
+            if (tab === 'pedidos') cargarPedidosPayPal();
+        }
+
+        async function cargarPedidosPayPal() {
+            const list = document.getElementById('admin-paypal-orders-list');
+            list.replaceChildren();
+            try {
+                const response = await fetch('/api/admin/paypal-orders');
+                const orders = await response.json();
+                if (!response.ok) throw new Error(orders.error || 'No se pudieron cargar los pedidos');
+                if (!orders.length) {
+                    const empty = document.createElement('p');
+                    empty.className = 'admin-inventory-empty';
+                    empty.textContent = 'Todavía no hay pedidos PayPal.';
+                    list.appendChild(empty);
+                    return;
+                }
+                orders.forEach(order => {
+                    const card = document.createElement('article');
+                    card.className = 'admin-inventory-item';
+                    card.style.display = 'block';
+                    card.style.marginBottom = '10px';
+                    const title = document.createElement('strong');
+                    title.textContent = `${order.referencia} · ${order.estado}`;
+                    const summary = document.createElement('p');
+                    summary.textContent = `$${Number(order.total_cop).toLocaleString('es-CO')} COP · USD ${order.total_usd} cobrado por PayPal · TRM aplicada ${Number(order.tasa_cop_usd).toLocaleString('es-CO')} COP/USD · Creado ${order.created_at ? new Date(order.created_at).toLocaleString('es-CO') : 'sin fecha'}${order.payer_email ? ` · ${order.payer_email}` : ''}`;
+                    const products = document.createElement('p');
+                    products.textContent = (order.items || []).map(item => {
+                        const custom = item.personalizacion ? ` · Personalización: ${Object.entries(item.personalizacion).filter(([, value]) => value).map(([key, value]) => `${key}: ${value}`).join(' | ')}` : '';
+                        return `${item.nombre} ($${Number(item.precio_cop).toLocaleString('es-CO')} COP)${custom}`;
+                    }).join(' · ');
+                    card.append(title, summary, products);
+                    list.appendChild(card);
+                });
+            } catch (error) {
+                const message = document.createElement('p');
+                message.className = 'admin-inventory-empty';
+                message.textContent = error.message || 'No se pudieron cargar los pedidos.';
+                list.appendChild(message);
+            }
         }
 
         async function guardarNuevoPersonalizado(e) {
@@ -1545,8 +1721,8 @@
             cargarTodo();
         }
 
-        function agregarAlCaldero(nombre, precio) {
-            carrito.push({nombre, precio});
+        function agregarAlCaldero(nombre, precio, tipo, id) {
+            carrito.push({nombre, precio, tipo, id});
             updateCart();
             showToast(`Añadido: ${nombre}`);
         }
@@ -1566,6 +1742,11 @@
                 const price = document.createElement('span');
                 price.className = 'cart-item-price';
                 price.textContent = `$${i.precio.toLocaleString('es-CO')}`;
+                price.appendChild(document.createElement('br'));
+                const usdPrice = document.createElement('small');
+                usdPrice.className = 'cart-item-price-usd';
+                usdPrice.textContent = formatearUSD(i.precio);
+                price.appendChild(usdPrice);
                 const remove = document.createElement('button');
                 remove.type = 'button';
                 remove.className = 'cart-item-remove';
@@ -1577,6 +1758,12 @@
                 list.appendChild(row);
             });
             document.getElementById('cart-total').innerText = `$${total.toLocaleString('es-CO')}`;
+            actualizarVistasUSD();
+            const paypalWrap = document.getElementById('paypal-checkout-wrap');
+            if (paypalWrap) {
+                const supportedItems = carrito.length > 0 && carrito.every(item => item.tipo && item.id && item.tipo !== 'suscripciones');
+                paypalWrap.style.display = paypalConfig?.enabled && supportedItems ? 'block' : 'none';
+            }
         }
 
         function quitarDelCaldero(index) {
@@ -1733,6 +1920,7 @@
 
         window.onload = function() {
             cargarTodo();
+            cargarPayPal();
             inicializarTarot();
             if (window.location.pathname.replace(/\/+$/, '') === '/admin') showSection('admin');
         };

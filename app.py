@@ -1,5 +1,14 @@
 import os
 import hmac
+import json
+import time
+import uuid
+import re
+from datetime import datetime, timezone
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
+from urllib.error import HTTPError, URLError
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
 from flask import Flask, render_template, request, jsonify, session, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import inspect, text
@@ -33,6 +42,12 @@ db = SQLAlchemy(app)
 
 ADMIN_USER = os.environ.get('ADMIN_USER')
 ADMIN_PASS = os.environ.get('ADMIN_PASS')
+PAYPAL_CLIENT_ID = os.environ.get('PAYPAL_CLIENT_ID', '').strip()
+PAYPAL_CLIENT_SECRET = os.environ.get('PAYPAL_CLIENT_SECRET', '').strip()
+PAYPAL_ENV = os.environ.get('PAYPAL_ENV', 'sandbox').strip().lower()
+if PAYPAL_ENV not in {'sandbox', 'live'}:
+    PAYPAL_ENV = 'sandbox'
+PAYPAL_API_BASE = 'https://api-m.paypal.com' if PAYPAL_ENV == 'live' else 'https://api-m.sandbox.paypal.com'
 
 class Producto(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -175,6 +190,150 @@ class ForoTema(db.Model):
             'imagen': self.imagen,
             'fecha': self.fecha
         }
+
+class PedidoPayPal(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    referencia = db.Column(db.String(40), nullable=False, unique=True)
+    paypal_order_id = db.Column(db.String(100), nullable=False, unique=True)
+    estado = db.Column(db.String(30), nullable=False, default='PENDING')
+    total_cop = db.Column(db.Integer, nullable=False)
+    tasa_cop_usd = db.Column(db.Numeric(12, 4), nullable=False)
+    total_usd = db.Column(db.Numeric(12, 2), nullable=False)
+    items_json = db.Column(db.Text, nullable=False)
+    payer_email = db.Column(db.String(254), nullable=True)
+    created_at = db.Column(db.DateTime, nullable=False, default=db.func.now())
+    captured_at = db.Column(db.DateTime, nullable=True)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'referencia': self.referencia,
+            'paypal_order_id': self.paypal_order_id,
+            'estado': self.estado,
+            'total_cop': self.total_cop,
+            'tasa_cop_usd': float(self.tasa_cop_usd),
+            'total_usd': f'{self.total_usd:.2f}',
+            'items': json.loads(self.items_json),
+            'payer_email': self.payer_email,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'captured_at': self.captured_at.isoformat() if self.captured_at else None,
+        }
+
+PAYMENT_ITEM_MODELS = {
+    'productos': (Producto, 'precio'),
+    'personalizados': (Personalizado, 'precio_base'),
+    'rituales': (Ritual, 'precio'),
+    'remedios': (Remedio, 'precio'),
+}
+
+_trm_cache = {'value': None, 'expires_at': 0}
+
+def get_cop_usd_rate():
+    """Read the current official COP/USD TRM from Colombia's open-data API."""
+    now = time.time()
+    if _trm_cache['value'] and now < _trm_cache['expires_at']:
+        return _trm_cache['value']
+
+    params = urlencode({'$limit': '1', '$order': 'vigenciadesde DESC'})
+    req = Request(
+        f'https://www.datos.gov.co/resource/32sa-8pi3.json?{params}',
+        headers={'Accept': 'application/json', 'User-Agent': 'SusurrosDelDragon/1.0'},
+    )
+    try:
+        with urlopen(req, timeout=8) as response:
+            records = json.loads(response.read().decode('utf-8'))
+        rate = Decimal(str(records[0]['valor']))
+        if rate <= 0:
+            raise ValueError('Invalid TRM')
+    except (HTTPError, URLError, TimeoutError, ValueError, KeyError, IndexError, InvalidOperation, json.JSONDecodeError):
+        if _trm_cache['value'] and now < _trm_cache['expires_at'] + 86400:
+            return _trm_cache['value']
+        raise RuntimeError('No se pudo consultar la tasa TRM vigente')
+
+    _trm_cache.update({'value': rate, 'expires_at': now + 1800})
+    return rate
+
+def paypal_api_request(path, method='GET', payload=None, request_id=None):
+    if not PAYPAL_CLIENT_ID or not PAYPAL_CLIENT_SECRET:
+        raise RuntimeError('PayPal no está configurado')
+
+    auth = (f'{PAYPAL_CLIENT_ID}:{PAYPAL_CLIENT_SECRET}').encode('utf-8')
+    import base64
+    token_request = Request(
+        f'{PAYPAL_API_BASE}/v1/oauth2/token',
+        data=b'grant_type=client_credentials',
+        headers={
+            'Authorization': f'Basic {base64.b64encode(auth).decode("ascii")}',
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        method='POST',
+    )
+    try:
+        with urlopen(token_request, timeout=15) as response:
+            access_token = json.loads(response.read().decode('utf-8'))['access_token']
+        body = json.dumps(payload).encode('utf-8') if payload is not None else None
+        api_request = Request(
+            f'{PAYPAL_API_BASE}{path}',
+            data=body,
+            headers={
+                'Authorization': f'Bearer {access_token}',
+                'Content-Type': 'application/json',
+                'PayPal-Request-Id': request_id or str(uuid.uuid4()),
+            },
+            method=method,
+        )
+        with urlopen(api_request, timeout=20) as response:
+            return json.loads(response.read().decode('utf-8'))
+    except (HTTPError, URLError, TimeoutError, KeyError, json.JSONDecodeError) as error:
+        # Keep credentials and provider response bodies out of application logs.
+        raise RuntimeError('No se pudo completar la solicitud a PayPal') from error
+
+def resolve_payment_items(raw_items):
+    if not isinstance(raw_items, list) or not raw_items or len(raw_items) > 30:
+        raise ValueError('El caldero no contiene productos válidos')
+
+    items = []
+    total_cop = 0
+    for raw in raw_items:
+        if not isinstance(raw, dict):
+            raise ValueError('Actualiza el caldero e inténtalo de nuevo')
+        item_type = raw.get('tipo')
+        try:
+            item_id = int(raw.get('id'))
+        except (TypeError, ValueError):
+            raise ValueError('Actualiza el caldero e inténtalo de nuevo')
+
+        config = PAYMENT_ITEM_MODELS.get(item_type)
+        if not config:
+            if item_type == 'suscripciones':
+                raise ValueError('Las suscripciones se gestionan por WhatsApp; el cobro recurrente de PayPal no está configurado')
+            raise ValueError('Hay un artículo que no se puede pagar con PayPal')
+        model, price_field = config
+        item = db.session.get(model, item_id)
+        if not item:
+            raise ValueError('Uno de los artículos ya no está disponible')
+        price = Decimal(str(getattr(item, price_field))).quantize(Decimal('1'), rounding=ROUND_HALF_UP)
+        if price <= 0:
+            raise ValueError('El precio de un artículo no es válido')
+
+        name = item.nombre
+        if item_type == 'rituales':
+            name = f'Ritual: {name}'
+        elif item_type == 'personalizados':
+            name = f'Personalizado: {name}'
+
+        details = raw.get('personalizacion') if item_type == 'personalizados' else None
+        snapshot = {'tipo': item_type, 'id': item_id, 'nombre': name, 'precio_cop': int(price)}
+        if details and isinstance(details, dict):
+            # Keep customer customization for fulfillment, but never send these fields to PayPal.
+            snapshot['personalizacion'] = {
+                key: str(details.get(key, '')).strip()[:300]
+                for key in ('cliente', 'fecha_nac', 'intencion', 'detalles')
+            }
+        items.append(snapshot)
+        total_cop += int(price)
+
+    return items, total_cop
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -350,6 +509,159 @@ def logout():
 @app.route('/api/check-auth', methods=['GET'])
 def check_auth():
     return jsonify({'authenticated': session.get('logged_in', False)})
+
+@app.route('/api/tasa-cambio', methods=['GET'])
+def tasa_cambio():
+    try:
+        return jsonify({
+            'cop_por_usd': str(get_cop_usd_rate()),
+            'moneda': 'USD',
+            'fuente': 'TRM oficial · Superintendencia Financiera de Colombia',
+        })
+    except RuntimeError:
+        return jsonify({'error': 'La tasa de cambio no está disponible en este momento'}), 503
+
+def paypal_is_configured():
+    return bool(PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET)
+
+def paypal_order_amount(total_cop, rate):
+    return (Decimal(total_cop) / rate).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+@app.route('/api/paypal/config', methods=['GET'])
+def paypal_config():
+    return jsonify({
+        'enabled': paypal_is_configured(),
+        'client_id': PAYPAL_CLIENT_ID if paypal_is_configured() else None,
+        'environment': PAYPAL_ENV,
+        'currency': 'USD',
+    })
+
+@app.route('/api/paypal/quote', methods=['POST'])
+def paypal_quote():
+    data = request.get_json(silent=True) or {}
+    try:
+        _, total_cop = resolve_payment_items(data.get('items'))
+        rate = get_cop_usd_rate()
+        total_usd = paypal_order_amount(total_cop, rate)
+        if total_usd <= 0:
+            raise ValueError('El total es demasiado bajo para convertirlo a USD')
+        return jsonify({
+            'total_cop': total_cop,
+            'total_usd': f'{total_usd:.2f}',
+            'cop_por_usd': str(rate),
+            'moneda': 'USD',
+            'fuente': 'TRM oficial · Superintendencia Financiera de Colombia',
+        })
+    except ValueError as error:
+        return jsonify({'error': str(error)}), 400
+    except RuntimeError:
+        return jsonify({'error': 'No se pudo consultar la TRM vigente'}), 503
+
+@app.route('/api/paypal/orders', methods=['POST'])
+def crear_pedido_paypal():
+    if not paypal_is_configured():
+        return jsonify({'error': 'PayPal aún no está configurado'}), 503
+    data = request.get_json(silent=True) or {}
+    try:
+        items, total_cop = resolve_payment_items(data.get('items'))
+        rate = get_cop_usd_rate()
+        total_usd = paypal_order_amount(total_cop, rate)
+        if total_usd <= 0:
+            raise ValueError('El total es demasiado bajo para convertirlo a USD')
+    except ValueError as error:
+        return jsonify({'error': str(error)}), 400
+    except RuntimeError:
+        return jsonify({'error': 'No se pudo consultar la TRM vigente'}), 503
+
+    reference = f'SDR-{uuid.uuid4().hex[:20].upper()}'
+    payload = {
+        'intent': 'CAPTURE',
+        'purchase_units': [{
+            'reference_id': reference,
+            'custom_id': reference,
+            'invoice_id': reference,
+            'description': f'Pedido Susurros del Dragón {reference}',
+            'amount': {'currency_code': 'USD', 'value': f'{total_usd:.2f}'},
+        }],
+        'application_context': {
+            'brand_name': 'Susurros del Dragón',
+            'user_action': 'PAY_NOW',
+            'shipping_preference': 'NO_SHIPPING',
+        },
+    }
+    try:
+        paypal_order = paypal_api_request('/v2/checkout/orders', 'POST', payload, request_id=reference)
+        order_id = paypal_order.get('id')
+        if not order_id:
+            raise RuntimeError('PayPal no devolvió el ID del pedido')
+        order = PedidoPayPal(
+            referencia=reference,
+            paypal_order_id=order_id,
+            estado=paypal_order.get('status', 'CREATED'),
+            total_cop=total_cop,
+            tasa_cop_usd=rate,
+            total_usd=total_usd,
+            items_json=json.dumps(items, ensure_ascii=False),
+        )
+        db.session.add(order)
+        db.session.commit()
+        return jsonify({'id': order_id, 'reference': reference})
+    except RuntimeError:
+        db.session.rollback()
+        return jsonify({'error': 'PayPal no pudo iniciar el pago. Inténtalo de nuevo.'}), 502
+    except Exception:
+        db.session.rollback()
+        return jsonify({'error': 'No se pudo guardar el pedido de pago.'}), 500
+
+@app.route('/api/paypal/orders/<string:paypal_order_id>/capture', methods=['POST'])
+def capturar_pedido_paypal(paypal_order_id):
+    if not paypal_is_configured() or not re.fullmatch(r'[A-Z0-9-]{8,100}', paypal_order_id):
+        return jsonify({'error': 'Pedido PayPal inválido'}), 400
+    order = PedidoPayPal.query.filter_by(paypal_order_id=paypal_order_id).first()
+    if not order:
+        return jsonify({'error': 'No se encontró el pedido de pago'}), 404
+    if order.estado == 'COMPLETED':
+        return jsonify({'success': True, 'status': order.estado, 'reference': order.referencia})
+
+    try:
+        result = paypal_api_request(
+            f'/v2/checkout/orders/{paypal_order_id}/capture',
+            'POST', {}, request_id=f'capture-{paypal_order_id}'[:38],
+        )
+    except RuntimeError:
+        return jsonify({'error': 'PayPal no pudo confirmar el pago. Revisa tu cuenta antes de reintentar.'}), 502
+
+    status = result.get('status', 'UNKNOWN')
+    capture = (((result.get('purchase_units') or [{}])[0].get('payments') or {}).get('captures') or [{}])[0]
+    captured_amount = capture.get('amount') or {}
+    if status == 'COMPLETED':
+        try:
+            amount_matches = (
+                captured_amount.get('currency_code') == 'USD'
+                and Decimal(captured_amount.get('value', '0')) == Decimal(order.total_usd)
+            )
+        except InvalidOperation:
+            amount_matches = False
+        if not amount_matches:
+            order.estado = 'REVIEW'
+            db.session.commit()
+            return jsonify({'error': 'El importe confirmado requiere revisión del comercio'}), 409
+        order.estado = 'COMPLETED'
+        order.payer_email = (result.get('payer') or {}).get('email_address')
+        order.captured_at = datetime.now(timezone.utc)
+        db.session.commit()
+        return jsonify({'success': True, 'status': order.estado, 'reference': order.referencia})
+
+    order.estado = status
+    db.session.commit()
+    return jsonify({'success': False, 'status': status, 'error': 'El pago no quedó completado'}), 402
+
+@app.route('/api/admin/paypal-orders', methods=['GET'])
+def listar_pedidos_paypal():
+    if not session.get('logged_in'):
+        return jsonify({'error': 'No autorizado'}), 403
+    orders = PedidoPayPal.query.order_by(PedidoPayPal.id.desc()).limit(100).all()
+    return jsonify([order.to_dict() for order in orders])
 
 # PERSONALIZADOS
 @app.route('/api/personalizados', methods=['GET'])
