@@ -56,6 +56,7 @@ class Producto(db.Model):
     precio = db.Column(db.Float, nullable=False)
     imagen = db.Column(db.Text, nullable=False)
     imagen_posicion = db.Column(db.String(16), nullable=False, default='50% 50%')
+    imagen_zoom = db.Column(db.Float, nullable=False, default=1.0)
     descripcion = db.Column(db.Text, nullable=True)
 
     def to_dict(self):
@@ -66,6 +67,7 @@ class Producto(db.Model):
             'precio': self.precio,
             'imagen': self.imagen,
             'imagen_posicion': self.imagen_posicion or '50% 50%',
+            'imagen_zoom': self.imagen_zoom or 1.0,
             'descripcion': self.descripcion
         }
 
@@ -76,6 +78,7 @@ class Personalizado(db.Model):
     precio_base = db.Column(db.Float, nullable=False)
     imagen = db.Column(db.Text, nullable=False)
     imagen_posicion = db.Column(db.String(16), nullable=False, default='50% 50%')
+    imagen_zoom = db.Column(db.Float, nullable=False, default=1.0)
     descripcion = db.Column(db.Text, nullable=True)
     opciones = db.Column(db.Text, nullable=True)
 
@@ -87,6 +90,7 @@ class Personalizado(db.Model):
             'precio_base': self.precio_base,
             'imagen': self.imagen,
             'imagen_posicion': self.imagen_posicion or '50% 50%',
+            'imagen_zoom': self.imagen_zoom or 1.0,
             'descripcion': self.descripcion,
             'opciones': self.opciones
         }
@@ -98,6 +102,7 @@ class Ritual(db.Model):
     precio = db.Column(db.Float, nullable=False)
     imagen = db.Column(db.Text, nullable=False)
     imagen_posicion = db.Column(db.String(16), nullable=False, default='50% 50%')
+    imagen_zoom = db.Column(db.Float, nullable=False, default=1.0)
     proposito = db.Column(db.Text, nullable=True)
     incluye = db.Column(db.Text, nullable=True)
     duracion = db.Column(db.String(50), default="1 Sesión Mística")
@@ -110,6 +115,7 @@ class Ritual(db.Model):
             'precio': self.precio,
             'imagen': self.imagen,
             'imagen_posicion': self.imagen_posicion or '50% 50%',
+            'imagen_zoom': self.imagen_zoom or 1.0,
             'proposito': self.proposito,
             'incluye': self.incluye,
             'duracion': self.duracion
@@ -148,6 +154,7 @@ class Suscripcion(db.Model):
     beneficios = db.Column(db.Text, nullable=True)
     imagen = db.Column(db.Text, nullable=True)
     imagen_posicion = db.Column(db.String(16), nullable=False, default='50% 50%')
+    imagen_zoom = db.Column(db.Float, nullable=False, default=1.0)
 
     def to_dict(self):
         return {
@@ -158,7 +165,8 @@ class Suscripcion(db.Model):
             'descripcion': self.descripcion,
             'beneficios': self.beneficios,
             'imagen': self.imagen,
-            'imagen_posicion': self.imagen_posicion or '50% 50%'
+            'imagen_posicion': self.imagen_posicion or '50% 50%',
+            'imagen_zoom': self.imagen_zoom or 1.0
         }
 
 class Remedio(db.Model):
@@ -168,6 +176,7 @@ class Remedio(db.Model):
     precio = db.Column(db.Float, nullable=False)
     imagen = db.Column(db.Text, nullable=False)
     imagen_posicion = db.Column(db.String(16), nullable=False, default='50% 50%')
+    imagen_zoom = db.Column(db.Float, nullable=False, default=1.0)
     preparacion = db.Column(db.Text, nullable=True)
     propiedades = db.Column(db.Text, nullable=True)
 
@@ -179,6 +188,7 @@ class Remedio(db.Model):
             'precio': self.precio,
             'imagen': self.imagen,
             'imagen_posicion': self.imagen_posicion or '50% 50%',
+            'imagen_zoom': self.imagen_zoom or 1.0,
             'preparacion': self.preparacion,
             'propiedades': self.propiedades
         }
@@ -366,12 +376,12 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 ADMIN_EDIT_FIELDS = {
-    'personalizados': (Personalizado, ('nombre', 'tipo', 'precio_base', 'descripcion', 'opciones', 'imagen', 'imagen_posicion'), {'precio_base'}),
+    'personalizados': (Personalizado, ('nombre', 'tipo', 'precio_base', 'descripcion', 'opciones', 'imagen', 'imagen_posicion', 'imagen_zoom'), {'precio_base'}),
     'citas': (Cita, ('nombre_cliente', 'telefono', 'tipo_servicio', 'modalidad', 'fecha', 'hora', 'notas'), set()),
-    'productos': (Producto, ('nombre', 'categoria', 'precio', 'descripcion', 'imagen', 'imagen_posicion'), {'precio'}),
-    'rituales': (Ritual, ('nombre', 'categoria', 'precio', 'duracion', 'proposito', 'incluye', 'imagen', 'imagen_posicion'), {'precio'}),
-    'suscripciones': (Suscripcion, ('nombre', 'precio', 'frecuencia', 'descripcion', 'beneficios', 'imagen', 'imagen_posicion'), {'precio'}),
-    'remedios': (Remedio, ('nombre', 'categoria', 'precio', 'preparacion', 'propiedades', 'imagen', 'imagen_posicion'), {'precio'}),
+    'productos': (Producto, ('nombre', 'categoria', 'precio', 'descripcion', 'imagen', 'imagen_posicion', 'imagen_zoom'), {'precio'}),
+    'rituales': (Ritual, ('nombre', 'categoria', 'precio', 'duracion', 'proposito', 'incluye', 'imagen', 'imagen_posicion', 'imagen_zoom'), {'precio'}),
+    'suscripciones': (Suscripcion, ('nombre', 'precio', 'frecuencia', 'descripcion', 'beneficios', 'imagen', 'imagen_posicion', 'imagen_zoom'), {'precio'}),
+    'remedios': (Remedio, ('nombre', 'categoria', 'precio', 'preparacion', 'propiedades', 'imagen', 'imagen_posicion', 'imagen_zoom'), {'precio'}),
     'foro': (ForoTema, ('titulo', 'semana', 'contenido', 'imagen'), set()),
 }
 
@@ -399,6 +409,14 @@ def normalize_image_position(value):
         return '50% 50%'
     return f'{x}% {y}%'
 
+def normalize_image_zoom(value):
+    """Keep the image scale between 50% and 150%."""
+    try:
+        zoom = float(value)
+    except (TypeError, ValueError):
+        return 1.0
+    return round(min(1.5, max(0.5, zoom)), 2)
+
 @app.route('/api/<string:modulo>/<int:registro_id>', methods=['PUT'])
 def update_admin_item(modulo, registro_id):
     if not session.get('logged_in'):
@@ -421,6 +439,8 @@ def update_admin_item(modulo, registro_id):
             value = values.get(field)
             if field == 'imagen_posicion':
                 value = normalize_image_position(value)
+            elif field == 'imagen_zoom':
+                value = normalize_image_zoom(value)
             setattr(item, field, float(value) if field in numeric_fields else value)
 
         if 'imagen' in fields:
@@ -454,6 +474,12 @@ def init_db():
                 with db.engine.begin() as connection:
                     connection.execute(text(
                         f"ALTER TABLE {model.__tablename__} ADD COLUMN imagen_posicion VARCHAR(16) NOT NULL DEFAULT '50% 50%'"
+                    ))
+            columns = {column['name'] for column in inspect(db.engine).get_columns(model.__tablename__)}
+            if 'imagen_zoom' not in columns:
+                with db.engine.begin() as connection:
+                    connection.execute(text(
+                        f"ALTER TABLE {model.__tablename__} ADD COLUMN imagen_zoom FLOAT NOT NULL DEFAULT 1.0"
                     ))
         if Producto.query.count() == 0:
             prods = [
@@ -758,6 +784,7 @@ def add_personalizado():
 
     nuevo = Personalizado(nombre=nombre, tipo=tipo, precio_base=precio_base, imagen=imagen_final,
                           imagen_posicion=normalize_image_position(request.form.get('imagen_posicion')),
+                          imagen_zoom=normalize_image_zoom(request.form.get('imagen_zoom')),
                           descripcion=descripcion, opciones=opciones)
     db.session.add(nuevo)
     db.session.commit()
@@ -840,6 +867,7 @@ def add_producto():
 
     nuevo = Producto(nombre=nombre, categoria=categoria, precio=precio, imagen=imagen_final,
                      imagen_posicion=normalize_image_position(request.form.get('imagen_posicion')),
+                     imagen_zoom=normalize_image_zoom(request.form.get('imagen_zoom')),
                      descripcion=descripcion)
     db.session.add(nuevo)
     db.session.commit()
@@ -890,6 +918,7 @@ def add_ritual():
 
     nuevo = Ritual(nombre=nombre, categoria=categoria, precio=precio, imagen=imagen_final,
                    imagen_posicion=normalize_image_position(request.form.get('imagen_posicion')),
+                   imagen_zoom=normalize_image_zoom(request.form.get('imagen_zoom')),
                    proposito=proposito, incluye=incluye, duracion=duracion)
     db.session.add(nuevo)
     db.session.commit()
@@ -935,7 +964,8 @@ def add_suscripcion():
         descripcion=request.form.get('descripcion', ''),
         beneficios=request.form.get('beneficios', ''),
         imagen=imagen_final or None,
-        imagen_posicion=normalize_image_position(request.form.get('imagen_posicion'))
+        imagen_posicion=normalize_image_position(request.form.get('imagen_posicion')),
+        imagen_zoom=normalize_image_zoom(request.form.get('imagen_zoom'))
     )
     db.session.add(nueva)
     db.session.commit()
@@ -985,6 +1015,7 @@ def add_remedio():
 
     nuevo = Remedio(nombre=nombre, categoria=categoria, precio=precio, imagen=imagen_final,
                     imagen_posicion=normalize_image_position(request.form.get('imagen_posicion')),
+                    imagen_zoom=normalize_image_zoom(request.form.get('imagen_zoom')),
                     preparacion=preparacion, propiedades=propiedades)
     db.session.add(nuevo)
     db.session.commit()
