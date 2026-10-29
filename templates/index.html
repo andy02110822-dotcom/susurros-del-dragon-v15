@@ -2181,14 +2181,31 @@
             publicationPreviewFocus = null;
         }
 
+        function enviarFormularioCompat(form) {
+            if (typeof form.requestSubmit === 'function') {
+                try {
+                    form.requestSubmit();
+                    return;
+                } catch (error) {
+                    // Older mobile browsers may expose requestSubmit but fail to dispatch it.
+                }
+            }
+            if (!form.reportValidity()) return;
+            const submitEvent = document.createEvent('Event');
+            submitEvent.initEvent('submit', true, true);
+            form.dispatchEvent(submitEvent);
+        }
+
         function confirmarPublicacionDesdeVistaPrevia() {
             if (!publicationPreviewType) return;
             if (publicationPreviewMode === 'edit') {
+                const form = document.getElementById('admin-edit-form');
+                if (!form.reportValidity()) return;
                 publicationConfirmed = true;
                 const button = document.getElementById('product-preview-publish');
                 button.disabled = true;
                 button.innerHTML = '<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> GUARDANDO…';
-                document.getElementById('admin-edit-form').requestSubmit();
+                enviarFormularioCompat(form);
                 return;
             }
             const config = PUBLICATION_PREVIEW_CONFIG[publicationPreviewType];
@@ -2198,7 +2215,7 @@
             const button = document.getElementById('product-preview-publish');
             button.disabled = true;
             button.innerHTML = '<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> PUBLICANDO…';
-            form.requestSubmit();
+            enviarFormularioCompat(form);
         }
 
         document.addEventListener('input', event => {
