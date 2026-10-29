@@ -1336,7 +1336,7 @@
             ]}
         };
 
-        const ADMIN_EDIT_PREVIEW_TYPES = new Set(['personalizados', 'rituales', 'productos', 'remedios', 'suscripciones']);
+
 
         async function cargarTodo() {
             await verificarSesion();
@@ -1417,7 +1417,7 @@
             const editStatus = document.getElementById('admin-edit-status');
             editStatus.textContent = '';
             editStatus.removeAttribute('data-state');
-            document.querySelector('#admin-edit-form button[type="submit"]').textContent = ADMIN_EDIT_PREVIEW_TYPES.has(modulo) ? 'VISTA PREVIA Y GUARDAR' : 'GUARDAR CAMBIOS';
+            document.querySelector('#admin-edit-form button[type="submit"]').textContent = 'GUARDAR CAMBIOS';
             const fields = document.getElementById('admin-edit-fields');
             fields.replaceChildren();
 
@@ -1520,11 +1520,6 @@
             if (!adminEditing || !estaAutenticado) return;
             const { modulo, id } = adminEditing;
             const config = ADMIN_EDIT_CONFIG[modulo];
-            if (ADMIN_EDIT_PREVIEW_TYPES.has(modulo) &&
-                (!publicationConfirmed || publicationPreviewMode !== 'edit' || publicationPreviewType !== modulo)) {
-                if (event.currentTarget.reportValidity()) abrirVistaPreviaPublicacion(modulo, 'edit');
-                return;
-            }
             publicationConfirmed = false;
             const status = document.getElementById('admin-edit-status');
             status.textContent = '';
