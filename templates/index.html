@@ -2205,7 +2205,9 @@
                 const button = document.getElementById('product-preview-publish');
                 button.disabled = true;
                 button.innerHTML = '<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> GUARDANDO…';
-                enviarFormularioCompat(form);
+                // Evita depender de requestSubmit(), que algunos navegadores de tablet
+                // exponen pero no llegan a despachar. La validación ya se hizo arriba.
+                void guardarEdicionAdmin({ preventDefault() {}, currentTarget: form });
                 return;
             }
             const config = PUBLICATION_PREVIEW_CONFIG[publicationPreviewType];
