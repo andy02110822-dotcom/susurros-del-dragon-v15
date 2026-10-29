@@ -168,6 +168,7 @@
             background: var(--bg-card); border: 1px solid var(--border-glow); border-radius: 16px; overflow: hidden;
             display: flex; flex-direction: column; position: relative;
         }
+        .custom-card > img { transform-origin: center center; transition: transform .12s ease; }
 
         .card-body { padding: 1.2rem; display: flex; flex-direction: column; flex-grow: 1; }
         .card-price { font-size: 1.25rem; font-weight: 800; color: var(--text-gold); }
@@ -453,7 +454,7 @@
         .product-preview-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, .82fr); gap: 1.25rem; align-items: start; }
         .product-preview-stage { min-width: 0; padding: 1rem; border-radius: 16px; background: radial-gradient(circle at top, rgba(123,31,162,.2), rgba(4,5,20,.65)); }
         .product-preview-card { max-width: 380px; margin: 0 auto; }
-        .product-preview-image { display: block; width: 100%; height: 210px; object-fit: cover; background: #171023; }
+        .product-preview-image { display: block; width: 100%; height: 210px; object-fit: cover; object-position: center; transform-origin: center; transition: transform .12s ease; background: #171023; }
         .product-preview-placeholder { display: grid; place-items: center; height: 210px; color: var(--text-gold); background: rgba(0,0,0,.35); font-size: 2rem; }
         .product-preview-controls { padding: 1rem; border: 1px solid rgba(168,220,255,.18); border-radius: 16px; background: rgba(8,13,34,.55); }
         .product-preview-controls input[type="range"] { width: 100%; accent-color: #bd5fff; }
@@ -923,6 +924,10 @@
                         <label for="preview-image-y">Vertical <span id="preview-image-y-value">50%</span></label>
                         <input id="preview-image-y" type="range" min="0" max="100" value="50" aria-label="Posición vertical de la foto">
                     </div>
+                    <div class="form-group">
+                        <label for="preview-image-zoom">Tamaño de la foto <span id="preview-image-zoom-value">100%</span></label>
+                        <input id="preview-image-zoom" type="range" min="50" max="150" step="5" value="100" aria-label="Tamaño de la foto">
+                    </div>
                     <button type="button" class="btn-outline" onclick="centrarFotoVistaPrevia()" style="width:100%;">CENTRAR FOTO</button>
                     <p id="product-preview-warning" class="product-preview-warning" role="status" aria-live="polite"></p>
                 </div>
@@ -1073,6 +1078,7 @@
         let publicationImageObjectUrl = null;
         let publicationPreviewFocus = null;
         let publicationPosition = {x:50,y:50};
+        let publicationImageZoom = 1;
 
         async function cargarTasaCambio() {
             try {
@@ -1240,6 +1246,12 @@
             return x <= 100 && y <= 100 ? `${x}% ${y}%` : '50% 50%';
         }
 
+        function cssImagenZoom(value) {
+            if (value === null || value === undefined || value === '') return 1;
+            const zoom = Number(value);
+            return Number.isFinite(zoom) ? Math.min(1.5, Math.max(.5, zoom)) : 1;
+        }
+
         function actualizarVistasUSD(root = document) {
             root.querySelectorAll('[data-price-preview]').forEach(preview => {
                 const input = preview.parentElement.querySelector('[data-price-cop]');
@@ -1263,7 +1275,7 @@
         const ADMIN_EDIT_CONFIG = {
             personalizados: { title: 'Editar personalizado', fields: [
                 {key:'nombre', label:'Nombre', required:true}, {key:'tipo', label:'Tipo'}, {key:'precio_base', label:'Precio base ($ COP)', type:'number', required:true},
-                {key:'descripcion', label:'Descripción', type:'textarea'}, {key:'opciones', label:'Opciones sugeridas', type:'textarea'}, {key:'imagen_url', label:'URL de imagen (opcional)', type:'url'}, {key:'imagen_archivo', label:'Cambiar imagen', type:'file'}, {key:'imagen_posicion', label:'Encuadre de imagen', type:'position'}
+                {key:'descripcion', label:'Descripción', type:'textarea'}, {key:'opciones', label:'Opciones sugeridas', type:'textarea'}, {key:'imagen_url', label:'URL de imagen (opcional)', type:'url'}, {key:'imagen_archivo', label:'Cambiar imagen', type:'file'}, {key:'imagen_posicion', label:'Encuadre de imagen', type:'position'}, {key:'imagen_zoom', label:'Tamaño de la foto', type:'zoom'}
             ]},
             citas: { title: 'Editar cita', fields: [
                 {key:'nombre_cliente', label:'Nombre del cliente', required:true}, {key:'telefono', label:'Teléfono', type:'tel', required:true},
@@ -1273,22 +1285,22 @@
             productos: { title: 'Editar producto', fields: [
                 {key:'nombre', label:'Nombre', required:true}, {key:'categoria', label:'Sección', type:'select', options:['amuletos','tarot','cristales','inciensos','otros']},
                 {key:'precio', label:'Precio ($ COP)', type:'number', required:true}, {key:'descripcion', label:'Descripción', type:'textarea'},
-                {key:'imagen_url', label:'URL de imagen (opcional)', type:'url'}, {key:'imagen_archivo', label:'Cambiar imagen', type:'file'}, {key:'imagen_posicion', label:'Encuadre de imagen', type:'position'}
+                {key:'imagen_url', label:'URL de imagen (opcional)', type:'url'}, {key:'imagen_archivo', label:'Cambiar imagen', type:'file'}, {key:'imagen_posicion', label:'Encuadre de imagen', type:'position'}, {key:'imagen_zoom', label:'Tamaño de la foto', type:'zoom'}
             ]},
             rituales: { title: 'Editar ritual', fields: [
                 {key:'nombre', label:'Nombre', required:true}, {key:'categoria', label:'Categoría'}, {key:'precio', label:'Precio ($ COP)', type:'number', required:true},
                 {key:'duracion', label:'Duración / modalidad'}, {key:'proposito', label:'Propósito', type:'textarea'}, {key:'incluye', label:'Incluye', type:'textarea'},
-                {key:'imagen_url', label:'URL de imagen (opcional)', type:'url'}, {key:'imagen_archivo', label:'Cambiar imagen', type:'file'}, {key:'imagen_posicion', label:'Encuadre de imagen', type:'position'}
+                {key:'imagen_url', label:'URL de imagen (opcional)', type:'url'}, {key:'imagen_archivo', label:'Cambiar imagen', type:'file'}, {key:'imagen_posicion', label:'Encuadre de imagen', type:'position'}, {key:'imagen_zoom', label:'Tamaño de la foto', type:'zoom'}
             ]},
             remedios: { title: 'Editar remedio', fields: [
                 {key:'nombre', label:'Nombre', required:true}, {key:'categoria', label:'Categoría', type:'select', options:['Infusiones','Tónicos','Ungüentos','Baños','Otros']},
                 {key:'precio', label:'Precio ($ COP)', type:'number', required:true}, {key:'preparacion', label:'Preparación', type:'textarea'},
-                {key:'propiedades', label:'Propiedades', type:'textarea'}, {key:'imagen_url', label:'URL de imagen (opcional)', type:'url'}, {key:'imagen_archivo', label:'Cambiar imagen', type:'file'}, {key:'imagen_posicion', label:'Encuadre de imagen', type:'position'}
+                {key:'propiedades', label:'Propiedades', type:'textarea'}, {key:'imagen_url', label:'URL de imagen (opcional)', type:'url'}, {key:'imagen_archivo', label:'Cambiar imagen', type:'file'}, {key:'imagen_posicion', label:'Encuadre de imagen', type:'position'}, {key:'imagen_zoom', label:'Tamaño de la foto', type:'zoom'}
             ]},
             suscripciones: { title: 'Editar suscripción', fields: [
                 {key:'nombre', label:'Nombre', required:true}, {key:'precio', label:'Precio ($ COP)', type:'number', required:true}, {key:'frecuencia', label:'Frecuencia'},
                 {key:'descripcion', label:'Descripción', type:'textarea'}, {key:'beneficios', label:'Beneficios', type:'textarea'},
-                {key:'imagen_url', label:'URL de imagen (opcional)', type:'url'}, {key:'imagen_archivo', label:'Cambiar imagen', type:'file'}, {key:'imagen_posicion', label:'Encuadre de imagen', type:'position'}
+                {key:'imagen_url', label:'URL de imagen (opcional)', type:'url'}, {key:'imagen_archivo', label:'Cambiar imagen', type:'file'}, {key:'imagen_posicion', label:'Encuadre de imagen', type:'position'}, {key:'imagen_zoom', label:'Tamaño de la foto', type:'zoom'}
             ]},
             foro: { title: 'Editar publicación del foro', fields: [
                 {key:'titulo', label:'Título', required:true}, {key:'semana', label:'Semana'}, {key:'contenido', label:'Contenido', type:'textarea', required:true},
@@ -1388,7 +1400,7 @@
                 input.className = 'form-input';
                 input.name = def.key;
                 if (def.type === 'textarea') input.rows = 3;
-                else if (def.type === 'position') input.type = 'hidden';
+                else if (def.type === 'position' || def.type === 'zoom') input.type = 'hidden';
                 else if (def.type === 'select') {
                     const options = [...def.options];
                     if (item[def.key] && !options.includes(item[def.key])) options.push(item[def.key]);
@@ -1398,7 +1410,7 @@
                         option.textContent = optionValue;
                         input.appendChild(option);
                     });
-                } else if (def.type !== 'position') input.type = def.type || 'text';
+                } else if (def.type !== 'position' && def.type !== 'zoom') input.type = def.type || 'text';
                 if (def.required) input.required = true;
 
                 if (def.type === 'file') {
@@ -1429,6 +1441,23 @@
                     const [xLabel, xRange] = makeAxis('x', initialX);
                     const [yLabel, yRange] = makeAxis('y', initialY);
                     group.append(label, xLabel, xRange, yLabel, yRange, input);
+                    fields.appendChild(group);
+                    return;
+                } else if (def.type === 'zoom') {
+                    input.value = String(cssImagenZoom(item[def.key]) || 1);
+                    const zoomLabel = document.createElement('label');
+                    zoomLabel.style.marginTop = '.55rem';
+                    const initialZoom = Math.round(Number(input.value) * 100);
+                    zoomLabel.textContent = `Tamaño · ${initialZoom}%`;
+                    const range = document.createElement('input');
+                    range.type = 'range'; range.min = '50'; range.max = '150'; range.step = '5'; range.value = initialZoom;
+                    range.setAttribute('aria-label', 'Tamaño de la foto');
+                    range.dataset.imageZoom = 'true';
+                    range.addEventListener('input', () => {
+                        input.value = String(Number(range.value) / 100);
+                        zoomLabel.textContent = `Tamaño · ${range.value}%`;
+                    });
+                    group.append(label, zoomLabel, range, input);
                     fields.appendChild(group);
                     return;
                 } else {
@@ -1522,7 +1551,7 @@
                 grid.innerHTML += `
                     <div class="custom-card" style="border-color: var(--text-gold);">
                         ${del}
-                        <img src="${p.imagen}" alt="" style="width:100%; height:190px; object-fit:cover; object-position:${cssImagenPosicion(p.imagen_posicion)};">
+                        <img src="${p.imagen}" alt="" style="width:100%; height:190px; object-fit:cover; object-position:${cssImagenPosicion(p.imagen_posicion)}; transform:scale(${cssImagenZoom(p.imagen_zoom)});">
                         <div class="card-body">
                             <span style="color:var(--text-gold); font-size:0.7rem; font-weight:bold; text-transform:uppercase;">✨ ${p.tipo}</span>
                             <h3 style="color:white; margin:6px 0; font-size:1.15rem;">${p.nombre}</h3>
@@ -1665,7 +1694,7 @@
                 grid.innerHTML += `
                     <div class="custom-card" style="border-color: var(--purple-glow);">
                         ${del}
-                        <img src="${r.imagen}" alt="" style="width:100%; height:190px; object-fit:cover; object-position:${cssImagenPosicion(r.imagen_posicion)};">
+                        <img src="${r.imagen}" alt="" style="width:100%; height:190px; object-fit:cover; object-position:${cssImagenPosicion(r.imagen_posicion)}; transform:scale(${cssImagenZoom(r.imagen_zoom)});">
                         <div class="card-body">
                             <span style="color:var(--text-gold); font-size:0.7rem; font-weight:bold; text-transform:uppercase; letter-spacing:1px;">✨ ${r.categoria} | ${r.duracion}</span>
                             <h3 style="color:white; margin:6px 0; font-size:1.15rem;">${r.nombre}</h3>
@@ -1692,7 +1721,7 @@
                 grid.innerHTML += `
                     <div class="custom-card">
                         ${del}
-                        <img src="${p.imagen}" alt="" style="width:100%; height:180px; object-fit:cover; object-position:${cssImagenPosicion(p.imagen_posicion)};">
+                        <img src="${p.imagen}" alt="" style="width:100%; height:180px; object-fit:cover; object-position:${cssImagenPosicion(p.imagen_posicion)}; transform:scale(${cssImagenZoom(p.imagen_zoom)});">
                         <div class="card-body">
                             <h3 style="color:white; margin-bottom:6px; font-size:1.1rem;">${p.nombre}</h3>
                             <p style="color:#a496c4; font-size:0.8rem; margin-bottom:12px; flex-grow:1;">${p.descripcion}</p>
@@ -1717,7 +1746,7 @@
                 grid.innerHTML += `
                     <div class="custom-card">
                         ${del}
-                        <img src="${r.imagen}" alt="" style="width:100%; height:180px; object-fit:cover; object-position:${cssImagenPosicion(r.imagen_posicion)};">
+                        <img src="${r.imagen}" alt="" style="width:100%; height:180px; object-fit:cover; object-position:${cssImagenPosicion(r.imagen_posicion)}; transform:scale(${cssImagenZoom(r.imagen_zoom)});">
                         <div class="card-body">
                             <span style="color:var(--purple-glow); font-size:0.7rem; font-weight:bold; text-transform:uppercase;">${r.categoria}</span>
                             <h3 style="color:white; margin:4px 0; font-size:1.1rem;">${r.nombre}</h3>
@@ -1744,7 +1773,7 @@
                 grid.innerHTML += `
                     <div class="custom-card" style="border-color: var(--text-gold);">
                         ${del}
-                        ${s.imagen ? `<img src="${s.imagen}" alt="Imagen de ${s.nombre}" style="width:100%; height:190px; object-fit:cover; object-position:${cssImagenPosicion(s.imagen_posicion)};">` : ''}
+                        ${s.imagen ? `<img src="${s.imagen}" alt="Imagen de ${s.nombre}" style="width:100%; height:190px; object-fit:cover; object-position:${cssImagenPosicion(s.imagen_posicion)}; transform:scale(${cssImagenZoom(s.imagen_zoom)});">` : ''}
                         <div class="card-body" style="text-align:center;">
                             ${s.imagen ? '' : '<i class="fa-solid fa-crown" style="font-size:2rem; color:var(--text-gold); margin-bottom:10px;"></i>'}
                             <h3 style="color:white; margin-bottom:6px; font-size:1.1rem;">${s.nombre}</h3>
@@ -1864,6 +1893,19 @@
             return field?.files?.[0] || null;
         }
 
+        function obtenerAjusteOcultoImagen(form, key, defaultValue) {
+            let field = form.elements.namedItem(key);
+            if (!field) {
+                field = document.createElement('input');
+                field.type = 'hidden';
+                field.name = key;
+                field.value = defaultValue;
+                field.defaultValue = defaultValue;
+                form.appendChild(field);
+            }
+            return field;
+        }
+
         function prepararImagenVistaPrevia() {
             if (publicationImageObjectUrl) URL.revokeObjectURL(publicationImageObjectUrl);
             publicationImageObjectUrl = null;
@@ -1892,18 +1934,30 @@
             publicationPreviewType = type;
             publicationPreviewMode = mode;
             let initialPosition = '50% 50%';
+            let initialZoom = 1;
             if (mode === 'edit') {
-                const positionField = document.getElementById('admin-edit-form').elements.namedItem('imagen_posicion');
+                const editForm = document.getElementById('admin-edit-form');
+                const positionField = editForm.elements.namedItem('imagen_posicion');
+                const zoomField = editForm.elements.namedItem('imagen_zoom');
                 initialPosition = positionField?.value || '50% 50%';
+                initialZoom = cssImagenZoom(zoomField?.value);
                 document.getElementById('modal-admin-edit').style.display = 'none';
+            } else {
+                const form = document.getElementById(config.formId);
+                initialPosition = obtenerAjusteOcultoImagen(form, 'imagen_posicion', '50% 50%').value;
+                initialZoom = cssImagenZoom(obtenerAjusteOcultoImagen(form, 'imagen_zoom', '1').value);
             }
             const initialCoordinates = cssImagenPosicion(initialPosition).match(/\d+/g) || ['50', '50'];
             publicationPosition = {x:Number(initialCoordinates[0]),y:Number(initialCoordinates[1])};
+            publicationImageZoom = initialZoom;
             const x = document.getElementById('preview-image-x');
             const y = document.getElementById('preview-image-y');
+            const zoom = document.getElementById('preview-image-zoom');
             x.value = publicationPosition.x; y.value = publicationPosition.y;
+            zoom.value = Math.round(publicationImageZoom * 100);
             document.getElementById('preview-image-x-value').textContent = `${publicationPosition.x}%`;
             document.getElementById('preview-image-y-value').textContent = `${publicationPosition.y}%`;
+            document.getElementById('preview-image-zoom-value').textContent = `${zoom.value}%`;
             document.getElementById('product-preview-publish').innerHTML = mode === 'edit'
                 ? '<i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> GUARDAR CAMBIOS'
                 : '<i class="fa-solid fa-cloud-arrow-up" aria-hidden="true"></i> PUBLICAR';
@@ -1945,6 +1999,7 @@
                 img.alt = `Vista previa de ${valorCampoVistaPrevia(config, config.nameKey, config.nameId) || 'la imagen'}`;
                 img.src = image;
                 img.style.objectPosition = `${publicationPosition.x}% ${publicationPosition.y}%`;
+                img.style.transform = `scale(${publicationImageZoom})`;
                 img.addEventListener('error', () => { warning.textContent = 'No se pudo cargar la foto. Revisa el archivo o la URL antes de publicar.'; });
                 img.addEventListener('load', () => { warning.textContent = ''; });
                 card.appendChild(img);
@@ -2013,6 +2068,7 @@
             card.appendChild(body);
             document.getElementById('preview-image-x').disabled = !image;
             document.getElementById('preview-image-y').disabled = !image;
+            document.getElementById('preview-image-zoom').disabled = !image;
         }
 
         function ajustarEncuadreVistaPrevia() {
@@ -2033,13 +2089,39 @@
                     const label = range.previousElementSibling;
                     if (label) label.textContent = `${axis === 'x' ? 'Horizontal' : 'Vertical'} · ${value}%`;
                 });
+            } else if (publicationPreviewType) {
+                const form = document.getElementById(PUBLICATION_PREVIEW_CONFIG[publicationPreviewType].formId);
+                obtenerAjusteOcultoImagen(form, 'imagen_posicion', '50% 50%').value = `${publicationPosition.x}% ${publicationPosition.y}%`;
+            }
+        }
+
+        function ajustarTamanoFotoVistaPrevia() {
+            publicationImageZoom = cssImagenZoom(Number(document.getElementById('preview-image-zoom').value) / 100);
+            document.getElementById('preview-image-zoom-value').textContent = `${Math.round(publicationImageZoom * 100)}%`;
+            const image = document.querySelector('#product-preview-card .product-preview-image');
+            if (image) image.style.transform = `scale(${publicationImageZoom})`;
+            if (publicationPreviewMode === 'edit') {
+                const form = document.getElementById('admin-edit-form');
+                const zoomField = form.elements.namedItem('imagen_zoom');
+                if (zoomField) zoomField.value = String(publicationImageZoom);
+                const range = form.querySelector('[data-image-zoom="true"]');
+                if (range) {
+                    range.value = Math.round(publicationImageZoom * 100);
+                    const label = range.previousElementSibling;
+                    if (label) label.textContent = `Tamaño · ${range.value}%`;
+                }
+            } else if (publicationPreviewType) {
+                const form = document.getElementById(PUBLICATION_PREVIEW_CONFIG[publicationPreviewType].formId);
+                obtenerAjusteOcultoImagen(form, 'imagen_zoom', '1').value = String(publicationImageZoom);
             }
         }
 
         function centrarFotoVistaPrevia() {
             document.getElementById('preview-image-x').value = '50';
             document.getElementById('preview-image-y').value = '50';
+            document.getElementById('preview-image-zoom').value = '100';
             ajustarEncuadreVistaPrevia();
+            ajustarTamanoFotoVistaPrevia();
         }
 
         function cerrarVistaPrevia(success=false) {
@@ -2052,8 +2134,10 @@
             publicationImageObjectUrl = null;
             if (success) {
                 publicationPosition = {x:50,y:50};
+                publicationImageZoom = 1;
                 document.getElementById('preview-image-x').value = '50';
                 document.getElementById('preview-image-y').value = '50';
+                document.getElementById('preview-image-zoom').value = '100';
             }
             if (previousMode === 'edit' && !success && adminEditing) document.getElementById('modal-admin-edit').style.display = 'flex';
             if (publicationPreviewFocus?.isConnected) publicationPreviewFocus.focus();
@@ -2099,6 +2183,7 @@
         });
         document.getElementById('preview-image-x').addEventListener('input', ajustarEncuadreVistaPrevia);
         document.getElementById('preview-image-y').addEventListener('input', ajustarEncuadreVistaPrevia);
+        document.getElementById('preview-image-zoom').addEventListener('input', ajustarTamanoFotoVistaPrevia);
         document.getElementById('modal-product-preview').addEventListener('click', event => { if (event.target.id === 'modal-product-preview') cerrarVistaPrevia(); });
         document.addEventListener('keydown', event => { if (event.key === 'Escape' && publicationPreviewType) cerrarVistaPrevia(); });
 
@@ -2117,6 +2202,7 @@
             ADMIN_PUBLISH_FIELDS[type].forEach(([key, id]) => fd.append(key, document.getElementById(id).value));
             fd.append('imagen_url', obtenerTextoBorrador(config.urlId));
             fd.append('imagen_posicion', `${publicationPosition.x}% ${publicationPosition.y}%`);
+            fd.append('imagen_zoom', String(publicationImageZoom));
             const file = document.getElementById(config.fileId).files[0];
             if (file) fd.append('imagen_archivo', file);
 
