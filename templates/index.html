@@ -449,6 +449,19 @@
         #admin-edit-fields { display: grid; gap: .65rem; }
         .admin-edit-actions { display: flex; gap: .65rem; margin-top: 1rem; }
         .admin-edit-actions button { flex: 1; }
+        #modal-product-preview .modal-content { max-width: 900px; }
+        .product-preview-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, .82fr); gap: 1.25rem; align-items: start; }
+        .product-preview-stage { min-width: 0; padding: 1rem; border-radius: 16px; background: radial-gradient(circle at top, rgba(123,31,162,.2), rgba(4,5,20,.65)); }
+        .product-preview-card { max-width: 380px; margin: 0 auto; }
+        .product-preview-image { display: block; width: 100%; height: 210px; object-fit: cover; background: #171023; }
+        .product-preview-placeholder { display: grid; place-items: center; height: 210px; color: var(--text-gold); background: rgba(0,0,0,.35); font-size: 2rem; }
+        .product-preview-controls { padding: 1rem; border: 1px solid rgba(168,220,255,.18); border-radius: 16px; background: rgba(8,13,34,.55); }
+        .product-preview-controls input[type="range"] { width: 100%; accent-color: #bd5fff; }
+        .product-preview-controls label { display: flex; justify-content: space-between; gap: .75rem; color: #e6ddf7; font-size: .82rem; }
+        .product-preview-warning { min-height: 1.1em; color: #ffd294; font-size: .78rem; margin: .65rem 0 0; }
+        .product-preview-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: .65rem; margin-top: 1rem; }
+        .product-preview-actions button { min-height: 44px; }
+        @media (max-width: 680px) { .product-preview-layout { grid-template-columns: 1fr; } .product-preview-image, .product-preview-placeholder { height: 190px; } .product-preview-stage { padding: .65rem; } }
         @media (max-width: 860px) {
             .admin-dashboard { grid-template-columns: 205px minmax(0,1fr); gap: .75rem; }
             .admin-sidebar { padding: 13px 9px; }
@@ -760,7 +773,7 @@
 
                     <div class="form-group"><label>Descripción</label><textarea id="pers-desc" class="form-input" rows="2" placeholder="Explicación del producto personalizado..."></textarea></div>
                     <div class="form-group"><label>Opciones o Piedras/Aromas Sugeridos</label><textarea id="pers-opc" class="form-input" rows="2" placeholder="Opciones: Cuarzo Rosa, Salvia, Amatista..."></textarea></div>
-                    <button type="submit" class="btn-purple" style="width: 100%;">GUARDAR PERSONALIZADO</button>
+                    <button type="submit" class="btn-purple" style="width: 100%;"><i class="fa-solid fa-eye"></i> VISTA PREVIA Y PUBLICAR</button>
                     <div class="admin-inventory"><h4><i class="fa-solid fa-boxes-stacked"></i> Modelos personalizados publicados</h4><div class="admin-inventory-list" id="admin-list-personalizados"></div></div>
                 </form>
 
@@ -784,7 +797,7 @@
 
                     <div class="form-group"><label>Propósito / Objetivo del Ritual</label><textarea id="rit-prop" class="form-input" rows="2" placeholder="Desbloqueo de energías, prosperidad..."></textarea></div>
                     <div class="form-group"><label>¿Qué Incluye?</label><textarea id="rit-inc" class="form-input" rows="2" placeholder="Vela consagrada, lectura previa, reporte de canalización..."></textarea></div>
-                    <button type="submit" class="btn-purple" style="width: 100%;">GUARDAR RITUAL</button>
+                    <button type="submit" class="btn-purple" style="width: 100%;"><i class="fa-solid fa-eye"></i> VISTA PREVIA Y PUBLICAR</button>
                     <div class="admin-inventory"><h4><i class="fa-solid fa-boxes-stacked"></i> Rituales publicados</h4><div class="admin-inventory-list" id="admin-list-rituales"></div></div>
                 </form>
 
@@ -806,7 +819,7 @@
                     </div>
 
                     <div class="form-group"><label>Descripción</label><textarea id="p-desc" class="form-input" rows="2"></textarea></div>
-                    <button type="submit" class="btn-purple" style="width: 100%;">GUARDAR PRODUCTO</button>
+                    <button type="submit" class="btn-purple" style="width: 100%;"><i class="fa-solid fa-eye"></i> VISTA PREVIA Y PUBLICAR</button>
                     <div class="admin-inventory"><h4><i class="fa-solid fa-boxes-stacked"></i> Productos publicados</h4><div class="admin-inventory-list" id="admin-list-productos"></div></div>
                 </form>
 
@@ -829,7 +842,7 @@
 
                     <div class="form-group"><label>Preparación</label><textarea id="r-prep" class="form-input" rows="2"></textarea></div>
                     <div class="form-group"><label>Propiedades</label><textarea id="r-prop" class="form-input" rows="2"></textarea></div>
-                    <button type="submit" class="btn-purple" style="width: 100%;">GUARDAR REMEDIO</button>
+                    <button type="submit" class="btn-purple" style="width: 100%;"><i class="fa-solid fa-eye"></i> VISTA PREVIA Y PUBLICAR</button>
                     <div class="admin-inventory"><h4><i class="fa-solid fa-boxes-stacked"></i> Remedios publicados</h4><div class="admin-inventory-list" id="admin-list-remedios"></div></div>
                 </form>
 
@@ -844,7 +857,7 @@
                     <div class="form-group"><label>URL de imagen web</label><input type="url" id="s-url" class="form-input" placeholder="https://..."></div>
                     <div class="form-group"><label>Descripción</label><textarea id="s-desc" class="form-input" rows="2"></textarea></div>
                     <div class="form-group"><label>Beneficios</label><textarea id="s-ben" class="form-input" rows="2"></textarea></div>
-                    <button type="submit" class="btn-purple" style="width: 100%;">GUARDAR</button>
+                    <button type="submit" class="btn-purple" style="width: 100%;"><i class="fa-solid fa-eye"></i> VISTA PREVIA Y PUBLICAR</button>
                     <div class="admin-inventory"><h4><i class="fa-solid fa-boxes-stacked"></i> Suscripciones publicadas</h4><div class="admin-inventory-list" id="admin-list-suscripciones"></div></div>
                 </form>
 
@@ -886,6 +899,38 @@
                     <button type="submit" class="btn-purple">GUARDAR CAMBIOS</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-product-preview" role="dialog" aria-modal="true" aria-labelledby="product-preview-title" aria-describedby="product-preview-description">
+        <div class="modal-content">
+            <button type="button" onclick="cerrarVistaPrevia()" aria-label="Cerrar vista previa" style="position:absolute; top:12px; right:15px; background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;">&times;</button>
+            <span id="product-preview-eyebrow" class="admin-eyebrow"><i class="fa-solid fa-eye"></i> ANTES DE PUBLICAR</span>
+            <h3 id="product-preview-title" style="color:var(--text-gold); margin:.35rem 2rem .25rem 0; font-size:1.25rem;">Vista previa</h3>
+            <p id="product-preview-description" style="color:#c4b5fd; font-size:.82rem; margin-bottom:1rem;">Revisa la tarjeta y ajusta el encuadre antes de continuar.</p>
+            <div class="product-preview-layout">
+                <div class="product-preview-stage">
+                    <div id="product-preview-card" class="custom-card product-preview-card"></div>
+                </div>
+                <div class="product-preview-controls">
+                    <h4 style="color:#b8edff; margin:0 0 .8rem;">Ajustar foto</h4>
+                    <p style="color:#c4b5fd; font-size:.78rem; margin-bottom:.9rem;">Mueve el encuadre para mostrar la parte importante de la imagen.</p>
+                    <div class="form-group">
+                        <label for="preview-image-x">Horizontal <span id="preview-image-x-value">50%</span></label>
+                        <input id="preview-image-x" type="range" min="0" max="100" value="50" aria-label="Posición horizontal de la foto">
+                    </div>
+                    <div class="form-group">
+                        <label for="preview-image-y">Vertical <span id="preview-image-y-value">50%</span></label>
+                        <input id="preview-image-y" type="range" min="0" max="100" value="50" aria-label="Posición vertical de la foto">
+                    </div>
+                    <button type="button" class="btn-outline" onclick="centrarFotoVistaPrevia()" style="width:100%;">CENTRAR FOTO</button>
+                    <p id="product-preview-warning" class="product-preview-warning" role="status" aria-live="polite"></p>
+                </div>
+            </div>
+            <div class="product-preview-actions">
+                <button type="button" class="btn-outline" onclick="cerrarVistaPrevia()">SEGUIR EDITANDO</button>
+                <button type="button" id="product-preview-publish" class="btn-purple" onclick="confirmarPublicacionDesdeVistaPrevia()"><i class="fa-solid fa-cloud-arrow-up"></i> PUBLICAR</button>
+            </div>
         </div>
     </div>
 
@@ -1015,6 +1060,19 @@
         let paypalConfig = null;
         let paypalButtonRendered = false;
         const WA_NUM = '573218259526';
+        const PUBLICATION_PREVIEW_CONFIG = {
+            personalizados: { label:'Personalizado', formId:'form-admin-personalizado', endpoint:'/api/personalizados', fileId:'pers-file', fileKey:'imagen_archivo', urlId:'pers-url', urlKey:'imagen_url', fallback:'https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?auto=format&fit=crop&w=600&q=80', border:'var(--border-glow)', priceId:'pers-precio', priceKey:'precio_base', nameId:'pers-nombre', nameKey:'nombre', button:'SOLICITAR', fields:[['tipo','pers-tipo','tipo'],['descripcion','pers-desc','description'],['opciones','pers-opc','options']], refresh:cargarPersonalizados },
+            rituales: { label:'Ritual', formId:'form-admin-ritual', endpoint:'/api/rituales', fileId:'rit-file', fileKey:'imagen_archivo', urlId:'rit-url', urlKey:'imagen_url', fallback:'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=600&q=80', border:'var(--purple-glow)', priceId:'rit-precio', priceKey:'precio', nameId:'rit-nombre', nameKey:'nombre', button:'SOLICITAR', fields:[['categoria','rit-cat','eyebrow'],['duracion','rit-dur','eyebrowExtra'],['proposito','rit-prop','description'],['incluye','rit-inc','options']], refresh:cargarRituales },
+            productos: { label:'Producto', formId:'form-admin-producto', endpoint:'/api/productos', fileId:'p-file', fileKey:'imagen_archivo', urlId:'p-url', urlKey:'imagen_url', fallback:'https://images.unsplash.com/photo-1567653418876-5bb0e566e1c2?auto=format&fit=crop&w=600&q=80', border:'var(--border-glow)', priceId:'p-precio', priceKey:'precio', nameId:'p-nombre', nameKey:'nombre', button:'AÑADIR', fields:[['categoria','p-cat','eyebrow'],['descripcion','p-desc','description']], refresh:cargarProductos },
+            remedios: { label:'Remedio', formId:'form-admin-remedio', endpoint:'/api/remedios', fileId:'r-file', fileKey:'imagen_archivo', urlId:'r-url', urlKey:'imagen_url', fallback:'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=600&q=80', border:'var(--border-glow)', priceId:'r-precio', priceKey:'precio', nameId:'r-nombre', nameKey:'nombre', button:'PEDIR', fields:[['categoria','r-cat','eyebrow'],['propiedades','r-prop','description'],['preparacion','r-prep','options']], refresh:cargarRemedios },
+            suscripciones: { label:'Suscripción', formId:'form-admin-suscripcion', endpoint:'/api/suscripciones', fileId:'s-file', fileKey:'imagen_archivo', urlId:'s-url', urlKey:'imagen_url', fallback:'', border:'var(--text-gold)', priceId:'s-precio', priceKey:'precio', nameId:'s-nombre', nameKey:'nombre', button:'UNIRME AL CÍRCULO', fields:[['frecuencia','s-frec','eyebrow'],['descripcion','s-desc','description'],['beneficios','s-ben','options']], refresh:cargarSuscripciones }
+        };
+        let publicationPreviewType = null;
+        let publicationPreviewMode = 'create';
+        let publicationConfirmed = false;
+        let publicationImageObjectUrl = null;
+        let publicationPreviewFocus = null;
+        let publicationPosition = {x:50,y:50};
 
         async function cargarTasaCambio() {
             try {
@@ -1175,6 +1233,13 @@
             return `$${precio.toLocaleString('es-CO')} COP · ${formatearUSD(precio)}`;
         }
 
+        function cssImagenPosicion(value) {
+            const match = String(value || '').match(/^\s*(\d{1,3})%\s+(\d{1,3})%\s*$/);
+            if (!match) return '50% 50%';
+            const x = Number(match[1]), y = Number(match[2]);
+            return x <= 100 && y <= 100 ? `${x}% ${y}%` : '50% 50%';
+        }
+
         function actualizarVistasUSD(root = document) {
             root.querySelectorAll('[data-price-preview]').forEach(preview => {
                 const input = preview.parentElement.querySelector('[data-price-cop]');
@@ -1198,7 +1263,7 @@
         const ADMIN_EDIT_CONFIG = {
             personalizados: { title: 'Editar personalizado', fields: [
                 {key:'nombre', label:'Nombre', required:true}, {key:'tipo', label:'Tipo'}, {key:'precio_base', label:'Precio base ($ COP)', type:'number', required:true},
-                {key:'descripcion', label:'Descripción', type:'textarea'}, {key:'opciones', label:'Opciones sugeridas', type:'textarea'}, {key:'imagen_url', label:'URL de imagen (opcional)', type:'url'}, {key:'imagen_archivo', label:'Cambiar imagen', type:'file'}
+                {key:'descripcion', label:'Descripción', type:'textarea'}, {key:'opciones', label:'Opciones sugeridas', type:'textarea'}, {key:'imagen_url', label:'URL de imagen (opcional)', type:'url'}, {key:'imagen_archivo', label:'Cambiar imagen', type:'file'}, {key:'imagen_posicion', label:'Encuadre de imagen', type:'position'}
             ]},
             citas: { title: 'Editar cita', fields: [
                 {key:'nombre_cliente', label:'Nombre del cliente', required:true}, {key:'telefono', label:'Teléfono', type:'tel', required:true},
@@ -1208,28 +1273,30 @@
             productos: { title: 'Editar producto', fields: [
                 {key:'nombre', label:'Nombre', required:true}, {key:'categoria', label:'Sección', type:'select', options:['amuletos','tarot','cristales','inciensos','otros']},
                 {key:'precio', label:'Precio ($ COP)', type:'number', required:true}, {key:'descripcion', label:'Descripción', type:'textarea'},
-                {key:'imagen_url', label:'URL de imagen (opcional)', type:'url'}, {key:'imagen_archivo', label:'Cambiar imagen', type:'file'}
+                {key:'imagen_url', label:'URL de imagen (opcional)', type:'url'}, {key:'imagen_archivo', label:'Cambiar imagen', type:'file'}, {key:'imagen_posicion', label:'Encuadre de imagen', type:'position'}
             ]},
             rituales: { title: 'Editar ritual', fields: [
                 {key:'nombre', label:'Nombre', required:true}, {key:'categoria', label:'Categoría'}, {key:'precio', label:'Precio ($ COP)', type:'number', required:true},
                 {key:'duracion', label:'Duración / modalidad'}, {key:'proposito', label:'Propósito', type:'textarea'}, {key:'incluye', label:'Incluye', type:'textarea'},
-                {key:'imagen_url', label:'URL de imagen (opcional)', type:'url'}, {key:'imagen_archivo', label:'Cambiar imagen', type:'file'}
+                {key:'imagen_url', label:'URL de imagen (opcional)', type:'url'}, {key:'imagen_archivo', label:'Cambiar imagen', type:'file'}, {key:'imagen_posicion', label:'Encuadre de imagen', type:'position'}
             ]},
             remedios: { title: 'Editar remedio', fields: [
                 {key:'nombre', label:'Nombre', required:true}, {key:'categoria', label:'Categoría', type:'select', options:['Infusiones','Tónicos','Ungüentos','Baños','Otros']},
                 {key:'precio', label:'Precio ($ COP)', type:'number', required:true}, {key:'preparacion', label:'Preparación', type:'textarea'},
-                {key:'propiedades', label:'Propiedades', type:'textarea'}, {key:'imagen_url', label:'URL de imagen (opcional)', type:'url'}, {key:'imagen_archivo', label:'Cambiar imagen', type:'file'}
+                {key:'propiedades', label:'Propiedades', type:'textarea'}, {key:'imagen_url', label:'URL de imagen (opcional)', type:'url'}, {key:'imagen_archivo', label:'Cambiar imagen', type:'file'}, {key:'imagen_posicion', label:'Encuadre de imagen', type:'position'}
             ]},
             suscripciones: { title: 'Editar suscripción', fields: [
                 {key:'nombre', label:'Nombre', required:true}, {key:'precio', label:'Precio ($ COP)', type:'number', required:true}, {key:'frecuencia', label:'Frecuencia'},
                 {key:'descripcion', label:'Descripción', type:'textarea'}, {key:'beneficios', label:'Beneficios', type:'textarea'},
-                {key:'imagen_url', label:'URL de imagen (opcional)', type:'url'}, {key:'imagen_archivo', label:'Cambiar imagen', type:'file'}
+                {key:'imagen_url', label:'URL de imagen (opcional)', type:'url'}, {key:'imagen_archivo', label:'Cambiar imagen', type:'file'}, {key:'imagen_posicion', label:'Encuadre de imagen', type:'position'}
             ]},
             foro: { title: 'Editar publicación del foro', fields: [
                 {key:'titulo', label:'Título', required:true}, {key:'semana', label:'Semana'}, {key:'contenido', label:'Contenido', type:'textarea', required:true},
                 {key:'imagen_url', label:'URL de imagen (opcional)', type:'url'}, {key:'imagen_archivo', label:'Cambiar imagen', type:'file'}
             ]}
         };
+
+        const ADMIN_EDIT_PREVIEW_TYPES = new Set(['personalizados', 'rituales', 'productos', 'remedios', 'suscripciones']);
 
         async function cargarTodo() {
             await verificarSesion();
@@ -1307,6 +1374,7 @@
 
             adminEditing = { modulo, id };
             document.getElementById('admin-edit-title').textContent = config.title;
+            document.querySelector('#admin-edit-form button[type="submit"]').textContent = ADMIN_EDIT_PREVIEW_TYPES.has(modulo) ? 'VISTA PREVIA Y GUARDAR' : 'GUARDAR CAMBIOS';
             const fields = document.getElementById('admin-edit-fields');
             fields.replaceChildren();
 
@@ -1320,6 +1388,7 @@
                 input.className = 'form-input';
                 input.name = def.key;
                 if (def.type === 'textarea') input.rows = 3;
+                else if (def.type === 'position') input.type = 'hidden';
                 else if (def.type === 'select') {
                     const options = [...def.options];
                     if (item[def.key] && !options.includes(item[def.key])) options.push(item[def.key]);
@@ -1329,7 +1398,7 @@
                         option.textContent = optionValue;
                         input.appendChild(option);
                     });
-                } else input.type = def.type || 'text';
+                } else if (def.type !== 'position') input.type = def.type || 'text';
                 if (def.required) input.required = true;
 
                 if (def.type === 'file') {
@@ -1337,6 +1406,31 @@
                 } else if (def.key === 'imagen_url') {
                     input.placeholder = 'Deja vacío para conservar la imagen actual';
                     if (item.imagen && !item.imagen.startsWith('/static/uploads/')) input.value = item.imagen;
+                } else if (def.type === 'position') {
+                    input.value = item[def.key] || '50% 50%';
+                    const [initialX, initialY] = input.value.match(/\d+/g) || ['50', '50'];
+                    const makeAxis = (axis, initialValue) => {
+                        const axisLabel = document.createElement('label');
+                        axisLabel.style.marginTop = '.55rem';
+                        axisLabel.textContent = axis === 'x' ? 'Horizontal' : 'Vertical';
+                        const range = document.createElement('input');
+                        range.type = 'range'; range.min = '0'; range.max = '100'; range.value = initialValue;
+                        range.setAttribute('aria-label', `${def.label} ${axisLabel.textContent.toLowerCase()}`);
+                        range.addEventListener('input', () => {
+                            const x = group.querySelector('[data-image-axis="x"]')?.value || initialX;
+                            const y = group.querySelector('[data-image-axis="y"]')?.value || initialY;
+                            input.value = `${x}% ${y}%`;
+                            axisLabel.textContent = `${axis === 'x' ? 'Horizontal' : 'Vertical'} · ${range.value}%`;
+                        });
+                        range.dataset.imageAxis = axis;
+                        axisLabel.append(` · ${initialValue}%`);
+                        return [axisLabel, range];
+                    };
+                    const [xLabel, xRange] = makeAxis('x', initialX);
+                    const [yLabel, yRange] = makeAxis('y', initialY);
+                    group.append(label, xLabel, xRange, yLabel, yRange, input);
+                    fields.appendChild(group);
+                    return;
                 } else {
                     input.value = item[def.key] ?? '';
                 }
@@ -1366,6 +1460,12 @@
             if (!adminEditing || !estaAutenticado) return;
             const { modulo, id } = adminEditing;
             const config = ADMIN_EDIT_CONFIG[modulo];
+            if (ADMIN_EDIT_PREVIEW_TYPES.has(modulo) &&
+                (!publicationConfirmed || publicationPreviewMode !== 'edit' || publicationPreviewType !== modulo)) {
+                if (event.currentTarget.reportValidity()) abrirVistaPreviaPublicacion(modulo, 'edit');
+                return;
+            }
+            publicationConfirmed = false;
             const submit = event.currentTarget.querySelector('button[type="submit"]');
             submit.disabled = true;
 
@@ -1391,6 +1491,7 @@
                 const res = await fetch(`/api/${modulo}/${id}`, options);
                 const result = await res.json();
                 if (!res.ok) throw new Error(result.error || 'No se pudieron guardar los cambios');
+                if (publicationPreviewMode === 'edit') cerrarVistaPrevia(true);
                 cerrarEdicionAdmin();
                 await ({
                     personalizados: cargarPersonalizados, citas: cargarCitasAdmin, productos: cargarProductos,
@@ -1398,9 +1499,15 @@
                 }[modulo])();
                 showToast('Cambios guardados');
             } catch (error) {
+                if (publicationPreviewMode === 'edit') document.getElementById('product-preview-warning').textContent = error.message || 'No se pudieron guardar los cambios';
                 showToast(error.message || 'No se pudieron guardar los cambios');
             } finally {
                 submit.disabled = false;
+                if (publicationPreviewMode === 'edit') {
+                    const previewButton = document.getElementById('product-preview-publish');
+                    previewButton.disabled = false;
+                    previewButton.innerHTML = '<i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> GUARDAR CAMBIOS';
+                }
             }
         }
 
@@ -1415,7 +1522,7 @@
                 grid.innerHTML += `
                     <div class="custom-card" style="border-color: var(--text-gold);">
                         ${del}
-                        <img src="${p.imagen}" style="width:100%; height:190px; object-fit:cover;">
+                        <img src="${p.imagen}" alt="" style="width:100%; height:190px; object-fit:cover; object-position:${cssImagenPosicion(p.imagen_posicion)};">
                         <div class="card-body">
                             <span style="color:var(--text-gold); font-size:0.7rem; font-weight:bold; text-transform:uppercase;">✨ ${p.tipo}</span>
                             <h3 style="color:white; margin:6px 0; font-size:1.15rem;">${p.nombre}</h3>
@@ -1558,7 +1665,7 @@
                 grid.innerHTML += `
                     <div class="custom-card" style="border-color: var(--purple-glow);">
                         ${del}
-                        <img src="${r.imagen}" style="width:100%; height:190px; object-fit:cover;">
+                        <img src="${r.imagen}" alt="" style="width:100%; height:190px; object-fit:cover; object-position:${cssImagenPosicion(r.imagen_posicion)};">
                         <div class="card-body">
                             <span style="color:var(--text-gold); font-size:0.7rem; font-weight:bold; text-transform:uppercase; letter-spacing:1px;">✨ ${r.categoria} | ${r.duracion}</span>
                             <h3 style="color:white; margin:6px 0; font-size:1.15rem;">${r.nombre}</h3>
@@ -1585,7 +1692,7 @@
                 grid.innerHTML += `
                     <div class="custom-card">
                         ${del}
-                        <img src="${p.imagen}" style="width:100%; height:180px; object-fit:cover;">
+                        <img src="${p.imagen}" alt="" style="width:100%; height:180px; object-fit:cover; object-position:${cssImagenPosicion(p.imagen_posicion)};">
                         <div class="card-body">
                             <h3 style="color:white; margin-bottom:6px; font-size:1.1rem;">${p.nombre}</h3>
                             <p style="color:#a496c4; font-size:0.8rem; margin-bottom:12px; flex-grow:1;">${p.descripcion}</p>
@@ -1610,7 +1717,7 @@
                 grid.innerHTML += `
                     <div class="custom-card">
                         ${del}
-                        <img src="${r.imagen}" style="width:100%; height:180px; object-fit:cover;">
+                        <img src="${r.imagen}" alt="" style="width:100%; height:180px; object-fit:cover; object-position:${cssImagenPosicion(r.imagen_posicion)};">
                         <div class="card-body">
                             <span style="color:var(--purple-glow); font-size:0.7rem; font-weight:bold; text-transform:uppercase;">${r.categoria}</span>
                             <h3 style="color:white; margin:4px 0; font-size:1.1rem;">${r.nombre}</h3>
@@ -1637,7 +1744,7 @@
                 grid.innerHTML += `
                     <div class="custom-card" style="border-color: var(--text-gold);">
                         ${del}
-                        ${s.imagen ? `<img src="${s.imagen}" alt="Imagen de ${s.nombre}" style="width:100%; height:190px; object-fit:cover;">` : ''}
+                        ${s.imagen ? `<img src="${s.imagen}" alt="Imagen de ${s.nombre}" style="width:100%; height:190px; object-fit:cover; object-position:${cssImagenPosicion(s.imagen_posicion)};">` : ''}
                         <div class="card-body" style="text-align:center;">
                             ${s.imagen ? '' : '<i class="fa-solid fa-crown" style="font-size:2rem; color:var(--text-gold); margin-bottom:10px;"></i>'}
                             <h3 style="color:white; margin-bottom:6px; font-size:1.1rem;">${s.nombre}</h3>
@@ -1730,112 +1837,312 @@
             }
         }
 
-        async function guardarNuevoPersonalizado(e) {
-            e.preventDefault();
-            const fd = new FormData();
-            fd.append('nombre', document.getElementById('pers-nombre').value);
-            fd.append('tipo', document.getElementById('pers-tipo').value);
-            fd.append('precio_base', document.getElementById('pers-precio').value);
-            fd.append('descripcion', document.getElementById('pers-desc').value);
-            fd.append('opciones', document.getElementById('pers-opc').value);
-            fd.append('imagen_url', document.getElementById('pers-url').value);
+        const ADMIN_PUBLISH_FIELDS = {
+            personalizados: [['nombre','pers-nombre'],['tipo','pers-tipo'],['precio_base','pers-precio'],['descripcion','pers-desc'],['opciones','pers-opc']],
+            rituales: [['nombre','rit-nombre'],['categoria','rit-cat'],['precio','rit-precio'],['duracion','rit-dur'],['proposito','rit-prop'],['incluye','rit-inc']],
+            productos: [['nombre','p-nombre'],['categoria','p-cat'],['precio','p-precio'],['descripcion','p-desc']],
+            remedios: [['nombre','r-nombre'],['categoria','r-cat'],['precio','r-precio'],['preparacion','r-prep'],['propiedades','r-prop']],
+            suscripciones: [['nombre','s-nombre'],['precio','s-precio'],['frecuencia','s-frec'],['descripcion','s-desc'],['beneficios','s-ben']]
+        };
 
-            const fileInput = document.getElementById('pers-file');
-            if (fileInput.files.length > 0) {
-                fd.append('imagen_archivo', fileInput.files[0]);
-            }
-
-            await fetch('/api/personalizados', { method: 'POST', body: fd });
-            showToast("✨ Personalizado Creado");
-            document.getElementById('form-admin-personalizado').reset();
-            cargarPersonalizados();
+        function obtenerTextoBorrador(elementId) {
+            return document.getElementById(elementId)?.value?.trim() || '';
         }
 
-        async function guardarNuevoRitual(e) {
-            e.preventDefault();
-            const fd = new FormData();
-            fd.append('nombre', document.getElementById('rit-nombre').value);
-            fd.append('categoria', document.getElementById('rit-cat').value);
-            fd.append('precio', document.getElementById('rit-precio').value);
-            fd.append('duracion', document.getElementById('rit-dur').value);
-            fd.append('proposito', document.getElementById('rit-prop').value);
-            fd.append('incluye', document.getElementById('rit-inc').value);
-            fd.append('imagen_url', document.getElementById('rit-url').value);
-
-            const fileInput = document.getElementById('rit-file');
-            if (fileInput.files.length > 0) {
-                fd.append('imagen_archivo', fileInput.files[0]);
+        function valorCampoVistaPrevia(config, key, elementId) {
+            if (publicationPreviewMode === 'edit') {
+                const field = document.getElementById('admin-edit-form').elements.namedItem(key);
+                return field?.value?.trim?.() || '';
             }
-
-            await fetch('/api/rituales', { method: 'POST', body: fd });
-            showToast("✨ Ritual Guardado con Éxito");
-            document.getElementById('form-admin-ritual').reset();
-            cargarRituales();
+            return obtenerTextoBorrador(elementId);
         }
 
-        async function guardarNuevoProducto(e) {
-            e.preventDefault();
-            const fd = new FormData();
-            fd.append('nombre', document.getElementById('p-nombre').value);
-            fd.append('categoria', document.getElementById('p-cat').value);
-            fd.append('precio', document.getElementById('p-precio').value);
-            fd.append('descripcion', document.getElementById('p-desc').value);
-            fd.append('imagen_url', document.getElementById('p-url').value);
-
-            const fileInput = document.getElementById('p-file');
-            if (fileInput.files.length > 0) {
-                fd.append('imagen_archivo', fileInput.files[0]);
-            }
-
-            await fetch('/api/productos', { method: 'POST', body: fd });
-            showToast("✨ Producto Guardado");
-            document.getElementById('form-admin-producto').reset();
-            cargarProductos();
+        function archivoVistaPrevia(config) {
+            const field = publicationPreviewMode === 'edit'
+                ? document.getElementById('admin-edit-form').elements.namedItem(config.fileKey)
+                : document.getElementById(config.fileId);
+            return field?.files?.[0] || null;
         }
 
-        async function guardarNuevoRemedio(e) {
-            e.preventDefault();
-            const fd = new FormData();
-            fd.append('nombre', document.getElementById('r-nombre').value);
-            fd.append('categoria', document.getElementById('r-cat').value);
-            fd.append('precio', document.getElementById('r-precio').value);
-            fd.append('preparacion', document.getElementById('r-prep').value);
-            fd.append('propiedades', document.getElementById('r-prop').value);
-            fd.append('imagen_url', document.getElementById('r-url').value);
-
-            const fileInput = document.getElementById('r-file');
-            if (fileInput.files.length > 0) {
-                fd.append('imagen_archivo', fileInput.files[0]);
-            }
-
-            await fetch('/api/remedios', { method: 'POST', body: fd });
-            showToast("🌿 Remedio Guardado");
-            document.getElementById('form-admin-remedio').reset();
-            cargarRemedios();
+        function prepararImagenVistaPrevia() {
+            if (publicationImageObjectUrl) URL.revokeObjectURL(publicationImageObjectUrl);
+            publicationImageObjectUrl = null;
+            if (!publicationPreviewType) return;
+            const config = PUBLICATION_PREVIEW_CONFIG[publicationPreviewType];
+            const file = archivoVistaPrevia(config);
+            if (file) publicationImageObjectUrl = URL.createObjectURL(file);
         }
 
-        async function guardarNuevaSuscripcion(e) {
-            e.preventDefault();
-            const fd = new FormData();
-            fd.append('nombre', document.getElementById('s-nombre').value);
-            fd.append('precio', document.getElementById('s-precio').value);
-            fd.append('frecuencia', document.getElementById('s-frec').value);
-            fd.append('descripcion', document.getElementById('s-desc').value);
-            fd.append('beneficios', document.getElementById('s-ben').value);
-            fd.append('imagen_url', document.getElementById('s-url').value);
+        function obtenerImagenBorrador(config) {
+            if (publicationImageObjectUrl) return publicationImageObjectUrl;
+            const imageUrl = valorCampoVistaPrevia(config, config.urlKey, config.urlId);
+            if (imageUrl) return imageUrl;
+            if (publicationPreviewMode === 'edit' && adminEditing) {
+                const currentItem = (adminRecords[adminEditing.modulo] || []).find(item => item.id === adminEditing.id);
+                return currentItem?.imagen || config.fallback;
+            }
+            return config.fallback;
+        }
 
-            const fileInput = document.getElementById('s-file');
-            if (fileInput.files.length > 0) fd.append('imagen_archivo', fileInput.files[0]);
+        function abrirVistaPreviaPublicacion(type, mode='create') {
+            if (!estaAutenticado) { showToast('Inicia sesión para publicar'); return; }
+            const config = PUBLICATION_PREVIEW_CONFIG[type];
+            if (!config) return;
+            publicationPreviewFocus = document.activeElement;
+            publicationPreviewType = type;
+            publicationPreviewMode = mode;
+            let initialPosition = '50% 50%';
+            if (mode === 'edit') {
+                const positionField = document.getElementById('admin-edit-form').elements.namedItem('imagen_posicion');
+                initialPosition = positionField?.value || '50% 50%';
+                document.getElementById('modal-admin-edit').style.display = 'none';
+            }
+            const initialCoordinates = cssImagenPosicion(initialPosition).match(/\d+/g) || ['50', '50'];
+            publicationPosition = {x:Number(initialCoordinates[0]),y:Number(initialCoordinates[1])};
+            const x = document.getElementById('preview-image-x');
+            const y = document.getElementById('preview-image-y');
+            x.value = publicationPosition.x; y.value = publicationPosition.y;
+            document.getElementById('preview-image-x-value').textContent = `${publicationPosition.x}%`;
+            document.getElementById('preview-image-y-value').textContent = `${publicationPosition.y}%`;
+            document.getElementById('product-preview-publish').innerHTML = mode === 'edit'
+                ? '<i class="fa-solid fa-floppy-disk" aria-hidden="true"></i> GUARDAR CAMBIOS'
+                : '<i class="fa-solid fa-cloud-arrow-up" aria-hidden="true"></i> PUBLICAR';
+            document.getElementById('product-preview-eyebrow').innerHTML = `<i class="fa-solid fa-eye" aria-hidden="true"></i> ${mode === 'edit' ? 'REVISIÓN DE CAMBIOS' : 'ANTES DE PUBLICAR'}`;
+            document.getElementById('product-preview-description').textContent = mode === 'edit'
+                ? 'Revisa cómo quedará el cambio. Se guardará solo cuando pulses “Guardar cambios”.'
+                : 'Revisa la tarjeta y ajusta el encuadre. No se publicará hasta que pulses “Publicar”.';
+            prepararImagenVistaPrevia();
+            renderizarVistaPreviaPublicacion();
+            document.getElementById('modal-product-preview').style.display = 'flex';
+            document.getElementById('product-preview-publish').focus();
+        }
 
-            const res = await fetch('/api/suscripciones', { method: 'POST', body: fd });
-            if (!res.ok) {
-                showToast('No se pudo guardar la suscripción');
+        function agregarTextoVistaPrevia(parent, label, value, className='') {
+            if (!value) return;
+            const p = document.createElement('p');
+            p.style.cssText = 'color:#a496c4;font-size:.82rem;margin:0 0 10px;line-height:1.45;white-space:pre-line;';
+            if (className === 'description') p.style.color = '#e2d8f3';
+            const strong = document.createElement('strong');
+            strong.textContent = label ? `${label}: ` : '';
+            p.append(strong, document.createTextNode(value));
+            parent.appendChild(p);
+        }
+
+        function renderizarVistaPreviaPublicacion() {
+            if (!publicationPreviewType) return;
+            const config = PUBLICATION_PREVIEW_CONFIG[publicationPreviewType];
+            const card = document.getElementById('product-preview-card');
+            const warning = document.getElementById('product-preview-warning');
+            const image = obtenerImagenBorrador(config);
+            card.replaceChildren();
+            card.style.borderColor = config.border;
+            warning.textContent = '';
+            document.getElementById('product-preview-title').textContent = `${publicationPreviewMode === 'edit' ? 'Vista previa del cambio · ' : 'Vista previa · '}${config.label}`;
+
+            if (image) {
+                const img = document.createElement('img');
+                img.className = 'product-preview-image';
+                img.alt = `Vista previa de ${valorCampoVistaPrevia(config, config.nameKey, config.nameId) || 'la imagen'}`;
+                img.src = image;
+                img.style.objectPosition = `${publicationPosition.x}% ${publicationPosition.y}%`;
+                img.addEventListener('error', () => { warning.textContent = 'No se pudo cargar la foto. Revisa el archivo o la URL antes de publicar.'; });
+                img.addEventListener('load', () => { warning.textContent = ''; });
+                card.appendChild(img);
+            } else {
+                const placeholder = document.createElement('div');
+                placeholder.className = 'product-preview-placeholder';
+                placeholder.innerHTML = '<i class="fa-solid fa-crown" aria-hidden="true"></i>';
+                card.appendChild(placeholder);
+            }
+
+            const body = document.createElement('div');
+            body.className = 'card-body';
+            if (publicationPreviewType === 'suscripciones') body.style.textAlign = 'center';
+            const values = Object.create(null);
+            config.fields.forEach(([key, elementId, role]) => { values[key] = valorCampoVistaPrevia(config, key, elementId); values[role] = values[key]; });
+            if (values.eyebrow || values.eyebrowExtra) {
+                const eyebrow = document.createElement('span');
+                eyebrow.style.cssText = 'color:var(--text-gold);font-size:.7rem;font-weight:bold;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;';
+                eyebrow.textContent = [values.eyebrow, values.eyebrowExtra].filter(Boolean).join(' · ');
+                body.appendChild(eyebrow);
+            }
+            if (publicationPreviewType === 'suscripciones' && !image) {
+                const crown = document.createElement('i');
+                crown.className = 'fa-solid fa-crown';
+                crown.setAttribute('aria-hidden', 'true');
+                crown.style.cssText = 'font-size:2rem;color:var(--text-gold);margin-bottom:10px;';
+                body.appendChild(crown);
+            }
+            const title = document.createElement('h3');
+            title.style.cssText = 'color:white;margin:0 0 8px;font-size:1.1rem;';
+            title.textContent = valorCampoVistaPrevia(config, config.nameKey, config.nameId) || 'Nombre del artículo';
+            body.appendChild(title);
+            if (publicationPreviewType === 'personalizados') {
+                agregarTextoVistaPrevia(body, 'Tipo', values.tipo, '');
+                agregarTextoVistaPrevia(body, 'Descripción', values.description, 'description');
+                agregarTextoVistaPrevia(body, 'Opciones', values.options, '');
+            } else if (publicationPreviewType === 'rituales') {
+                agregarTextoVistaPrevia(body, 'Propósito', values.description, 'description');
+                agregarTextoVistaPrevia(body, 'Incluye', values.options, '');
+            } else if (publicationPreviewType === 'productos') {
+                agregarTextoVistaPrevia(body, 'Descripción', values.description, 'description');
+            } else if (publicationPreviewType === 'remedios') {
+                agregarTextoVistaPrevia(body, 'Propiedades', values.description, 'description');
+                agregarTextoVistaPrevia(body, 'Preparación', values.options, '');
+            }
+            if (publicationPreviewType === 'suscripciones') {
+                const priceLine = document.createElement('span');
+                priceLine.className = 'card-price';
+                priceLine.style.cssText = 'display:block;margin-bottom:10px;';
+                priceLine.innerHTML = `${precioDobleHTML(valorCampoVistaPrevia(config, config.priceKey, config.priceId))} / ${values.eyebrow || 'Mensual'}`;
+                body.appendChild(priceLine);
+                agregarTextoVistaPrevia(body, 'Descripción', values.description, 'description');
+                agregarTextoVistaPrevia(body, 'Beneficios', values.options, '');
+            } else {
+                const footer = document.createElement('div');
+                footer.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:auto;';
+                const price = document.createElement('span');
+                price.className = 'card-price';
+                price.innerHTML = precioDobleHTML(valorCampoVistaPrevia(config, config.priceKey, config.priceId));
+                const button = document.createElement('button');
+                button.type = 'button'; button.className = 'btn-purple'; button.disabled = true; button.style.opacity = '.78';
+                button.textContent = config.button;
+                footer.append(price, button);
+                body.appendChild(footer);
+            }
+            card.appendChild(body);
+            document.getElementById('preview-image-x').disabled = !image;
+            document.getElementById('preview-image-y').disabled = !image;
+        }
+
+        function ajustarEncuadreVistaPrevia() {
+            publicationPosition.x = Number(document.getElementById('preview-image-x').value);
+            publicationPosition.y = Number(document.getElementById('preview-image-y').value);
+            document.getElementById('preview-image-x-value').textContent = `${publicationPosition.x}%`;
+            document.getElementById('preview-image-y-value').textContent = `${publicationPosition.y}%`;
+            const image = document.querySelector('#product-preview-card .product-preview-image');
+            if (image) image.style.objectPosition = `${publicationPosition.x}% ${publicationPosition.y}%`;
+            if (publicationPreviewMode === 'edit') {
+                const form = document.getElementById('admin-edit-form');
+                const positionField = form.elements.namedItem('imagen_posicion');
+                if (positionField) positionField.value = `${publicationPosition.x}% ${publicationPosition.y}%`;
+                [['x', publicationPosition.x], ['y', publicationPosition.y]].forEach(([axis, value]) => {
+                    const range = form.querySelector(`[data-image-axis="${axis}"]`);
+                    if (!range) return;
+                    range.value = value;
+                    const label = range.previousElementSibling;
+                    if (label) label.textContent = `${axis === 'x' ? 'Horizontal' : 'Vertical'} · ${value}%`;
+                });
+            }
+        }
+
+        function centrarFotoVistaPrevia() {
+            document.getElementById('preview-image-x').value = '50';
+            document.getElementById('preview-image-y').value = '50';
+            ajustarEncuadreVistaPrevia();
+        }
+
+        function cerrarVistaPrevia(success=false) {
+            const previousMode = publicationPreviewMode;
+            document.getElementById('modal-product-preview').style.display = 'none';
+            publicationPreviewType = null;
+            publicationPreviewMode = 'create';
+            publicationConfirmed = false;
+            if (publicationImageObjectUrl) URL.revokeObjectURL(publicationImageObjectUrl);
+            publicationImageObjectUrl = null;
+            if (success) {
+                publicationPosition = {x:50,y:50};
+                document.getElementById('preview-image-x').value = '50';
+                document.getElementById('preview-image-y').value = '50';
+            }
+            if (previousMode === 'edit' && !success && adminEditing) document.getElementById('modal-admin-edit').style.display = 'flex';
+            if (publicationPreviewFocus?.isConnected) publicationPreviewFocus.focus();
+            publicationPreviewFocus = null;
+        }
+
+        function confirmarPublicacionDesdeVistaPrevia() {
+            if (!publicationPreviewType) return;
+            if (publicationPreviewMode === 'edit') {
+                publicationConfirmed = true;
+                const button = document.getElementById('product-preview-publish');
+                button.disabled = true;
+                button.innerHTML = '<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> GUARDANDO…';
+                document.getElementById('admin-edit-form').requestSubmit();
                 return;
             }
-            showToast("⭐ Suscripción Creada");
-            document.getElementById('form-admin-suscripcion').reset();
-            cargarSuscripciones();
+            const config = PUBLICATION_PREVIEW_CONFIG[publicationPreviewType];
+            const form = document.getElementById(config.formId);
+            if (!form.reportValidity()) return;
+            publicationConfirmed = true;
+            const button = document.getElementById('product-preview-publish');
+            button.disabled = true;
+            button.innerHTML = '<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i> PUBLICANDO…';
+            form.requestSubmit();
         }
+
+        document.addEventListener('input', event => {
+            if (publicationPreviewType && document.getElementById(PUBLICATION_PREVIEW_CONFIG[publicationPreviewType].formId).contains(event.target)) renderizarVistaPreviaPublicacion();
+        });
+        document.addEventListener('change', event => {
+            if (publicationPreviewType && document.getElementById(PUBLICATION_PREVIEW_CONFIG[publicationPreviewType].formId).contains(event.target)) {
+                if (event.target.type === 'file') prepararImagenVistaPrevia();
+                renderizarVistaPreviaPublicacion();
+            }
+        });
+        document.getElementById('admin-edit-form').addEventListener('input', event => {
+            if (publicationPreviewMode === 'edit' && document.getElementById('admin-edit-form').contains(event.target)) renderizarVistaPreviaPublicacion();
+        });
+        document.getElementById('admin-edit-form').addEventListener('change', event => {
+            if (publicationPreviewMode !== 'edit' || !document.getElementById('admin-edit-form').contains(event.target)) return;
+            if (event.target.type === 'file') prepararImagenVistaPrevia();
+            renderizarVistaPreviaPublicacion();
+        });
+        document.getElementById('preview-image-x').addEventListener('input', ajustarEncuadreVistaPrevia);
+        document.getElementById('preview-image-y').addEventListener('input', ajustarEncuadreVistaPrevia);
+        document.getElementById('modal-product-preview').addEventListener('click', event => { if (event.target.id === 'modal-product-preview') cerrarVistaPrevia(); });
+        document.addEventListener('keydown', event => { if (event.key === 'Escape' && publicationPreviewType) cerrarVistaPrevia(); });
+
+        async function manejarPublicacionPrevisualizada(event, type) {
+            event.preventDefault();
+            const config = PUBLICATION_PREVIEW_CONFIG[type];
+            if (!publicationConfirmed || publicationPreviewType !== type) {
+                const form = document.getElementById(config.formId);
+                if (form.reportValidity()) abrirVistaPreviaPublicacion(type);
+                return;
+            }
+            publicationConfirmed = false;
+            const form = document.getElementById(config.formId);
+            const button = document.getElementById('product-preview-publish');
+            const fd = new FormData();
+            ADMIN_PUBLISH_FIELDS[type].forEach(([key, id]) => fd.append(key, document.getElementById(id).value));
+            fd.append('imagen_url', obtenerTextoBorrador(config.urlId));
+            fd.append('imagen_posicion', `${publicationPosition.x}% ${publicationPosition.y}%`);
+            const file = document.getElementById(config.fileId).files[0];
+            if (file) fd.append('imagen_archivo', file);
+
+            try {
+                const response = await fetch(config.endpoint, {method:'POST', body:fd});
+                let result = {};
+                try { result = await response.json(); } catch (_) {}
+                if (!response.ok) throw new Error(result.error || `No se pudo publicar (${response.status})`);
+                showToast(`${config.label} publicado correctamente`);
+                form.reset();
+                cerrarVistaPrevia(true);
+                await config.refresh();
+            } catch (error) {
+                document.getElementById('product-preview-warning').textContent = error.message || 'No se pudo publicar. Revisa los datos e inténtalo otra vez.';
+                showToast(error.message || 'No se pudo publicar');
+            } finally {
+                button.disabled = false;
+                button.innerHTML = '<i class="fa-solid fa-cloud-arrow-up" aria-hidden="true"></i> PUBLICAR';
+            }
+        }
+
+        function guardarNuevoPersonalizado(e) { return manejarPublicacionPrevisualizada(e, 'personalizados'); }
+        function guardarNuevoRitual(e) { return manejarPublicacionPrevisualizada(e, 'rituales'); }
+        function guardarNuevoProducto(e) { return manejarPublicacionPrevisualizada(e, 'productos'); }
+        function guardarNuevoRemedio(e) { return manejarPublicacionPrevisualizada(e, 'remedios'); }
+        function guardarNuevaSuscripcion(e) { return manejarPublicacionPrevisualizada(e, 'suscripciones'); }
 
         async function guardarNuevoForo(e) {
             e.preventDefault();

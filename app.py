@@ -55,6 +55,7 @@ class Producto(db.Model):
     categoria = db.Column(db.String(50), nullable=False)
     precio = db.Column(db.Float, nullable=False)
     imagen = db.Column(db.Text, nullable=False)
+    imagen_posicion = db.Column(db.String(16), nullable=False, default='50% 50%')
     descripcion = db.Column(db.Text, nullable=True)
 
     def to_dict(self):
@@ -64,6 +65,7 @@ class Producto(db.Model):
             'categoria': self.categoria,
             'precio': self.precio,
             'imagen': self.imagen,
+            'imagen_posicion': self.imagen_posicion or '50% 50%',
             'descripcion': self.descripcion
         }
 
@@ -73,6 +75,7 @@ class Personalizado(db.Model):
     tipo = db.Column(db.String(50), default="Amuleto a Medida")
     precio_base = db.Column(db.Float, nullable=False)
     imagen = db.Column(db.Text, nullable=False)
+    imagen_posicion = db.Column(db.String(16), nullable=False, default='50% 50%')
     descripcion = db.Column(db.Text, nullable=True)
     opciones = db.Column(db.Text, nullable=True)
 
@@ -83,6 +86,7 @@ class Personalizado(db.Model):
             'tipo': self.tipo,
             'precio_base': self.precio_base,
             'imagen': self.imagen,
+            'imagen_posicion': self.imagen_posicion or '50% 50%',
             'descripcion': self.descripcion,
             'opciones': self.opciones
         }
@@ -93,6 +97,7 @@ class Ritual(db.Model):
     categoria = db.Column(db.String(50), default="Protección")
     precio = db.Column(db.Float, nullable=False)
     imagen = db.Column(db.Text, nullable=False)
+    imagen_posicion = db.Column(db.String(16), nullable=False, default='50% 50%')
     proposito = db.Column(db.Text, nullable=True)
     incluye = db.Column(db.Text, nullable=True)
     duracion = db.Column(db.String(50), default="1 Sesión Mística")
@@ -104,6 +109,7 @@ class Ritual(db.Model):
             'categoria': self.categoria,
             'precio': self.precio,
             'imagen': self.imagen,
+            'imagen_posicion': self.imagen_posicion or '50% 50%',
             'proposito': self.proposito,
             'incluye': self.incluye,
             'duracion': self.duracion
@@ -141,6 +147,7 @@ class Suscripcion(db.Model):
     descripcion = db.Column(db.Text, nullable=True)
     beneficios = db.Column(db.Text, nullable=True)
     imagen = db.Column(db.Text, nullable=True)
+    imagen_posicion = db.Column(db.String(16), nullable=False, default='50% 50%')
 
     def to_dict(self):
         return {
@@ -150,7 +157,8 @@ class Suscripcion(db.Model):
             'frecuencia': self.frecuencia,
             'descripcion': self.descripcion,
             'beneficios': self.beneficios,
-            'imagen': self.imagen
+            'imagen': self.imagen,
+            'imagen_posicion': self.imagen_posicion or '50% 50%'
         }
 
 class Remedio(db.Model):
@@ -159,6 +167,7 @@ class Remedio(db.Model):
     categoria = db.Column(db.String(50), default="Infusiones")
     precio = db.Column(db.Float, nullable=False)
     imagen = db.Column(db.Text, nullable=False)
+    imagen_posicion = db.Column(db.String(16), nullable=False, default='50% 50%')
     preparacion = db.Column(db.Text, nullable=True)
     propiedades = db.Column(db.Text, nullable=True)
 
@@ -169,6 +178,7 @@ class Remedio(db.Model):
             'categoria': self.categoria,
             'precio': self.precio,
             'imagen': self.imagen,
+            'imagen_posicion': self.imagen_posicion or '50% 50%',
             'preparacion': self.preparacion,
             'propiedades': self.propiedades
         }
@@ -356,12 +366,12 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 ADMIN_EDIT_FIELDS = {
-    'personalizados': (Personalizado, ('nombre', 'tipo', 'precio_base', 'descripcion', 'opciones', 'imagen'), {'precio_base'}),
+    'personalizados': (Personalizado, ('nombre', 'tipo', 'precio_base', 'descripcion', 'opciones', 'imagen', 'imagen_posicion'), {'precio_base'}),
     'citas': (Cita, ('nombre_cliente', 'telefono', 'tipo_servicio', 'modalidad', 'fecha', 'hora', 'notas'), set()),
-    'productos': (Producto, ('nombre', 'categoria', 'precio', 'descripcion', 'imagen'), {'precio'}),
-    'rituales': (Ritual, ('nombre', 'categoria', 'precio', 'duracion', 'proposito', 'incluye', 'imagen'), {'precio'}),
-    'suscripciones': (Suscripcion, ('nombre', 'precio', 'frecuencia', 'descripcion', 'beneficios', 'imagen'), {'precio'}),
-    'remedios': (Remedio, ('nombre', 'categoria', 'precio', 'preparacion', 'propiedades', 'imagen'), {'precio'}),
+    'productos': (Producto, ('nombre', 'categoria', 'precio', 'descripcion', 'imagen', 'imagen_posicion'), {'precio'}),
+    'rituales': (Ritual, ('nombre', 'categoria', 'precio', 'duracion', 'proposito', 'incluye', 'imagen', 'imagen_posicion'), {'precio'}),
+    'suscripciones': (Suscripcion, ('nombre', 'precio', 'frecuencia', 'descripcion', 'beneficios', 'imagen', 'imagen_posicion'), {'precio'}),
+    'remedios': (Remedio, ('nombre', 'categoria', 'precio', 'preparacion', 'propiedades', 'imagen', 'imagen_posicion'), {'precio'}),
     'foro': (ForoTema, ('titulo', 'semana', 'contenido', 'imagen'), set()),
 }
 
@@ -378,6 +388,16 @@ def save_updated_image(current_image):
 
     image_url = request.form.get('imagen_url', '').strip()
     return image_url or current_image, None
+
+def normalize_image_position(value):
+    """Keep image cropping controls to two safe percentage values."""
+    match = re.fullmatch(r'\s*(\d{1,3})%\s+(\d{1,3})%\s*', str(value or ''))
+    if not match:
+        return '50% 50%'
+    x, y = (int(part) for part in match.groups())
+    if not (0 <= x <= 100 and 0 <= y <= 100):
+        return '50% 50%'
+    return f'{x}% {y}%'
 
 @app.route('/api/<string:modulo>/<int:registro_id>', methods=['PUT'])
 def update_admin_item(modulo, registro_id):
@@ -399,6 +419,8 @@ def update_admin_item(modulo, registro_id):
             if field == 'imagen' or field not in values:
                 continue
             value = values.get(field)
+            if field == 'imagen_posicion':
+                value = normalize_image_position(value)
             setattr(item, field, float(value) if field in numeric_fields else value)
 
         if 'imagen' in fields:
@@ -426,6 +448,13 @@ def init_db():
                 updated_columns = {column['name'] for column in inspect(db.engine).get_columns(Suscripcion.__tablename__)}
                 if 'imagen' not in updated_columns:
                     raise
+        for model in (Producto, Personalizado, Ritual, Remedio, Suscripcion):
+            columns = {column['name'] for column in inspect(db.engine).get_columns(model.__tablename__)}
+            if 'imagen_posicion' not in columns:
+                with db.engine.begin() as connection:
+                    connection.execute(text(
+                        f"ALTER TABLE {model.__tablename__} ADD COLUMN imagen_posicion VARCHAR(16) NOT NULL DEFAULT '50% 50%'"
+                    ))
         if Producto.query.count() == 0:
             prods = [
                 Producto(nombre="TALISMAN DE VIDA", categoria="amuletos", precio=45000, imagen="https://images.unsplash.com/photo-1567653418876-5bb0e566e1c2?auto=format&fit=crop&w=600&q=80", descripcion="Artículo ritual consagrado."),
@@ -727,7 +756,9 @@ def add_personalizado():
     if not imagen_final:
         imagen_final = "https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?auto=format&fit=crop&w=600&q=80"
 
-    nuevo = Personalizado(nombre=nombre, tipo=tipo, precio_base=precio_base, imagen=imagen_final, descripcion=descripcion, opciones=opciones)
+    nuevo = Personalizado(nombre=nombre, tipo=tipo, precio_base=precio_base, imagen=imagen_final,
+                          imagen_posicion=normalize_image_position(request.form.get('imagen_posicion')),
+                          descripcion=descripcion, opciones=opciones)
     db.session.add(nuevo)
     db.session.commit()
     return jsonify(nuevo.to_dict()), 201
@@ -807,7 +838,9 @@ def add_producto():
     if not imagen_final:
         imagen_final = "https://images.unsplash.com/photo-1567653418876-5bb0e566e1c2?auto=format&fit=crop&w=600&q=80"
 
-    nuevo = Producto(nombre=nombre, categoria=categoria, precio=precio, imagen=imagen_final, descripcion=descripcion)
+    nuevo = Producto(nombre=nombre, categoria=categoria, precio=precio, imagen=imagen_final,
+                     imagen_posicion=normalize_image_position(request.form.get('imagen_posicion')),
+                     descripcion=descripcion)
     db.session.add(nuevo)
     db.session.commit()
     return jsonify(nuevo.to_dict()), 201
@@ -855,7 +888,9 @@ def add_ritual():
     if not imagen_final:
         imagen_final = "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=600&q=80"
 
-    nuevo = Ritual(nombre=nombre, categoria=categoria, precio=precio, imagen=imagen_final, proposito=proposito, incluye=incluye, duracion=duracion)
+    nuevo = Ritual(nombre=nombre, categoria=categoria, precio=precio, imagen=imagen_final,
+                   imagen_posicion=normalize_image_position(request.form.get('imagen_posicion')),
+                   proposito=proposito, incluye=incluye, duracion=duracion)
     db.session.add(nuevo)
     db.session.commit()
     return jsonify(nuevo.to_dict()), 201
@@ -899,7 +934,8 @@ def add_suscripcion():
         frecuencia=request.form.get('frecuencia', 'Mensual'),
         descripcion=request.form.get('descripcion', ''),
         beneficios=request.form.get('beneficios', ''),
-        imagen=imagen_final or None
+        imagen=imagen_final or None,
+        imagen_posicion=normalize_image_position(request.form.get('imagen_posicion'))
     )
     db.session.add(nueva)
     db.session.commit()
@@ -947,7 +983,9 @@ def add_remedio():
     if not imagen_final:
         imagen_final = "https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=600&q=80"
 
-    nuevo = Remedio(nombre=nombre, categoria=categoria, precio=precio, imagen=imagen_final, preparacion=preparacion, propiedades=propiedades)
+    nuevo = Remedio(nombre=nombre, categoria=categoria, precio=precio, imagen=imagen_final,
+                    imagen_posicion=normalize_image_position(request.form.get('imagen_posicion')),
+                    preparacion=preparacion, propiedades=propiedades)
     db.session.add(nuevo)
     db.session.commit()
     return jsonify(nuevo.to_dict()), 201
