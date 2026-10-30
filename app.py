@@ -748,7 +748,7 @@ def capturar_pedido_paypal(paypal_order_id):
 def listar_pedidos_paypal():
     if not session.get('logged_in'):
         return jsonify({'error': 'No autorizado'}), 403
-    orders = PedidoPayPal.query.order_by(PedidoPayPal.id.desc()).limit(100).all()
+    orders = PedidoPayPal.query.filter(PedidoPayPal.estado == 'COMPLETED', PedidoPayPal.captured_at.isnot(None)).order_by(PedidoPayPal.id.desc()).limit(100).all()
     return jsonify([order.to_dict() for order in orders])
 
 # PERSONALIZADOS
