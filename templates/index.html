@@ -538,6 +538,21 @@
         .paypal-card-submit:disabled { cursor: wait; opacity: .65; }
         .paypal-card-error { min-height: 1em; margin: 0; color: #ffb8c0; font-size: .8rem; }
         @media (max-width: 420px) { .paypal-card-panel { padding: 12px; } .paypal-card-row { gap: 8px; } }
+        .shipping-dialog { width:min(560px, calc(100vw - 24px)); max-width:560px; max-height:calc(100dvh - 24px); padding:0; border:1px solid rgba(200,160,255,.48); border-radius:18px; background:#180d27; color:#f8f3ff; box-shadow:0 24px 80px rgba(0,0,0,.6); }
+        .shipping-dialog::backdrop { background:rgba(6,3,12,.78); backdrop-filter:blur(5px); }
+        .shipping-dialog-inner { max-height:calc(100dvh - 24px); overflow:auto; padding:22px; }
+        .shipping-dialog h2 { margin:0 0 6px; color:var(--text-gold); font-size:1.25rem; }
+        .shipping-dialog p { color:#c9b9df; line-height:1.5; }
+        .shipping-form-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+        .shipping-form-grid .span-two { grid-column:1 / -1; }
+        .shipping-field { display:grid; gap:6px; color:#eadcfb; font-size:.82rem; }
+        .shipping-field input, .shipping-field textarea { box-sizing:border-box; width:100%; min-height:46px; padding:11px 12px; border:1px solid #76618f; border-radius:9px; background:#fff; color:#241632; font:inherit; font-size:16px; }
+        .shipping-field textarea { min-height:76px; resize:vertical; }
+        .shipping-field input:focus, .shipping-field textarea:focus { outline:2px solid #c89aff; outline-offset:2px; }
+        .shipping-error { min-height:1.2em; margin:10px 0; color:#ffb8c0!important; font-size:.85rem; }
+        .shipping-submit { width:100%; min-height:48px; border:0; border-radius:10px; background:linear-gradient(135deg,#7a3bb0,#b86dd1); color:white; font-weight:700; font-size:.94rem; cursor:pointer; }
+        .shipping-submit:disabled { opacity:.65; cursor:wait; }
+        @media(max-width:520px) { .shipping-dialog-inner { padding:16px; } .shipping-form-grid { grid-template-columns:1fr; gap:10px; } .shipping-form-grid .span-two { grid-column:auto; } }
     </style>
 </head>
 <body>
@@ -745,6 +760,7 @@
                     <nav class="admin-side-nav" aria-label="Secciones de administración">
                         <button type="button" class="admin-nav-item active" data-admin-tab="citas" onclick="switchAdminTab('citas')"><i class="fa-solid fa-calendar-check"></i><span>Citas <small id="citas-count">0</small></span></button>
                         <button type="button" class="admin-nav-item" data-admin-tab="pedidos" onclick="switchAdminTab('pedidos')"><i class="fa-brands fa-paypal"></i><span>Pedidos PayPal</span></button>
+                        <button type="button" class="admin-nav-item" data-admin-tab="envios" onclick="switchAdminTab('envios')"><i class="fa-solid fa-truck-fast"></i><span>Envíos</span></button>
                         <button type="button" class="admin-nav-item" data-admin-tab="personalizado" onclick="switchAdminTab('personalizado')"><i class="fa-solid fa-wand-sparkles"></i><span>Personalizados</span></button>
                         <button type="button" class="admin-nav-item" data-admin-tab="ritual" onclick="switchAdminTab('ritual')"><i class="fa-solid fa-moon"></i><span>Rituales</span></button>
                         <button type="button" class="admin-nav-item" data-admin-tab="producto" onclick="switchAdminTab('producto')"><i class="fa-solid fa-gem"></i><span>Productos</span></button>
@@ -768,6 +784,10 @@
                 <div id="tab-admin-pedidos" style="display:none;">
                     <h3 style="color:var(--text-gold); margin-bottom:10px; font-size:1.1rem;"><i class="fa-brands fa-paypal"></i> Pedidos pagados con PayPal</h3>
                     <div id="admin-paypal-orders-list" class="admin-inventory-list"></div>
+                </div>
+                <div id="tab-admin-envios" style="display:none;">
+                    <h3 style="color:var(--text-gold); margin-bottom:10px; font-size:1.1rem;"><i class="fa-solid fa-truck-fast"></i> Envíos</h3>
+                    <div id="admin-envios-list" class="admin-inventory-list"></div>
                 </div>
 
                 <!-- Form Personalizado -->
@@ -1045,6 +1065,47 @@
         </div>
     </div>
 
+    <dialog id="shipping-details-dialog" class="shipping-dialog" aria-labelledby="shipping-details-title">
+        <div class="shipping-dialog-inner">
+            <h2 id="shipping-details-title"><i class="fa-solid fa-box"></i> Datos para el envío</h2>
+            <p>Tu pago fue confirmado. Completa estos datos para preparar el envío. El comercio los verá en la sección “Envíos”.</p>
+            <p id="shipping-order-reference" aria-live="polite"></p>
+            <form id="shipping-details-form" onsubmit="guardarDatosEnvio(event)">
+                <div class="shipping-form-grid">
+                    <label class="shipping-field span-two">Nombre completo del destinatario
+                        <input name="nombre" autocomplete="name" maxlength="150" required>
+                    </label>
+                    <label class="shipping-field">Teléfono de contacto
+                        <input name="telefono" type="tel" autocomplete="tel" maxlength="40" required>
+                    </label>
+                    <label class="shipping-field">País
+                        <input name="pais" autocomplete="country-name" maxlength="100" value="Colombia" required>
+                    </label>
+                    <label class="shipping-field span-two">Dirección de entrega
+                        <input name="direccion" autocomplete="street-address" maxlength="255" required placeholder="Calle, carrera, número">
+                    </label>
+                    <label class="shipping-field span-two">Apartamento, interior o complemento (opcional)
+                        <input name="complemento" maxlength="255" placeholder="Torre, conjunto, barrio u otra referencia">
+                    </label>
+                    <label class="shipping-field">Ciudad o municipio
+                        <input name="ciudad" autocomplete="address-level2" maxlength="100" required>
+                    </label>
+                    <label class="shipping-field">Departamento o región
+                        <input name="departamento" autocomplete="address-level1" maxlength="100" required>
+                    </label>
+                    <label class="shipping-field">Código postal (opcional)
+                        <input name="codigo_postal" autocomplete="postal-code" maxlength="30">
+                    </label>
+                    <label class="shipping-field span-two">Instrucciones de entrega (opcional)
+                        <textarea name="instrucciones" maxlength="1000" placeholder="Horario, portería o indicación útil"></textarea>
+                    </label>
+                </div>
+                <p id="shipping-submit-error" class="shipping-error" role="alert" aria-live="polite"></p>
+                <button id="shipping-submit-button" class="shipping-submit" type="submit">GUARDAR DATOS DE ENVÍO</button>
+            </form>
+        </div>
+    </dialog>
+
     <div class="toast" id="toast"></div>
 
     <script>
@@ -1080,6 +1141,7 @@
         let tasaCOPPorUSD = null;
         let paypalConfig = null;
         let paypalButtonRendered = false;
+        let shippingPendingOrder = null;
         const WA_NUM = '573218259526';
         const PUBLICATION_PREVIEW_CONFIG = {
             personalizados: { label:'Personalizado', formId:'form-admin-personalizado', endpoint:'/api/personalizados', fileId:'pers-file', fileKey:'imagen_archivo', urlId:'pers-url', urlKey:'imagen_url', fallback:'https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?auto=format&fit=crop&w=600&q=80', border:'var(--border-glow)', priceId:'pers-precio', priceKey:'precio_base', nameId:'pers-nombre', nameKey:'nombre', button:'SOLICITAR', fields:[['tipo','pers-tipo','tipo'],['descripcion','pers-desc','description'],['opciones','pers-opc','options']], refresh:cargarPersonalizados },
@@ -1139,14 +1201,79 @@
             return result.id;
         }
 
+        function mostrarFormularioEnvio(order) {
+            shippingPendingOrder = order;
+            try { localStorage.setItem('shipping_pending_order', JSON.stringify(order)); } catch (_) {}
+            const dialog = document.getElementById('shipping-details-dialog');
+            document.getElementById('shipping-order-reference').textContent = `Pedido ${order.reference}`;
+            document.getElementById('shipping-submit-error').textContent = '';
+            if (!dialog.open) dialog.showModal();
+        }
+
+        function restaurarFormularioEnvio() {
+            try {
+                const saved = localStorage.getItem('shipping_pending_order');
+                if (!saved) return;
+                const order = JSON.parse(saved);
+                if (!order?.id || !order?.reference || !order?.token) {
+                    localStorage.removeItem('shipping_pending_order');
+                    return;
+                }
+                mostrarFormularioEnvio(order);
+            } catch (_) {
+                localStorage.removeItem('shipping_pending_order');
+            }
+        }
+
+        async function guardarDatosEnvio(event) {
+            event.preventDefault();
+            if (!shippingPendingOrder) return;
+            const form = document.getElementById('shipping-details-form');
+            const submit = document.getElementById('shipping-submit-button');
+            const error = document.getElementById('shipping-submit-error');
+            const values = Object.fromEntries(new FormData(form).entries());
+            Object.keys(values).forEach(key => values[key] = String(values[key]).trim());
+            error.textContent = '';
+            submit.disabled = true;
+            submit.textContent = 'GUARDANDO…';
+            try {
+                const response = await fetch(`/api/paypal/orders/${encodeURIComponent(shippingPendingOrder.id)}/shipping`, {
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({...values, token:shippingPendingOrder.token})
+                });
+                const result = await response.json();
+                if (!response.ok || !result.success) throw new Error(result.error || 'No se pudieron guardar los datos');
+                const reference = shippingPendingOrder.reference;
+                localStorage.removeItem('shipping_pending_order');
+                shippingPendingOrder = null;
+                form.reset();
+                form.elements.pais.value = 'Colombia';
+                document.getElementById('shipping-details-dialog').close();
+                showToast(`Datos de envío guardados · Pedido ${reference}`);
+            } catch (saveError) {
+                error.textContent = saveError.message || 'No se pudieron guardar los datos. Inténtalo de nuevo.';
+            } finally {
+                submit.disabled = false;
+                submit.textContent = 'GUARDAR DATOS DE ENVÍO';
+            }
+        }
+
+        document.getElementById('shipping-details-dialog').addEventListener('cancel', event => event.preventDefault());
+
         async function confirmarOrdenPayPal(data) {
             const orderId = data.orderID || data.orderId;
             const response = await fetch(`/api/paypal/orders/${encodeURIComponent(orderId)}/capture`, {method:'POST'});
             const result = await response.json();
             if (!response.ok || !result.success) throw new Error(result.error || 'El pago no quedó confirmado');
+            if (!result.shipping_token) throw new Error('No se pudo abrir el formulario seguro de envío. Conservamos tu caldero; contáctanos antes de volver a pagar.');
             carrito = [];
             updateCart();
-            showToast(`Pago confirmado · Pedido ${result.reference}`);
+            mostrarFormularioEnvio({
+                id: orderId,
+                reference: result.reference,
+                token: result.shipping_token,
+            });
         }
 
         async function enviarPagoTarjeta(cardField) {
@@ -1850,6 +1977,7 @@
             });
             document.getElementById('tab-admin-citas').style.display = tab === 'citas' ? 'block' : 'none';
             document.getElementById('tab-admin-pedidos').style.display = tab === 'pedidos' ? 'block' : 'none';
+            document.getElementById('tab-admin-envios').style.display = tab === 'envios' ? 'block' : 'none';
             document.getElementById('form-admin-personalizado').style.display = tab === 'personalizado' ? 'block' : 'none';
             document.getElementById('form-admin-ritual').style.display = tab === 'ritual' ? 'block' : 'none';
             document.getElementById('form-admin-producto').style.display = tab === 'producto' ? 'block' : 'none';
@@ -1857,6 +1985,63 @@
             document.getElementById('form-admin-suscripcion').style.display = tab === 'suscripcion' ? 'block' : 'none';
             document.getElementById('form-admin-foro').style.display = tab === 'foro' ? 'block' : 'none';
             if (tab === 'pedidos') cargarPedidosPayPal();
+            if (tab === 'envios') cargarEnvios();
+        }
+
+        async function cargarEnvios() {
+            const list = document.getElementById('admin-envios-list');
+            list.replaceChildren();
+            try {
+                const response = await fetch('/api/admin/envios', {cache:'no-store'});
+                const orders = await response.json();
+                if (!response.ok) throw new Error(orders.error || 'No se pudieron cargar los envíos');
+                if (!orders.length) {
+                    const empty = document.createElement('p');
+                    empty.className = 'admin-inventory-empty';
+                    empty.textContent = 'Aún no hay pagos confirmados para preparar envíos.';
+                    list.appendChild(empty);
+                    return;
+                }
+                orders.forEach(order => {
+                    const card = document.createElement('article');
+                    card.className = 'admin-inventory-item';
+                    card.style.display = 'block';
+                    card.style.marginBottom = '12px';
+                    const title = document.createElement('strong');
+                    title.textContent = `${order.referencia} · ${order.shipping?.saved_at ? 'Datos recibidos' : 'Pendiente de datos del cliente'}`;
+                    const summary = document.createElement('p');
+                    summary.textContent = `Pago confirmado · ${Number(order.total_cop).toLocaleString('es-CO')} COP · USD ${order.total_usd} · ${(order.items || []).map(item => item.nombre).join(', ')}`;
+                    card.append(title, summary);
+                    if (order.shipping?.saved_at) {
+                        const shipping = order.shipping;
+                        const details = document.createElement('p');
+                        details.style.whiteSpace = 'pre-line';
+                        details.textContent = [
+                            `Destinatario: ${shipping.name}`,
+                            `Teléfono: ${shipping.phone}`,
+                            `Dirección: ${shipping.address}`,
+                            shipping.address_extra ? `Complemento: ${shipping.address_extra}` : '',
+                            `Ciudad: ${shipping.city} · ${shipping.region}`,
+                            shipping.postal_code ? `Código postal: ${shipping.postal_code}` : '',
+                            `País: ${shipping.country}`,
+                            shipping.instructions ? `Instrucciones: ${shipping.instructions}` : '',
+                            `Datos guardados: ${new Date(shipping.saved_at).toLocaleString('es-CO')}`,
+                        ].filter(Boolean).join('\n');
+                        card.appendChild(details);
+                    } else {
+                        const pending = document.createElement('p');
+                        pending.className = 'admin-inventory-empty';
+                        pending.textContent = 'El pedido está pagado; falta que el cliente complete su dirección de entrega.';
+                        card.appendChild(pending);
+                    }
+                    list.appendChild(card);
+                });
+            } catch (error) {
+                const message = document.createElement('p');
+                message.className = 'admin-inventory-empty';
+                message.textContent = error.message || 'Error al cargar los envíos';
+                list.appendChild(message);
+            }
         }
 
         async function cargarPedidosPayPal() {
@@ -2528,6 +2713,7 @@
             cargarPayPal();
             inicializarTarot();
             if (window.location.pathname.replace(/\/+$/, '') === '/admin') showSection('admin');
+            else restaurarFormularioEnvio();
         };
     </script>
 </body>
