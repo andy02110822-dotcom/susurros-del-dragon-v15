@@ -223,6 +223,16 @@ class PedidoPayPal(db.Model):
     payer_email = db.Column(db.String(254), nullable=True)
     created_at = db.Column(db.DateTime, nullable=False, default=db.func.now())
     captured_at = db.Column(db.DateTime, nullable=True)
+    shipping_name = db.Column(db.String(150), nullable=True)
+    shipping_phone = db.Column(db.String(40), nullable=True)
+    shipping_address = db.Column(db.String(255), nullable=True)
+    shipping_address_extra = db.Column(db.String(255), nullable=True)
+    shipping_city = db.Column(db.String(100), nullable=True)
+    shipping_region = db.Column(db.String(100), nullable=True)
+    shipping_postal_code = db.Column(db.String(30), nullable=True)
+    shipping_country = db.Column(db.String(100), nullable=True)
+    shipping_instructions = db.Column(db.Text, nullable=True)
+    shipping_saved_at = db.Column(db.DateTime, nullable=True)
 
     def to_dict(self):
         return {
@@ -237,6 +247,18 @@ class PedidoPayPal(db.Model):
             'payer_email': self.payer_email,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'captured_at': self.captured_at.isoformat() if self.captured_at else None,
+            'shipping': {
+                'name': self.shipping_name,
+                'phone': self.shipping_phone,
+                'address': self.shipping_address,
+                'address_extra': self.shipping_address_extra,
+                'city': self.shipping_city,
+                'region': self.shipping_region,
+                'postal_code': self.shipping_postal_code,
+                'country': self.shipping_country,
+                'instructions': self.shipping_instructions,
+                'saved_at': self.shipping_saved_at.isoformat() if self.shipping_saved_at else None,
+            },
         }
 
 PAYMENT_ITEM_MODELS = {
@@ -459,6 +481,29 @@ def update_admin_item(modulo, registro_id):
 def init_db():
     with app.app_context():
         db.create_all()
+        shipping_columns = {
+            'shipping_name': 'VARCHAR(150)',
+            'shipping_phone': 'VARCHAR(40)',
+            'shipping_address': 'VARCHAR(255)',
+            'shipping_address_extra': 'VARCHAR(255)',
+            'shipping_city': 'VARCHAR(100)',
+            'shipping_region': 'VARCHAR(100)',
+            'shipping_postal_code': 'VARCHAR(30)',
+            'shipping_country': 'VARCHAR(100)',
+            'shipping_instructions': 'TEXT',
+            'shipping_saved_at': 'TIMESTAMP',
+        }
+        existing_shipping_columns = {
+            column['name'] for column in inspect(db.engine).get_columns(PedidoPayPal.__tablename__)
+        }
+        for column_name, column_type in shipping_columns.items():
+            if column_name not in existing_shipping_columns:
+                with db.engine.begin() as connection:
+                    connection.execute(text(
+                        f'ALTER TABLE {PedidoPayPal.__tablename__} ADD COLUMN {column_name} {column_type}'
+                    ))
+                existing_shipping_columns.add(column_name)
+
         suscripcion_columns = {column['name'] for column in inspect(db.engine).get_columns(Suscripcion.__tablename__)}
         if 'imagen' not in suscripcion_columns:
             try:
@@ -701,6 +746,10 @@ def crear_pedido_paypal():
         db.session.rollback()
         return jsonify({'error': 'No se pudo guardar el pedido de pago.'}), 500
 
+def paypal_shipping_token(order):
+    message = f'envio:{order.paypal_order_id}:{order.referencia}'.encode('utf-8')
+    return hmac.new(app.config['SECRET_KEY'].encode('utf-8'), message, 'sha256').hexdigest()
+
 @app.route('/api/paypal/orders/<string:paypal_order_id>/capture', methods=['POST'])
 def capturar_pedido_paypal(paypal_order_id):
     if not paypal_is_configured() or not re.fullmatch(r'[A-Z0-9-]{8,100}', paypal_order_id):
@@ -709,7 +758,12 @@ def capturar_pedido_paypal(paypal_order_id):
     if not order:
         return jsonify({'error': 'No se encontró el pedido de pago'}), 404
     if order.estado == 'COMPLETED':
-        return jsonify({'success': True, 'status': order.estado, 'reference': order.referencia})
+        return jsonify({
+            'success': True,
+            'status': order.estado,
+            'reference': order.referencia,
+            'shipping_token': paypal_shipping_token(order),
+        })
 
     try:
         result = paypal_api_request(
@@ -738,11 +792,60 @@ def capturar_pedido_paypal(paypal_order_id):
         order.payer_email = (result.get('payer') or {}).get('email_address')
         order.captured_at = datetime.now(timezone.utc)
         db.session.commit()
-        return jsonify({'success': True, 'status': order.estado, 'reference': order.referencia})
+        return jsonify({
+            'success': True,
+            'status': order.estado,
+            'reference': order.referencia,
+            'shipping_token': paypal_shipping_token(order),
+        })
 
     order.estado = status
     db.session.commit()
     return jsonify({'success': False, 'status': status, 'error': 'El pago no quedó completado'}), 402
+
+@app.route('/api/paypal/orders/<string:paypal_order_id>/shipping', methods=['POST'])
+def guardar_envio_pedido_paypal(paypal_order_id):
+    order = PedidoPayPal.query.filter_by(paypal_order_id=paypal_order_id).first()
+    if not order:
+        return jsonify({'error': 'No se encontró el pedido'}), 404
+    if order.estado != 'COMPLETED' or not order.captured_at:
+        return jsonify({'error': 'Solo se aceptan datos para pagos confirmados'}), 409
+
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify({'error': 'Datos de envío inválidos'}), 400
+    token = data.get('token', '')
+    if not isinstance(token, str) or not hmac.compare_digest(token, paypal_shipping_token(order)):
+        return jsonify({'error': 'No se pudo validar este pedido'}), 403
+
+    fields = {
+        'nombre': ('shipping_name', 150),
+        'telefono': ('shipping_phone', 40),
+        'direccion': ('shipping_address', 255),
+        'complemento': ('shipping_address_extra', 255),
+        'ciudad': ('shipping_city', 100),
+        'departamento': ('shipping_region', 100),
+        'codigo_postal': ('shipping_postal_code', 30),
+        'pais': ('shipping_country', 100),
+        'instrucciones': ('shipping_instructions', 1000),
+    }
+    values = {}
+    for key, (attribute, limit) in fields.items():
+        value = data.get(key, '')
+        if not isinstance(value, str):
+            return jsonify({'error': 'Revisa los datos de envío'}), 400
+        values[attribute] = value.strip()[:limit]
+
+    required = ('shipping_name', 'shipping_phone', 'shipping_address', 'shipping_city', 'shipping_region', 'shipping_country')
+    if any(not values[field] for field in required):
+        return jsonify({'error': 'Completa los datos obligatorios de envío'}), 400
+
+    for field, value in values.items():
+        setattr(order, field, value or None)
+    order.shipping_saved_at = datetime.now(timezone.utc)
+    db.session.commit()
+    return jsonify({'success': True, 'reference': order.referencia})
+
 
 @app.route('/api/admin/paypal-orders', methods=['GET'])
 def listar_pedidos_paypal():
@@ -750,6 +853,18 @@ def listar_pedidos_paypal():
         return jsonify({'error': 'No autorizado'}), 403
     orders = PedidoPayPal.query.filter(PedidoPayPal.estado == 'COMPLETED', PedidoPayPal.captured_at.isnot(None)).order_by(PedidoPayPal.id.desc()).limit(100).all()
     return jsonify([order.to_dict() for order in orders])
+
+@app.route('/api/admin/envios', methods=['GET'])
+def listar_envios():
+    if not session.get('logged_in'):
+        return jsonify({'error': 'No autorizado'}), 403
+    orders = PedidoPayPal.query.filter(
+        PedidoPayPal.estado == 'COMPLETED',
+        PedidoPayPal.captured_at.isnot(None)
+    ).order_by(PedidoPayPal.id.desc()).limit(200).all()
+    response = jsonify([order.to_dict() for order in orders])
+    response.headers['Cache-Control'] = 'no-store'
+    return response
 
 # PERSONALIZADOS
 @app.route('/api/personalizados', methods=['GET'])
