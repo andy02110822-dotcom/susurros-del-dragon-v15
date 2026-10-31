@@ -4,14 +4,16 @@ import json
 import time
 import uuid
 import re
-from datetime import datetime, timezone
+import hashlib
+from datetime import datetime, timezone, timedelta
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
-from flask import Flask, render_template, request, jsonify, session, send_from_directory
+from flask import Flask, render_template, request, jsonify, session, send_from_directory, g
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import inspect, text
+from sqlalchemy import inspect, text, func
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
@@ -260,6 +262,56 @@ class PedidoPayPal(db.Model):
                 'saved_at': self.shipping_saved_at.isoformat() if self.shipping_saved_at else None,
             },
         }
+
+class VisitaDiaria(db.Model):
+    """Anonymous unique browser visits, stored once per browser and Colombia date."""
+    __tablename__ = 'visita_diaria'
+    visitante_hash = db.Column(db.String(64), primary_key=True)
+    fecha = db.Column(db.Date, primary_key=True)
+
+
+def registrar_visita_publica():
+    if request.method != 'GET' or request.path not in {'/', '/admin'} or session.get('logged_in'):
+        return
+
+    visitor_token = request.cookies.get('sd_visitor_id', '')
+    try:
+        visitor_token = str(uuid.UUID(visitor_token))
+    except (ValueError, TypeError, AttributeError):
+        visitor_token = str(uuid.uuid4())
+        g.nuevo_cookie_visitante = True
+    g.visitante_token = visitor_token
+
+    visitor_hash = hashlib.sha256(visitor_token.encode('ascii')).hexdigest()
+    fecha_local = (datetime.now(timezone.utc) + timedelta(hours=-5)).date()
+    try:
+        if db.session.get(VisitaDiaria, (visitor_hash, fecha_local)) is None:
+            db.session.add(VisitaDiaria(visitante_hash=visitor_hash, fecha=fecha_local))
+            try:
+                db.session.commit()
+            except IntegrityError:
+                # Another concurrent request from this browser already recorded today's visit.
+                db.session.rollback()
+    except SQLAlchemyError as error:
+        db.session.rollback()
+        app.logger.warning('No se pudo registrar una visita pública: %s', type(error).__name__)
+
+
+@app.before_request
+def contar_entrada_publica():
+    registrar_visita_publica()
+
+
+@app.after_request
+def guardar_cookie_visitante(response):
+    if getattr(g, 'nuevo_cookie_visitante', False):
+        response.set_cookie(
+            'sd_visitor_id', g.visitante_token,
+            max_age=60 * 60 * 24 * 365, httponly=True, secure=request.is_secure,
+            samesite='Lax', path='/',
+        )
+    return response
+
 
 PAYMENT_ITEM_MODELS = {
     'productos': (Producto, 'precio'),
@@ -592,6 +644,16 @@ def home():
 @app.route('/admin')
 def admin():
     return render_template('index.html')
+
+@app.route('/api/admin/visitas', methods=['GET'])
+def admin_visitas():
+    if not session.get('logged_in'):
+        return jsonify({'error': 'No autorizado'}), 403
+
+    hoy = (datetime.now(timezone.utc) + timedelta(hours=-5)).date()
+    total = db.session.query(func.count(func.distinct(VisitaDiaria.visitante_hash))).scalar() or 0
+    hoy_unicos = VisitaDiaria.query.filter_by(fecha=hoy).count()
+    return jsonify({'visitantes_unicos_total': total, 'visitantes_unicos_hoy': hoy_unicos})
 
 @app.route('/service-worker.js')
 def service_worker():

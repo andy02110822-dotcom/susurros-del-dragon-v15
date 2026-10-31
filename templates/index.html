@@ -438,6 +438,12 @@
         .admin-inventory-item strong { display: block; color: #fff; font-size: .88rem; }
         .admin-inventory-item small { display: block; color: #aebbd4; margin-top: 3px; font-size: .74rem; }
         .admin-inventory-empty { color: #a496c4; font-size: .84rem; padding: .75rem 0; }
+        .admin-visit-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 1rem; margin: 1rem 0; }
+        .admin-visit-card { padding: 1.2rem; border: 1px solid rgba(168,220,255,.24); border-radius: 16px; background: linear-gradient(145deg, rgba(16,28,55,.9), rgba(39,22,64,.82)); }
+        .admin-visit-card span { display: block; color: #b8edff; font-size: .85rem; }
+        .admin-visit-card strong { display: block; color: #fff; font-size: clamp(1.8rem, 6vw, 2.5rem); margin-top: .4rem; }
+        .admin-visit-note { color: #aebbd4; font-size: .82rem; line-height: 1.5; }
+        .admin-visit-refresh { min-height: 44px; padding: .65rem 1rem; }
         .admin-inventory-actions { display: flex; flex: 0 0 auto; align-items: center; gap: .45rem; }
         .admin-inventory-edit, .admin-inventory-delete { border: 1px solid rgba(168,220,255,.32); border-radius: 9px; background: rgba(30,87,126,.28); color: #e6f8ff; padding: .55rem .7rem; cursor: pointer; }
         .admin-inventory-edit:hover { background: rgba(49,133,177,.5); }
@@ -761,6 +767,7 @@
                         <button type="button" class="admin-nav-item active" data-admin-tab="citas" onclick="switchAdminTab('citas')"><i class="fa-solid fa-calendar-check"></i><span>Citas <small id="citas-count">0</small></span></button>
                         <button type="button" class="admin-nav-item" data-admin-tab="pedidos" onclick="switchAdminTab('pedidos')"><i class="fa-brands fa-paypal"></i><span>Pedidos PayPal</span></button>
                         <button type="button" class="admin-nav-item" data-admin-tab="envios" onclick="switchAdminTab('envios')"><i class="fa-solid fa-truck-fast"></i><span>Envíos</span></button>
+                        <button type="button" class="admin-nav-item" data-admin-tab="visitas" onclick="switchAdminTab('visitas')"><i class="fa-solid fa-chart-line"></i><span>Visitas</span></button>
                         <button type="button" class="admin-nav-item" data-admin-tab="personalizado" onclick="switchAdminTab('personalizado')"><i class="fa-solid fa-wand-sparkles"></i><span>Personalizados</span></button>
                         <button type="button" class="admin-nav-item" data-admin-tab="ritual" onclick="switchAdminTab('ritual')"><i class="fa-solid fa-moon"></i><span>Rituales</span></button>
                         <button type="button" class="admin-nav-item" data-admin-tab="producto" onclick="switchAdminTab('producto')"><i class="fa-solid fa-gem"></i><span>Productos</span></button>
@@ -788,6 +795,19 @@
                 <div id="tab-admin-envios" style="display:none;">
                     <h3 style="color:var(--text-gold); margin-bottom:10px; font-size:1.1rem;"><i class="fa-solid fa-truck-fast"></i> Envíos</h3>
                     <div id="admin-envios-list" class="admin-inventory-list"></div>
+                </div>
+
+                <div id="tab-admin-visitas" style="display:none;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+                        <h3 style="color:var(--text-gold); margin:0; font-size:1.1rem;"><i class="fa-solid fa-chart-line"></i> Visitas a la página</h3>
+                        <button type="button" class="btn-outline admin-visit-refresh" onclick="cargarEstadisticasVisitas()"><i class="fa-solid fa-rotate"></i> Actualizar</button>
+                    </div>
+                    <div class="admin-visit-metrics" aria-live="polite">
+                        <article class="admin-visit-card"><span>Visitantes únicos acumulados</span><strong id="admin-visitas-total">—</strong></article>
+                        <article class="admin-visit-card"><span>Visitantes únicos hoy</span><strong id="admin-visitas-hoy">—</strong></article>
+                    </div>
+                    <p id="admin-visitas-status" class="admin-visit-note" role="status" aria-live="polite">Las cifras se actualizan al abrir esta sección.</p>
+                    <p class="admin-visit-note">Conteo anónimo por navegador: la misma persona puede contarse más de una vez si usa distintos dispositivos o navegadores. No se guardan nombres ni direcciones IP.</p>
                 </div>
 
                 <!-- Form Personalizado -->
@@ -1978,6 +1998,7 @@
             document.getElementById('tab-admin-citas').style.display = tab === 'citas' ? 'block' : 'none';
             document.getElementById('tab-admin-pedidos').style.display = tab === 'pedidos' ? 'block' : 'none';
             document.getElementById('tab-admin-envios').style.display = tab === 'envios' ? 'block' : 'none';
+            document.getElementById('tab-admin-visitas').style.display = tab === 'visitas' ? 'block' : 'none';
             document.getElementById('form-admin-personalizado').style.display = tab === 'personalizado' ? 'block' : 'none';
             document.getElementById('form-admin-ritual').style.display = tab === 'ritual' ? 'block' : 'none';
             document.getElementById('form-admin-producto').style.display = tab === 'producto' ? 'block' : 'none';
@@ -1986,6 +2007,22 @@
             document.getElementById('form-admin-foro').style.display = tab === 'foro' ? 'block' : 'none';
             if (tab === 'pedidos') cargarPedidosPayPal();
             if (tab === 'envios') cargarEnvios();
+            if (tab === 'visitas') cargarEstadisticasVisitas();
+        }
+
+        async function cargarEstadisticasVisitas() {
+            const status = document.getElementById('admin-visitas-status');
+            status.textContent = 'Cargando estadísticas…';
+            try {
+                const response = await fetch('/api/admin/visitas', { cache: 'no-store' });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'No se pudieron cargar las visitas');
+                document.getElementById('admin-visitas-total').textContent = Number(data.visitantes_unicos_total).toLocaleString('es-CO');
+                document.getElementById('admin-visitas-hoy').textContent = Number(data.visitantes_unicos_hoy).toLocaleString('es-CO');
+                status.textContent = 'Estadísticas actualizadas.';
+            } catch (error) {
+                status.textContent = error.message || 'No se pudieron cargar las estadísticas. Intenta de nuevo.';
+            }
         }
 
         async function cargarEnvios() {
