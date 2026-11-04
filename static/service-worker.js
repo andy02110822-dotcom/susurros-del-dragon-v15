@@ -1,4 +1,4 @@
-const CACHE_NAME = "susurros-dragon-shell-v2";
+const CACHE_NAME = "susurros-dragon-shell-v3";
 const APP_SHELL = [
   "/",
   "/static/images/logo-dragon.jpeg",
