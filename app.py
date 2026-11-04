@@ -442,7 +442,7 @@ def resolve_payment_items(raw_items):
                 selected_variant = next((variant for variant in variants if variant['nombre'] == requested_variant), None)
                 if not selected_variant:
                     raise ValueError('Selecciona un tipo disponible para cada producto')
-                price = Decimal(str(selected_variant.get('precio') or price)).quantize(Decimal('1'), rounding=ROUND_HALF_UP)
+                price = Decimal(str(product_variant_price(selected_variant, price))).quantize(Decimal('1'), rounding=ROUND_HALF_UP)
             elif requested_variant:
                 raise ValueError('Actualiza el caldero e inténtalo de nuevo')
         if price <= 0:
@@ -515,7 +515,7 @@ def normalize_image_zoom(value):
     return round(min(1.5, max(0.5, zoom)), 2)
 
 def normalize_product_variants(value):
-    """Parse one product option per line: Name or Name|price in COP."""
+    """Parse one option per line: Name, Name|price, or legacy Name/price in COP."""
     if isinstance(value, list):
         raw_variants = value
     else:
@@ -535,14 +535,19 @@ def normalize_product_variants(value):
         if not isinstance(raw_variant, dict):
             raise ValueError('Revisa los tipos del producto')
         name = str(raw_variant.get('nombre') or '').strip()
+        raw_price = str(raw_variant.get('precio') or '').strip()
+        if not raw_price:
+            legacy_price = re.fullmatch(r'(.+?)/\s*([\d.,]+)\s*', name)
+            if legacy_price:
+                name, raw_price = legacy_price.group(1).strip(), legacy_price.group(2).strip()
         if not name or len(name) > 80 or name.lower() in seen:
             raise ValueError('Cada tipo necesita un nombre único de hasta 80 caracteres')
         seen.add(name.lower())
-        raw_price = str(raw_variant.get('precio') or '').strip()
         variant = {'nombre': name, 'precio': None}
         if raw_price:
             try:
-                price = Decimal(raw_price).quantize(Decimal('1'), rounding=ROUND_HALF_UP)
+                price_text = raw_price.replace('.', '').replace(',', '') if re.fullmatch(r'\d+(?:[.,]\d{3})+', raw_price) else raw_price
+                price = Decimal(price_text).quantize(Decimal('1'), rounding=ROUND_HALF_UP)
             except (InvalidOperation, TypeError, ValueError):
                 raise ValueError('El precio de cada tipo debe ser un número válido')
             if not price.is_finite() or price <= 0:
@@ -550,6 +555,21 @@ def normalize_product_variants(value):
             variant['precio'] = int(price)
         variants.append(variant)
     return json.dumps(variants, ensure_ascii=False)
+
+def product_variant_price(variant, base_price):
+    """Use a variant's explicit COP price or read a legacy trailing /price suffix."""
+    raw_price = str(variant.get('precio') or '').strip()
+    if not raw_price:
+        match = re.fullmatch(r'.+?/\s*([\d.,]+)\s*', str(variant.get('nombre') or '').strip())
+        raw_price = match.group(1) if match else ''
+    if raw_price:
+        if re.fullmatch(r'\d+(?:[.,]\d{3})+', raw_price):
+            raw_price = raw_price.replace('.', '').replace(',', '')
+        try:
+            return Decimal(raw_price).quantize(Decimal('1'), rounding=ROUND_HALF_UP)
+        except (InvalidOperation, TypeError, ValueError):
+            pass
+    return Decimal(str(base_price)).quantize(Decimal('1'), rounding=ROUND_HALF_UP)
 
 @app.route('/api/<string:modulo>/<int:registro_id>', methods=['PUT'])
 def update_admin_item(modulo, registro_id):
@@ -1351,5 +1371,6 @@ init_db()
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', '5000')), debug=False)
+
 
 
