@@ -816,6 +816,7 @@
                     <div class="form-group"><label>Nombre del Elemento</label><input type="text" id="pers-nombre" class="form-input" required placeholder="Ej: Amuleto de Protección Personal"></div>
                     <div class="form-group"><label>Tipo</label><input type="text" id="pers-tipo" class="form-input" placeholder="Ej: Amuleto / Velón / Saquito Ritual"></div>
                     <div class="form-group"><label>Precio Base (COP)</label><input type="number" id="pers-precio" class="form-input" data-price-cop required placeholder="60000"><small class="price-usd-preview" data-price-preview>Equivalente USD: cargando TRM…</small></div>
+                    <div class="form-group"><label>Tipos o variantes disponibles (opcional)</label><textarea id="pers-variantes" class="form-input" rows="3" placeholder="Básico&#10;Premium|75000"></textarea><small>Una opción por línea. Usa nombre|precio en COP para asignar otro precio.</small></div>
 
                     <div class="form-group">
                         <label>Subir Imagen (.jpg, .png, .webp)</label>
@@ -840,6 +841,7 @@
                     <div class="form-group"><label>Categoría</label><input type="text" id="rit-cat" class="form-input" placeholder="Ej: Protección / Abundancia / Amor"></div>
                     <div class="form-group"><label>Precio (COP)</label><input type="number" id="rit-precio" class="form-input" data-price-cop required placeholder="75000"><small class="price-usd-preview" data-price-preview>Equivalente USD: cargando TRM…</small></div>
                     <div class="form-group"><label>Duración / Modalidad</label><input type="text" id="rit-dur" class="form-input" placeholder="Ej: 1 Sesión / Presencial o Distancia"></div>
+                    <div class="form-group"><label>Tipos o variantes disponibles (opcional)</label><textarea id="rit-variantes" class="form-input" rows="3" placeholder="A distancia&#10;Presencial|95000"></textarea><small>Una opción por línea. Usa nombre|precio en COP para asignar otro precio.</small></div>
 
                     <div class="form-group">
                         <label>Subir Imagen (.jpg, .png, .webp)</label>
@@ -886,6 +888,7 @@
                     <div class="form-group"><label>Nombre del Remedio</label><input type="text" id="r-nombre" class="form-input" required></div>
                     <div class="form-group"><label>Categoría</label><select id="r-cat" class="form-input"><option>Infusiones</option><option>Tónicos</option><option>Ungüentos</option><option>Baños</option><option>Otros</option></select></div>
                     <div class="form-group"><label>Precio (COP)</label><input type="number" id="r-precio" class="form-input" data-price-cop required><small class="price-usd-preview" data-price-preview>Equivalente USD: cargando TRM…</small></div>
+                    <div class="form-group"><label>Tipos o variantes disponibles (opcional)</label><textarea id="r-variantes" class="form-input" rows="3" placeholder="Presentación pequeña&#10;Presentación grande|35000"></textarea><small>Una opción por línea. Usa nombre|precio en COP para asignar otro precio.</small></div>
 
                     <div class="form-group">
                         <label>Subir Imagen (.jpg, .png, etc.)</label>
@@ -914,6 +917,7 @@
                     <div class="form-group"><label>URL de imagen web</label><input type="url" id="s-url" class="form-input" placeholder="https://..."></div>
                     <div class="form-group"><label>Descripción</label><textarea id="s-desc" class="form-input" rows="2"></textarea></div>
                     <div class="form-group"><label>Beneficios</label><textarea id="s-ben" class="form-input" rows="2"></textarea></div>
+                    <div class="form-group"><label>Tipos o variantes disponibles (opcional)</label><textarea id="s-variantes" class="form-input" rows="3" placeholder="Mensual&#10;Trimestral|300000"></textarea><small>Las opciones se mostrarán a los clientes. El cobro de suscripciones sigue gestionándose por WhatsApp.</small></div>
                     <button type="submit" class="btn-purple" style="width: 100%;"><i class="fa-solid fa-eye"></i> VISTA PREVIA Y PUBLICAR</button>
                     <div class="admin-inventory"><h4><i class="fa-solid fa-boxes-stacked"></i> Suscripciones publicadas</h4><div class="admin-inventory-list" id="admin-list-suscripciones"></div></div>
                 </form>
@@ -1007,6 +1011,7 @@
                 <input type="hidden" id="custom-base-nombre">
                 <input type="hidden" id="custom-base-precio">
                 <input type="hidden" id="custom-base-id">
+                <input type="hidden" id="custom-base-variante">
                 <small id="custom-base-usd" class="price-usd-preview" style="margin:0 0 12px;"></small>
 
                 <div class="form-group">
@@ -1165,11 +1170,11 @@
         let shippingPendingOrder = null;
         const WA_NUM = '573218259526';
         const PUBLICATION_PREVIEW_CONFIG = {
-            personalizados: { label:'Personalizado', formId:'form-admin-personalizado', endpoint:'/api/personalizados', fileId:'pers-file', fileKey:'imagen_archivo', urlId:'pers-url', urlKey:'imagen_url', fallback:'https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?auto=format&fit=crop&w=600&q=80', border:'var(--border-glow)', priceId:'pers-precio', priceKey:'precio_base', nameId:'pers-nombre', nameKey:'nombre', button:'SOLICITAR', fields:[['tipo','pers-tipo','tipo'],['descripcion','pers-desc','description'],['opciones','pers-opc','options']], refresh:cargarPersonalizados },
-            rituales: { label:'Ritual', formId:'form-admin-ritual', endpoint:'/api/rituales', fileId:'rit-file', fileKey:'imagen_archivo', urlId:'rit-url', urlKey:'imagen_url', fallback:'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=600&q=80', border:'var(--purple-glow)', priceId:'rit-precio', priceKey:'precio', nameId:'rit-nombre', nameKey:'nombre', button:'SOLICITAR', fields:[['categoria','rit-cat','eyebrow'],['duracion','rit-dur','eyebrowExtra'],['proposito','rit-prop','description'],['incluye','rit-inc','options']], refresh:cargarRituales },
+            personalizados: { label:'Personalizado', formId:'form-admin-personalizado', endpoint:'/api/personalizados', fileId:'pers-file', fileKey:'imagen_archivo', urlId:'pers-url', urlKey:'imagen_url', fallback:'https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?auto=format&fit=crop&w=600&q=80', border:'var(--border-glow)', priceId:'pers-precio', priceKey:'precio_base', nameId:'pers-nombre', nameKey:'nombre', button:'SOLICITAR', fields:[['tipo','pers-tipo','tipo'],['descripcion','pers-desc','description'],['opciones','pers-opc','options'],['variantes','pers-variantes','options']], refresh:cargarPersonalizados },
+            rituales: { label:'Ritual', formId:'form-admin-ritual', endpoint:'/api/rituales', fileId:'rit-file', fileKey:'imagen_archivo', urlId:'rit-url', urlKey:'imagen_url', fallback:'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=600&q=80', border:'var(--purple-glow)', priceId:'rit-precio', priceKey:'precio', nameId:'rit-nombre', nameKey:'nombre', button:'SOLICITAR', fields:[['categoria','rit-cat','eyebrow'],['duracion','rit-dur','eyebrowExtra'],['proposito','rit-prop','description'],['incluye','rit-inc','options'],['variantes','rit-variantes','options']], refresh:cargarRituales },
             productos: { label:'Producto', formId:'form-admin-producto', endpoint:'/api/productos', fileId:'p-file', fileKey:'imagen_archivo', urlId:'p-url', urlKey:'imagen_url', fallback:'https://images.unsplash.com/photo-1567653418876-5bb0e566e1c2?auto=format&fit=crop&w=600&q=80', border:'var(--border-glow)', priceId:'p-precio', priceKey:'precio', nameId:'p-nombre', nameKey:'nombre', button:'AÑADIR', fields:[['categoria','p-cat','eyebrow'],['descripcion','p-desc','description'],['variantes','p-variantes','options']], refresh:cargarProductos },
-            remedios: { label:'Remedio', formId:'form-admin-remedio', endpoint:'/api/remedios', fileId:'r-file', fileKey:'imagen_archivo', urlId:'r-url', urlKey:'imagen_url', fallback:'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=600&q=80', border:'var(--border-glow)', priceId:'r-precio', priceKey:'precio', nameId:'r-nombre', nameKey:'nombre', button:'PEDIR', fields:[['categoria','r-cat','eyebrow'],['propiedades','r-prop','description'],['preparacion','r-prep','options']], refresh:cargarRemedios },
-            suscripciones: { label:'Suscripción', formId:'form-admin-suscripcion', endpoint:'/api/suscripciones', fileId:'s-file', fileKey:'imagen_archivo', urlId:'s-url', urlKey:'imagen_url', fallback:'', border:'var(--text-gold)', priceId:'s-precio', priceKey:'precio', nameId:'s-nombre', nameKey:'nombre', button:'UNIRME AL CÍRCULO', fields:[['frecuencia','s-frec','eyebrow'],['descripcion','s-desc','description'],['beneficios','s-ben','options']], refresh:cargarSuscripciones }
+            remedios: { label:'Remedio', formId:'form-admin-remedio', endpoint:'/api/remedios', fileId:'r-file', fileKey:'imagen_archivo', urlId:'r-url', urlKey:'imagen_url', fallback:'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=600&q=80', border:'var(--border-glow)', priceId:'r-precio', priceKey:'precio', nameId:'r-nombre', nameKey:'nombre', button:'PEDIR', fields:[['categoria','r-cat','eyebrow'],['propiedades','r-prop','description'],['preparacion','r-prep','options'],['variantes','r-variantes','options']], refresh:cargarRemedios },
+            suscripciones: { label:'Suscripción', formId:'form-admin-suscripcion', endpoint:'/api/suscripciones', fileId:'s-file', fileKey:'imagen_archivo', urlId:'s-url', urlKey:'imagen_url', fallback:'', border:'var(--text-gold)', priceId:'s-precio', priceKey:'precio', nameId:'s-nombre', nameKey:'nombre', button:'UNIRME AL CÍRCULO', fields:[['frecuencia','s-frec','eyebrow'],['descripcion','s-desc','description'],['beneficios','s-ben','options'],['variantes','s-variantes','options']], refresh:cargarSuscripciones }
         };
         let publicationPreviewType = null;
         let publicationPreviewMode = 'create';
@@ -1452,7 +1457,7 @@
         const ADMIN_EDIT_CONFIG = {
             personalizados: { title: 'Editar personalizado', fields: [
                 {key:'nombre', label:'Nombre', required:true}, {key:'tipo', label:'Tipo'}, {key:'precio_base', label:'Precio base ($ COP)', type:'number', required:true},
-                {key:'descripcion', label:'Descripción', type:'textarea'}, {key:'opciones', label:'Opciones sugeridas', type:'textarea'}, {key:'imagen_url', label:'URL de imagen (opcional)', type:'url'}, {key:'imagen_archivo', label:'Cambiar imagen', type:'file'}, {key:'imagen_posicion', label:'Encuadre de imagen', type:'position'}, {key:'imagen_zoom', label:'Tamaño de la foto', type:'zoom'}
+                {key:'descripcion', label:'Descripción', type:'textarea'}, {key:'opciones', label:'Opciones sugeridas', type:'textarea'}, {key:'variantes', label:'Tipos disponibles (una por línea: nombre o nombre|precio COP)', type:'textarea'}, {key:'imagen_url', label:'URL de imagen (opcional)', type:'url'}, {key:'imagen_archivo', label:'Cambiar imagen', type:'file'}, {key:'imagen_posicion', label:'Encuadre de imagen', type:'position'}, {key:'imagen_zoom', label:'Tamaño de la foto', type:'zoom'}
             ]},
             citas: { title: 'Editar cita', fields: [
                 {key:'nombre_cliente', label:'Nombre del cliente', required:true}, {key:'telefono', label:'Teléfono', type:'tel', required:true},
@@ -1467,17 +1472,17 @@
             ]},
             rituales: { title: 'Editar ritual', fields: [
                 {key:'nombre', label:'Nombre', required:true}, {key:'categoria', label:'Categoría'}, {key:'precio', label:'Precio ($ COP)', type:'number', required:true},
-                {key:'duracion', label:'Duración / modalidad'}, {key:'proposito', label:'Propósito', type:'textarea'}, {key:'incluye', label:'Incluye', type:'textarea'},
+                {key:'duracion', label:'Duración / modalidad'}, {key:'proposito', label:'Propósito', type:'textarea'}, {key:'incluye', label:'Incluye', type:'textarea'}, {key:'variantes', label:'Tipos disponibles (una por línea: nombre o nombre|precio COP)', type:'textarea'},
                 {key:'imagen_url', label:'URL de imagen (opcional)', type:'url'}, {key:'imagen_archivo', label:'Cambiar imagen', type:'file'}, {key:'imagen_posicion', label:'Encuadre de imagen', type:'position'}, {key:'imagen_zoom', label:'Tamaño de la foto', type:'zoom'}
             ]},
             remedios: { title: 'Editar remedio', fields: [
                 {key:'nombre', label:'Nombre', required:true}, {key:'categoria', label:'Categoría', type:'select', options:['Infusiones','Tónicos','Ungüentos','Baños','Otros']},
                 {key:'precio', label:'Precio ($ COP)', type:'number', required:true}, {key:'preparacion', label:'Preparación', type:'textarea'},
-                {key:'propiedades', label:'Propiedades', type:'textarea'}, {key:'imagen_url', label:'URL de imagen (opcional)', type:'url'}, {key:'imagen_archivo', label:'Cambiar imagen', type:'file'}, {key:'imagen_posicion', label:'Encuadre de imagen', type:'position'}, {key:'imagen_zoom', label:'Tamaño de la foto', type:'zoom'}
+                {key:'propiedades', label:'Propiedades', type:'textarea'}, {key:'variantes', label:'Tipos disponibles (una por línea: nombre o nombre|precio COP)', type:'textarea'}, {key:'imagen_url', label:'URL de imagen (opcional)', type:'url'}, {key:'imagen_archivo', label:'Cambiar imagen', type:'file'}, {key:'imagen_posicion', label:'Encuadre de imagen', type:'position'}, {key:'imagen_zoom', label:'Tamaño de la foto', type:'zoom'}
             ]},
             suscripciones: { title: 'Editar suscripción', fields: [
                 {key:'nombre', label:'Nombre', required:true}, {key:'precio', label:'Precio ($ COP)', type:'number', required:true}, {key:'frecuencia', label:'Frecuencia'},
-                {key:'descripcion', label:'Descripción', type:'textarea'}, {key:'beneficios', label:'Beneficios', type:'textarea'},
+                {key:'descripcion', label:'Descripción', type:'textarea'}, {key:'beneficios', label:'Beneficios', type:'textarea'}, {key:'variantes', label:'Tipos disponibles (una por línea: nombre o nombre|precio COP)', type:'textarea'},
                 {key:'imagen_url', label:'URL de imagen (opcional)', type:'url'}, {key:'imagen_archivo', label:'Cambiar imagen', type:'file'}, {key:'imagen_posicion', label:'Encuadre de imagen', type:'position'}, {key:'imagen_zoom', label:'Tamaño de la foto', type:'zoom'}
             ]},
             foro: { title: 'Editar publicación del foro', fields: [
@@ -1724,10 +1729,49 @@
             }
         }
 
+        function crearControlesCompra(item, tipo, precioBase, textoBoton, alComprar) {
+            const variantes = Array.isArray(item.variantes) ? item.variantes : [];
+            const wrap = document.createElement('div');
+            wrap.style.cssText = 'display:flex;flex-direction:column;gap:9px;margin-top:auto;';
+            let selector = null;
+            if (variantes.length) {
+                const label = document.createElement('label');
+                label.style.cssText = 'display:flex;flex-direction:column;gap:5px;color:var(--text-gold);font-size:.78rem;';
+                label.textContent = 'Elige el tipo';
+                selector = document.createElement('select');
+                selector.className = 'form-input';
+                selector.setAttribute('aria-label', `Tipo de ${item.nombre}`);
+                const placeholder = document.createElement('option');
+                placeholder.value = ''; placeholder.disabled = true; placeholder.selected = true;
+                placeholder.textContent = 'Selecciona una opción'; selector.appendChild(placeholder);
+                variantes.forEach((variante, index) => {
+                    const opcion = document.createElement('option');
+                    opcion.value = String(index);
+                    opcion.textContent = `${variante.nombre} · $${Number(variante.precio || precioBase).toLocaleString('es-CO')} COP`;
+                    selector.appendChild(opcion);
+                });
+                label.appendChild(selector); wrap.appendChild(label);
+            }
+            const footer = document.createElement('div');
+            footer.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:10px;';
+            const price = document.createElement('span'); price.className = 'card-price';
+            const button = document.createElement('button'); button.type = 'button'; button.className = 'btn-purple'; button.textContent = textoBoton;
+            const selected = () => selector && selector.value !== '' ? variantes[Number(selector.value)] : null;
+            const update = () => {
+                const variante = selected(); const value = variante ? (variante.precio || precioBase) : precioBase;
+                price.innerHTML = variantes.length && !variante ? 'Selecciona un tipo' : precioDobleHTML(value);
+                button.disabled = variantes.length > 0 && !variante;
+            };
+            selector?.addEventListener('change', update);
+            button.addEventListener('click', () => alComprar(selected()));
+            update(); footer.append(price, button); wrap.appendChild(footer);
+            return wrap;
+        }
+
         async function cargarPersonalizados() {
             const res = await fetch('/api/personalizados');
             const data = await res.json();
-            renderAdminInventory('admin-list-personalizados', data, 'personalizados', p => `${p.tipo || 'Personalizado'} · ${precioDobleAdmin(p.precio_base)}`);
+            renderAdminInventory('admin-list-personalizados', data, 'personalizados', p => `${p.tipo || 'Personalizado'} · ${precioDobleAdmin(p.precio_base)}${p.variantes?.length ? ` · ${p.variantes.length} tipos` : ''}`);
             const grid = document.getElementById('personalizados-grid');
             grid.innerHTML = '';
             data.forEach(p => {
@@ -1741,23 +1785,25 @@
                             <h3 style="color:white; margin:6px 0; font-size:1.15rem;">${p.nombre}</h3>
                             <p style="color:#e2d8f3; font-size:0.82rem; margin-bottom:8px;">${p.descripcion}</p>
                             ${p.opciones ? `<p style="color:#a496c4; font-size:0.78rem; margin-bottom:12px; flex-grow:1;"><strong>🔮 Opciones Sugeridas:</strong> ${p.opciones}</p>` : ''}
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <span class="card-price">${precioDobleHTML(p.precio_base)}</span>
-                                <button class="btn-purple" onclick="abrirModalCustom(${p.id}, '${p.nombre}', ${p.precio_base}, '${p.descripcion}')"><i class="fa-solid fa-wand-sparkles"></i> PERSONALIZAR</button>
-                            </div>
                         </div>
                     </div>
                 `;
+                const body = grid.lastElementChild.querySelector('.card-body');
+                body.appendChild(crearControlesCompra(p, 'personalizados', p.precio_base, 'PERSONALIZAR', variante => {
+                    if (p.variantes?.length && !variante) return;
+                    abrirModalCustom(p.id, p.nombre, variante?.precio || p.precio_base, p.descripcion, variante?.nombre || '');
+                }));
             });
         }
 
-        function abrirModalCustom(id, nombre, precio, desc) {
+        function abrirModalCustom(id, nombre, precio, desc, variante = '') {
             document.getElementById('modal-item-title').innerText = `PERSONALIZAR: ${nombre}`;
             document.getElementById('modal-item-desc').innerText = desc || 'Ingresa tus datos para la consagración mística.';
             document.getElementById('custom-base-nombre').value = nombre;
             document.getElementById('custom-base-precio').value = precio;
             document.getElementById('custom-base-id').value = id;
-            document.getElementById('custom-base-usd').textContent = `Precio base: $${Number(precio).toLocaleString('es-CO')} COP · ${formatearUSD(precio)} al valor TRM actual.`;
+            document.getElementById('custom-base-variante').value = variante;
+            document.getElementById('custom-base-usd').textContent = `Precio${variante ? ` (${variante})` : ''}: $${Number(precio).toLocaleString('es-CO')} COP · ${formatearUSD(precio)} al valor TRM actual.`;
             document.getElementById('modal-custom').style.display = 'flex';
         }
 
@@ -1774,13 +1820,15 @@
             const intencion = document.getElementById('custom-intencion').value;
             const detalles = document.getElementById('custom-detalles').value;
 
-            let descCustom = `${baseNombre} [Para: ${cliente} | Nac: ${fechaNac} | Intención: ${intencion}${detalles ? ' | Nota: ' + detalles : ''}]`;
+            const variante = document.getElementById('custom-base-variante').value;
+            let descCustom = `${baseNombre}${variante ? ` · ${variante}` : ''} [Para: ${cliente} | Nac: ${fechaNac} | Intención: ${intencion}${detalles ? ' | Nota: ' + detalles : ''}]`;
 
             carrito.push({
                 nombre: descCustom,
                 precio,
                 tipo: 'personalizados',
                 id: Number(document.getElementById('custom-base-id').value),
+                variante,
                 personalizacion: { cliente, fecha_nac: fechaNac, intencion, detalles }
             });
             updateCart();
@@ -1870,7 +1918,7 @@
         async function cargarRituales() {
             const res = await fetch('/api/rituales');
             const data = await res.json();
-            renderAdminInventory('admin-list-rituales', data, 'rituales', r => `${r.categoria || 'Ritual'} · ${precioDobleAdmin(r.precio)}`);
+            renderAdminInventory('admin-list-rituales', data, 'rituales', r => `${r.categoria || 'Ritual'} · ${precioDobleAdmin(r.precio)}${r.variantes?.length ? ` · ${r.variantes.length} tipos` : ''}`);
             const grid = document.getElementById('rituales-grid');
             grid.innerHTML = '';
             data.forEach(r => {
@@ -1884,13 +1932,14 @@
                             <h3 style="color:white; margin:6px 0; font-size:1.15rem;">${r.nombre}</h3>
                             <p style="color:#e2d8f3; font-size:0.82rem; margin-bottom:8px;"><strong>🔮 Propósito:</strong> ${r.proposito}</p>
                             <p style="color:#a496c4; font-size:0.78rem; margin-bottom:12px; flex-grow:1;"><strong>🕯️ Incluye:</strong> ${r.incluye}</p>
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <span class="card-price">${precioDobleHTML(r.precio)}</span>
-                                <button class="btn-purple" onclick="agregarAlCaldero('Ritual: ${r.nombre}', ${r.precio}, 'rituales', ${r.id})"><i class="fa-solid fa-wand-magic-sparkles"></i> SOLICITAR</button>
-                            </div>
                         </div>
                     </div>
                 `;
+                grid.lastElementChild.querySelector('.card-body').appendChild(crearControlesCompra(r, 'rituales', r.precio, 'SOLICITAR', variante => {
+                    if (r.variantes?.length && !variante) return;
+                    const precio = variante?.precio || r.precio;
+                    agregarAlCaldero(`Ritual: ${r.nombre}${variante ? ` · ${variante.nombre}` : ''}`, precio, 'rituales', r.id, variante?.nombre || '');
+                }));
             });
         }
 
@@ -1911,33 +1960,18 @@
                 const body = document.createElement('div'); body.className = 'card-body';
                 const title = document.createElement('h3'); title.style.cssText = 'color:white;margin-bottom:6px;font-size:1.1rem;'; title.textContent = p.nombre;
                 const description = document.createElement('p'); description.style.cssText = 'color:#a496c4;font-size:.8rem;margin-bottom:12px;flex-grow:1;'; description.textContent = p.descripcion || '';
-                const variants = Array.isArray(p.variantes) ? p.variantes : [];
-                let selector = null;
-                if (variants.length) {
-                    const label = document.createElement('label'); label.className = 'form-group'; label.style.marginBottom = '12px';
-                    const labelText = document.createElement('span'); labelText.textContent = 'Elige el tipo';
-                    selector = document.createElement('select'); selector.className = 'form-input'; selector.setAttribute('aria-label', `Tipo de ${p.nombre}`);
-                    const placeholder = document.createElement('option'); placeholder.value = ''; placeholder.textContent = 'Selecciona una opción'; placeholder.disabled = true; placeholder.selected = true; selector.appendChild(placeholder);
-                    variants.forEach((variant, index) => { const option = document.createElement('option'); option.value = String(index); option.textContent = `${variant.nombre}${variant.precio ? ` · $${Number(variant.precio).toLocaleString('es-CO')} COP` : ''}`; selector.appendChild(option); });
-                    label.append(labelText, selector); body.appendChild(label);
-                }
-                const footer = document.createElement('div'); footer.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:10px;';
-                const price = document.createElement('span'); price.className = 'card-price';
-                const selectedVariant = () => variants.length ? variants[Number(selector.value)] : null;
-                const renderPrice = () => { const variant = selectedVariant(); price.innerHTML = variants.length && !variant ? 'Selecciona un tipo' : precioDobleHTML(variant?.precio || p.precio); if (selector) add.disabled = !variant; };
-                if (selector) selector.addEventListener('change', renderPrice);
-                const add = document.createElement('button'); add.type = 'button'; add.className = 'btn-purple'; add.textContent = '+ AÑADIR';
-                add.disabled = variants.length > 0;
-                renderPrice();
-                add.addEventListener('click', () => { const variant = selectedVariant(); agregarAlCaldero(variant ? `${p.nombre} · ${variant.nombre}` : p.nombre, variant?.precio || p.precio, 'productos', p.id, variant?.nombre || ''); });
-                footer.append(price, add); body.append(title, description, footer); card.append(image, body); grid.appendChild(card);
+                body.append(title, description); card.append(image, body); grid.appendChild(card);
+                body.appendChild(crearControlesCompra(p, 'productos', p.precio, '+ AÑADIR', variant => {
+                    if (p.variantes?.length && !variant) return;
+                    agregarAlCaldero(variant ? `${p.nombre} · ${variant.nombre}` : p.nombre, variant?.precio || p.precio, 'productos', p.id, variant?.nombre || '');
+                }));
             });
         }
 
         async function cargarRemedios() {
             const res = await fetch('/api/remedios');
             const data = await res.json();
-            renderAdminInventory('admin-list-remedios', data, 'remedios', r => `${r.categoria || 'Remedio'} · ${precioDobleAdmin(r.precio)}`);
+            renderAdminInventory('admin-list-remedios', data, 'remedios', r => `${r.categoria || 'Remedio'} · ${precioDobleAdmin(r.precio)}${r.variantes?.length ? ` · ${r.variantes.length} tipos` : ''}`);
             const grid = document.getElementById('remedios-grid');
             grid.innerHTML = '';
             data.forEach(r => {
@@ -1951,20 +1985,20 @@
                             <h3 style="color:white; margin:4px 0; font-size:1.1rem;">${r.nombre}</h3>
                             <p style="color:#e2d8f3; font-size:0.8rem; margin-bottom:6px;"><strong>🌿 Propiedades:</strong> ${r.propiedades}</p>
                             <p style="color:#a496c4; font-size:0.75rem; margin-bottom:12px; flex-grow:1;"><strong>☕ Preparación:</strong> ${r.preparacion}</p>
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <span class="card-price">${precioDobleHTML(r.precio)}</span>
-                                <button class="btn-purple" onclick="agregarAlCaldero('${r.nombre}', ${r.precio}, 'remedios', ${r.id})">+ PEDIR</button>
-                            </div>
                         </div>
                     </div>
                 `;
+                grid.lastElementChild.querySelector('.card-body').appendChild(crearControlesCompra(r, 'remedios', r.precio, '+ PEDIR', variante => {
+                    if (r.variantes?.length && !variante) return;
+                    agregarAlCaldero(`${r.nombre}${variante ? ` · ${variante.nombre}` : ''}`, variante?.precio || r.precio, 'remedios', r.id, variante?.nombre || '');
+                }));
             });
         }
 
         async function cargarSuscripciones() {
             const res = await fetch('/api/suscripciones');
             const data = await res.json();
-            renderAdminInventory('admin-list-suscripciones', data, 'suscripciones', s => `${s.frecuencia || 'Suscripción'} · ${precioDobleAdmin(s.precio)}`);
+            renderAdminInventory('admin-list-suscripciones', data, 'suscripciones', s => `${s.frecuencia || 'Suscripción'} · ${precioDobleAdmin(s.precio)}${s.variantes?.length ? ` · ${s.variantes.length} tipos` : ''}`);
             const grid = document.getElementById('suscripciones-grid');
             grid.innerHTML = '';
             data.forEach(s => {
@@ -1981,10 +2015,13 @@
                             <div style="background:rgba(0,0,0,0.4); padding:8px; border-radius:8px; font-size:0.8rem; color:var(--text-gold); margin-bottom:15px;">
                                 ${s.beneficios}
                             </div>
-                            <button class="btn-purple" style="width:100%;" onclick="agregarAlCaldero('Suscripción: ${s.nombre}', ${s.precio}, 'suscripciones', ${s.id})">UNIRME AL CÍRCULO</button>
                         </div>
                     </div>
                 `;
+                grid.lastElementChild.querySelector('.card-body').appendChild(crearControlesCompra(s, 'suscripciones', s.precio, 'UNIRME AL CÍRCULO', variante => {
+                    if (s.variantes?.length && !variante) return;
+                    agregarAlCaldero(`Suscripción: ${s.nombre}${variante ? ` · ${variante.nombre}` : ''}`, variante?.precio || s.precio, 'suscripciones', s.id, variante?.nombre || '');
+                }));
             });
         }
 
@@ -2141,11 +2178,11 @@
         }
 
         const ADMIN_PUBLISH_FIELDS = {
-            personalizados: [['nombre','pers-nombre'],['tipo','pers-tipo'],['precio_base','pers-precio'],['descripcion','pers-desc'],['opciones','pers-opc']],
-            rituales: [['nombre','rit-nombre'],['categoria','rit-cat'],['precio','rit-precio'],['duracion','rit-dur'],['proposito','rit-prop'],['incluye','rit-inc']],
+            personalizados: [['nombre','pers-nombre'],['tipo','pers-tipo'],['precio_base','pers-precio'],['descripcion','pers-desc'],['opciones','pers-opc'],['variantes','pers-variantes']],
+            rituales: [['nombre','rit-nombre'],['categoria','rit-cat'],['precio','rit-precio'],['duracion','rit-dur'],['proposito','rit-prop'],['incluye','rit-inc'],['variantes','rit-variantes']],
             productos: [['nombre','p-nombre'],['categoria','p-cat'],['precio','p-precio'],['descripcion','p-desc'],['variantes','p-variantes']],
-            remedios: [['nombre','r-nombre'],['categoria','r-cat'],['precio','r-precio'],['preparacion','r-prep'],['propiedades','r-prop']],
-            suscripciones: [['nombre','s-nombre'],['precio','s-precio'],['frecuencia','s-frec'],['descripcion','s-desc'],['beneficios','s-ben']]
+            remedios: [['nombre','r-nombre'],['categoria','r-cat'],['precio','r-precio'],['preparacion','r-prep'],['propiedades','r-prop'],['variantes','r-variantes']],
+            suscripciones: [['nombre','s-nombre'],['precio','s-precio'],['frecuencia','s-frec'],['descripcion','s-desc'],['beneficios','s-ben'],['variantes','s-variantes']]
         };
 
         function obtenerTextoBorrador(elementId) {
@@ -2776,4 +2813,5 @@
     </script>
 </body>
 </html>
+
 
