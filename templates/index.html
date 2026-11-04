@@ -706,6 +706,39 @@
             .custom-card, .btn-purple, .btn-outline, .social-link { transition: none; }
             .custom-card:hover, .btn-purple:hover, .btn-outline:hover, .social-link:hover { transform: none; }
         }
+
+        /* Navegación compacta: accesos frecuentes visibles y resto agrupado */
+        nav.desktop-nav { position: relative; }
+        .nav-more { position: relative; flex: 0 0 auto; }
+        .nav-more-trigger {
+            min-height: 40px; display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+            padding: 9px 12px; border: 1px solid transparent; border-radius: 12px;
+            background: transparent; color: #bbb2c4; font: 700 .66rem 'Plus Jakarta Sans', sans-serif;
+            cursor: pointer; transition: color .18s ease, background .18s ease, border-color .18s ease;
+        }
+        .nav-more-trigger:hover, .nav-more-trigger.active, .nav-more.open .nav-more-trigger {
+            color: var(--text-gold); background: rgba(126, 96, 139, .16); border-color: rgba(201, 181, 211, .16);
+        }
+        .nav-more-menu {
+            display: none; position: absolute; top: calc(100% + 10px); right: 0; z-index: 1601;
+            width: 228px; padding: 7px; border: 1px solid rgba(201, 181, 211, .2); border-radius: 14px;
+            background: rgba(18, 14, 23, .98); box-shadow: 0 16px 40px rgba(0, 0, 0, .4); backdrop-filter: blur(18px);
+        }
+        .nav-more.open .nav-more-menu { display: grid; gap: 3px; }
+        .nav-more-menu a {
+            display: flex !important; flex-direction: row !important; justify-content: flex-start !important; gap: 10px !important;
+            width: 100%; min-width: 0 !important; padding: 10px 12px !important; border-radius: 10px !important;
+            color: #d2c9d7; font-size: .82rem !important; letter-spacing: 0 !important; text-align: left !important; text-transform: none !important;
+        }
+        .nav-more-menu a i { width: 18px; margin: 0 !important; color: var(--text-gold); font-size: .9rem !important; }
+        .nav-more-menu a:hover, .nav-more-menu a.active { color: #fff; background: rgba(126, 96, 139, .22); }
+        @media (max-width: 768px) {
+            .nav-more { position: static; flex: 0 0 68px; }
+            .nav-more-trigger { width: 68px; min-height: 56px; flex-direction: column; gap: 3px; padding: 5px 3px; font-size: .56rem; border-radius: 9px; }
+            .nav-more-trigger i { font-size: .95rem; }
+            .nav-more-menu { top: auto; bottom: calc(100% + 10px); right: 8px; width: min(270px, calc(100vw - 24px)); }
+            nav.desktop-nav a { min-width: 68px; flex: 0 0 68px; }
+        }
     </style>
 </head>
 <body>
@@ -715,16 +748,23 @@
     <!-- BARRA DE NAVEGACIÓN FIJA EN LA PARTE INFERIOR -->
     <header>
         <div class="logo-container"></div>
-        <nav class="desktop-nav">
+        <nav class="desktop-nav" aria-label="Navegación principal">
             <a onclick="showSection('inicio')" id="nav-inicio" class="active"><i class="fa-solid fa-house"></i>Inicio</a>
-            <a onclick="showSection('personalizados')" id="nav-personalizados"><i class="fa-solid fa-wand-sparkles"></i>Custom</a>
-            <a onclick="showSection('citas')" id="nav-citas"><i class="fa-solid fa-calendar-check"></i>Agendar</a>
-            <a onclick="showSection('rituales')" id="nav-rituales"><i class="fa-solid fa-wand-magic-sparkles"></i>Ritual</a>
             <a onclick="showSection('catalogo')" id="nav-catalogo"><i class="fa-solid fa-gem"></i>Tienda</a>
-            <a onclick="showSection('remedios')" id="nav-remedios"><i class="fa-solid fa-leaf"></i>Remedio</a>
-            <a onclick="showSection('suscripciones')" id="nav-suscripciones"><i class="fa-solid fa-crown"></i>VIP</a>
-            <a onclick="showSection('foro')" id="nav-foro"><i class="fa-solid fa-comments"></i>Foro</a>
-            <a onclick="showSection('tarot')" id="nav-tarot"><i class="fa-solid fa-moon"></i>Tarot</a>
+            <a onclick="showSection('rituales')" id="nav-rituales"><i class="fa-solid fa-wand-magic-sparkles"></i>Ritual</a>
+            <a onclick="showSection('personalizados')" id="nav-personalizados"><i class="fa-solid fa-wand-sparkles"></i>Personalizar</a>
+            <div class="nav-more">
+                <button type="button" id="nav-more-trigger" class="nav-more-trigger" aria-expanded="false" aria-controls="nav-more-menu" aria-haspopup="true" onclick="toggleMoreMenu()">
+                    <span>Más</span><i class="fa-solid fa-ellipsis" aria-hidden="true"></i>
+                </button>
+                <div id="nav-more-menu" class="nav-more-menu" aria-label="Más secciones">
+                    <a onclick="showSection('citas')" id="nav-citas"><i class="fa-solid fa-calendar-check"></i>Agendar cita</a>
+                    <a onclick="showSection('remedios')" id="nav-remedios"><i class="fa-solid fa-leaf"></i>Remedios</a>
+                    <a onclick="showSection('suscripciones')" id="nav-suscripciones"><i class="fa-solid fa-crown"></i>Suscripciones</a>
+                    <a onclick="showSection('foro')" id="nav-foro"><i class="fa-solid fa-comments"></i>Foro</a>
+                    <a onclick="showSection('tarot')" id="nav-tarot"><i class="fa-solid fa-moon"></i>Tarot</a>
+                </div>
+            </div>
         </nav>
     </header>
 
@@ -2858,6 +2898,22 @@
             cargarTodo();
         }
 
+        function toggleMoreMenu(forceOpen) {
+            const container = document.querySelector('.nav-more');
+            const trigger = document.getElementById('nav-more-trigger');
+            if (!container || !trigger) return;
+            const open = typeof forceOpen === 'boolean' ? forceOpen : !container.classList.contains('open');
+            container.classList.toggle('open', open);
+            trigger.setAttribute('aria-expanded', String(open));
+        }
+
+        document.addEventListener('click', event => {
+            if (!event.target.closest('.nav-more')) toggleMoreMenu(false);
+        });
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape') toggleMoreMenu(false);
+        });
+
         function showSection(sec) {
             document.body.classList.toggle('admin-mode', sec === 'admin');
             ['inicio', 'personalizados', 'citas', 'rituales', 'catalogo', 'remedios', 'suscripciones', 'foro', 'tarot', 'admin'].forEach(s => {
@@ -2867,6 +2923,8 @@
                 const n = document.getElementById(`nav-${s}`);
                 if(n) n.classList.toggle('active', s === sec);
             });
+            document.getElementById('nav-more-trigger')?.classList.toggle('active', ['citas', 'remedios', 'suscripciones', 'foro', 'tarot'].includes(sec));
+            toggleMoreMenu(false);
             window.scrollTo({top: 0, behavior: 'smooth'});
         }
 
