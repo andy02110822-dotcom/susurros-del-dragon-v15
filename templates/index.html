@@ -1784,7 +1784,7 @@
             grid.innerHTML = '';
             data.forEach(p => {
                 let del = estaAutenticado ? `<button class="delete-btn" onclick="eliminarItem('personalizados', ${p.id})"><i class="fa-solid fa-trash"></i></button>` : '';
-                grid.innerHTML += `
+                grid.insertAdjacentHTML('beforeend', `
                     <div class="custom-card" style="border-color: var(--text-gold);">
                         ${del}
                         <img src="${p.imagen}" alt="" style="width:100%; height:190px; object-fit:cover; object-position:${cssImagenPosicion(p.imagen_posicion)}; transform:scale(${cssImagenZoom(p.imagen_zoom)});">
@@ -1795,7 +1795,7 @@
                             ${p.opciones ? `<p style="color:#a496c4; font-size:0.78rem; margin-bottom:12px; flex-grow:1;"><strong>🔮 Opciones Sugeridas:</strong> ${p.opciones}</p>` : ''}
                         </div>
                     </div>
-                `;
+                `);
                 const body = grid.lastElementChild.querySelector('.card-body');
                 body.appendChild(crearControlesCompra(p, 'personalizados', p.precio_base, 'PERSONALIZAR', variante => {
                     if (p.variantes?.length && !variante) return;
@@ -1931,7 +1931,7 @@
             grid.innerHTML = '';
             data.forEach(r => {
                 let del = estaAutenticado ? `<button class="delete-btn" onclick="eliminarItem('rituales', ${r.id})"><i class="fa-solid fa-trash"></i></button>` : '';
-                grid.innerHTML += `
+                grid.insertAdjacentHTML('beforeend', `
                     <div class="custom-card" style="border-color: var(--purple-glow);">
                         ${del}
                         <img src="${r.imagen}" alt="" style="width:100%; height:190px; object-fit:cover; object-position:${cssImagenPosicion(r.imagen_posicion)}; transform:scale(${cssImagenZoom(r.imagen_zoom)});">
@@ -1942,7 +1942,7 @@
                             <p style="color:#a496c4; font-size:0.78rem; margin-bottom:12px; flex-grow:1;"><strong>🕯️ Incluye:</strong> ${r.incluye}</p>
                         </div>
                     </div>
-                `;
+                `);
                 grid.lastElementChild.querySelector('.card-body').appendChild(crearControlesCompra(r, 'rituales', r.precio, 'SOLICITAR', variante => {
                     if (r.variantes?.length && !variante) return;
                     const precio = variante?.precio || r.precio;
@@ -1984,7 +1984,7 @@
             grid.innerHTML = '';
             data.forEach(r => {
                 let del = estaAutenticado ? `<button class="delete-btn" onclick="eliminarItem('remedios', ${r.id})"><i class="fa-solid fa-trash"></i></button>` : '';
-                grid.innerHTML += `
+                grid.insertAdjacentHTML('beforeend', `
                     <div class="custom-card">
                         ${del}
                         <img src="${r.imagen}" alt="" style="width:100%; height:180px; object-fit:cover; object-position:${cssImagenPosicion(r.imagen_posicion)}; transform:scale(${cssImagenZoom(r.imagen_zoom)});">
@@ -1995,7 +1995,7 @@
                             <p style="color:#a496c4; font-size:0.75rem; margin-bottom:12px; flex-grow:1;"><strong>☕ Preparación:</strong> ${r.preparacion}</p>
                         </div>
                     </div>
-                `;
+                `);
                 grid.lastElementChild.querySelector('.card-body').appendChild(crearControlesCompra(r, 'remedios', r.precio, '+ PEDIR', variante => {
                     if (r.variantes?.length && !variante) return;
                     agregarAlCaldero(`${r.nombre}${variante ? ` · ${variante.nombre}` : ''}`, variante?.precio || r.precio, 'remedios', r.id, variante?.nombre || '');
@@ -2011,7 +2011,7 @@
             grid.innerHTML = '';
             data.forEach(s => {
                 let del = estaAutenticado ? `<button class="delete-btn" onclick="eliminarItem('suscripciones', ${s.id})"><i class="fa-solid fa-trash"></i></button>` : '';
-                grid.innerHTML += `
+                grid.insertAdjacentHTML('beforeend', `
                     <div class="custom-card" style="border-color: var(--text-gold);">
                         ${del}
                         ${s.imagen ? `<img src="${s.imagen}" alt="Imagen de ${s.nombre}" style="width:100%; height:190px; object-fit:cover; object-position:${cssImagenPosicion(s.imagen_posicion)}; transform:scale(${cssImagenZoom(s.imagen_zoom)});">` : ''}
@@ -2025,7 +2025,7 @@
                             </div>
                         </div>
                     </div>
-                `;
+                `);
                 grid.lastElementChild.querySelector('.card-body').appendChild(crearControlesCompra(s, 'suscripciones', s.precio, 'UNIRME AL CÍRCULO', variante => {
                     if (s.variantes?.length && !variante) return;
                     agregarAlCaldero(`Suscripción: ${s.nombre}${variante ? ` · ${variante.nombre}` : ''}`, variante?.precio || s.precio, 'suscripciones', s.id, variante?.nombre || '');
@@ -2821,6 +2821,7 @@
     </script>
 </body>
 </html>
+
 
 
 
