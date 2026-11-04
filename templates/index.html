@@ -1737,7 +1737,7 @@
             if (variantes.length) {
                 const label = document.createElement('label');
                 label.style.cssText = 'display:flex;flex-direction:column;gap:5px;color:var(--text-gold);font-size:.78rem;';
-                label.textContent = 'Elige el tipo';
+                label.textContent = 'Elige el tipo antes de solicitar';
                 selector = document.createElement('select');
                 selector.className = 'form-input';
                 selector.setAttribute('aria-label', `Tipo de ${item.nombre}`);
@@ -1760,10 +1760,18 @@
             const update = () => {
                 const variante = selected(); const value = variante ? (variante.precio || precioBase) : precioBase;
                 price.innerHTML = variantes.length && !variante ? 'Selecciona un tipo' : precioDobleHTML(value);
-                button.disabled = variantes.length > 0 && !variante;
             };
             selector?.addEventListener('change', update);
-            button.addEventListener('click', () => alComprar(selected()));
+            button.addEventListener('click', () => {
+                const variante = selected();
+                if (variantes.length && !variante) {
+                    showToast('Elige primero una opción para poder solicitar este artículo.');
+                    selector?.focus();
+                    selector?.scrollIntoView({behavior: 'smooth', block: 'center'});
+                    return;
+                }
+                alComprar(variante);
+            });
             update(); footer.append(price, button); wrap.appendChild(footer);
             return wrap;
         }
@@ -2813,5 +2821,6 @@
     </script>
 </body>
 </html>
+
 
 
