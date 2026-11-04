@@ -634,7 +634,9 @@ def init_db():
                     ))
             if model is Producto and 'variantes' not in columns:
                 with db.engine.begin() as connection:
-                    connection.execute(text("ALTER TABLE productos ADD COLUMN variantes TEXT NOT NULL DEFAULT '[]'"))
+                    connection.execute(text(
+                        f"ALTER TABLE {Producto.__tablename__} ADD COLUMN variantes TEXT NOT NULL DEFAULT '[]'"
+                    ))
         if Producto.query.count() == 0:
             prods = [
                 Producto(nombre="TALISMAN DE VIDA", categoria="amuletos", precio=45000, imagen="https://images.unsplash.com/photo-1567653418876-5bb0e566e1c2?auto=format&fit=crop&w=600&q=80", descripcion="Artículo ritual consagrado."),
