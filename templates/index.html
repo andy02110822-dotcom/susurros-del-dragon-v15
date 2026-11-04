@@ -878,7 +878,7 @@
         <div class="logo-container"></div>
         <nav class="desktop-nav" aria-label="Navegación de secciones">
             <div class="nav-more">
-                <button type="button" id="nav-more-trigger" class="nav-more-trigger" aria-expanded="false" aria-controls="nav-more-menu" aria-haspopup="true" aria-label="Abrir menú de secciones" title="Menú" onclick="toggleMoreMenu()">
+                <button type="button" id="nav-more-trigger" class="nav-more-trigger" aria-expanded="false" aria-controls="nav-more-menu" aria-haspopup="true" aria-label="Abrir menú de secciones" title="Menú" >
                     <i class="fa-solid fa-bars" aria-hidden="true"></i><span>Menú</span>
                 </button>
                 <div id="nav-more-menu" class="nav-more-menu" aria-label="Secciones del sitio">
@@ -3035,10 +3035,20 @@
             const open = typeof forceOpen === 'boolean' ? forceOpen : !container.classList.contains('open');
             container.classList.toggle('open', open);
             trigger.setAttribute('aria-expanded', String(open));
+            trigger.setAttribute('aria-label', open ? 'Cerrar menú de secciones' : 'Abrir menú de secciones');
         }
 
+        const navMoreTrigger = document.getElementById('nav-more-trigger');
+        navMoreTrigger?.addEventListener('click', event => {
+            event.preventDefault();
+            event.stopPropagation();
+            toggleMoreMenu();
+        });
+
         document.addEventListener('click', event => {
-            if (!event.target.closest('.nav-more')) toggleMoreMenu(false);
+            const container = document.querySelector('.nav-more');
+            const target = event.target;
+            if (container && target instanceof Element && !container.contains(target)) toggleMoreMenu(false);
         });
         document.addEventListener('keydown', event => {
             if (event.key === 'Escape') toggleMoreMenu(false);
