@@ -151,6 +151,11 @@
         .hero-portal p { max-width: 650px; margin: 0 auto 1.5rem auto; color: #c4b5fd; font-size: 0.95rem; line-height: 1.6; }
 
         .hero-buttons { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        .social-links { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:10px; margin:18px auto 0; }
+        .social-links-label { flex-basis:100%; color:var(--text-gold); text-align:center; font-size:.72rem; font-weight:700; letter-spacing:.16em; }
+        .social-link { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:42px; padding:9px 15px; border:1px solid var(--border-glow); border-radius:999px; background:rgba(17,8,35,.75); color:#fff; text-decoration:none; font-weight:700; transition:transform .2s,border-color .2s,box-shadow .2s; }
+        .social-link:hover,.social-link:focus-visible { transform:translateY(-2px); border-color:var(--text-gold); box-shadow:0 0 18px rgba(189,95,255,.4); outline:none; }
+        .social-link i { color:var(--text-gold); font-size:1.05rem; }
         .btn-purple {
             background: linear-gradient(135deg, var(--purple-main), var(--purple-glow)); color: white; padding: 10px 22px; border-radius: 30px;
             font-weight: 700; border: 1px solid var(--purple-glow); cursor: pointer; box-shadow: 0 0 20px rgba(189, 95, 255, 0.4); transition: all 0.3s;
@@ -598,6 +603,11 @@
                 <button class="btn-outline" onclick="showSection('citas')"><i class="fa-solid fa-calendar-check"></i> AGENDAR CITA</button>
                 <button class="btn-purple" onclick="showSection('catalogo')"><i class="fa-solid fa-gem"></i> CATÁLOGO</button>
                 <button class="btn-outline" type="button" onclick="instalarAplicacion()"><i class="fa-solid fa-download"></i> INSTALAR APP</button>
+            </div>
+            <div class="social-links" aria-label="Síguenos en redes sociales">
+                <span class="social-links-label">ENCUÉNTRANOS EN REDES</span>
+                <a class="social-link" href="https://www.instagram.com/susurrosdedragon1/" target="_blank" rel="noopener noreferrer" aria-label="Instagram de Susurros del Dragón"><i class="fa-brands fa-instagram" aria-hidden="true"></i><span>Instagram</span></a>
+                <a class="social-link" href="https://www.tiktok.com/@susurrosdedragon1" target="_blank" rel="noopener noreferrer" aria-label="TikTok de Susurros del Dragón"><i class="fa-brands fa-tiktok" aria-hidden="true"></i><span>TikTok</span></a>
             </div>
         </div>
     </div>
