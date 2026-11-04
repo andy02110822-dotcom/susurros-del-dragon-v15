@@ -863,6 +863,7 @@
                     <div class="form-group"><label>Nombre</label><input type="text" id="p-nombre" class="form-input" required></div>
                     <div class="form-group"><label>Sección del catálogo</label><select id="p-cat" class="form-input"><option value="amuletos">Amuletos</option><option value="tarot">Tarot</option><option value="cristales">Cristales</option><option value="inciensos">Inciensos</option><option value="otros">Otros</option></select></div>
                     <div class="form-group"><label>Precio (COP)</label><input type="number" id="p-precio" class="form-input" data-price-cop required><small class="price-usd-preview" data-price-preview>Equivalente USD: cargando TRM…</small></div>
+                    <div class="form-group"><label>Tipos o variantes disponibles (opcional)</label><textarea id="p-variantes" class="form-input" rows="3" placeholder="Pequeño&#10;Mediano|25000&#10;Grande|32000"></textarea><small>Escribe una opción por línea. Si no indicas precio, se usa el precio base del producto. Para asignar otro precio, escribe: nombre|precio en COP.</small></div>
 
                     <div class="form-group">
                         <label>Subir Imagen (.jpg, .png, .webp)</label>
@@ -1166,7 +1167,7 @@
         const PUBLICATION_PREVIEW_CONFIG = {
             personalizados: { label:'Personalizado', formId:'form-admin-personalizado', endpoint:'/api/personalizados', fileId:'pers-file', fileKey:'imagen_archivo', urlId:'pers-url', urlKey:'imagen_url', fallback:'https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?auto=format&fit=crop&w=600&q=80', border:'var(--border-glow)', priceId:'pers-precio', priceKey:'precio_base', nameId:'pers-nombre', nameKey:'nombre', button:'SOLICITAR', fields:[['tipo','pers-tipo','tipo'],['descripcion','pers-desc','description'],['opciones','pers-opc','options']], refresh:cargarPersonalizados },
             rituales: { label:'Ritual', formId:'form-admin-ritual', endpoint:'/api/rituales', fileId:'rit-file', fileKey:'imagen_archivo', urlId:'rit-url', urlKey:'imagen_url', fallback:'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=600&q=80', border:'var(--purple-glow)', priceId:'rit-precio', priceKey:'precio', nameId:'rit-nombre', nameKey:'nombre', button:'SOLICITAR', fields:[['categoria','rit-cat','eyebrow'],['duracion','rit-dur','eyebrowExtra'],['proposito','rit-prop','description'],['incluye','rit-inc','options']], refresh:cargarRituales },
-            productos: { label:'Producto', formId:'form-admin-producto', endpoint:'/api/productos', fileId:'p-file', fileKey:'imagen_archivo', urlId:'p-url', urlKey:'imagen_url', fallback:'https://images.unsplash.com/photo-1567653418876-5bb0e566e1c2?auto=format&fit=crop&w=600&q=80', border:'var(--border-glow)', priceId:'p-precio', priceKey:'precio', nameId:'p-nombre', nameKey:'nombre', button:'AÑADIR', fields:[['categoria','p-cat','eyebrow'],['descripcion','p-desc','description']], refresh:cargarProductos },
+            productos: { label:'Producto', formId:'form-admin-producto', endpoint:'/api/productos', fileId:'p-file', fileKey:'imagen_archivo', urlId:'p-url', urlKey:'imagen_url', fallback:'https://images.unsplash.com/photo-1567653418876-5bb0e566e1c2?auto=format&fit=crop&w=600&q=80', border:'var(--border-glow)', priceId:'p-precio', priceKey:'precio', nameId:'p-nombre', nameKey:'nombre', button:'AÑADIR', fields:[['categoria','p-cat','eyebrow'],['descripcion','p-desc','description'],['variantes','p-variantes','options']], refresh:cargarProductos },
             remedios: { label:'Remedio', formId:'form-admin-remedio', endpoint:'/api/remedios', fileId:'r-file', fileKey:'imagen_archivo', urlId:'r-url', urlKey:'imagen_url', fallback:'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=600&q=80', border:'var(--border-glow)', priceId:'r-precio', priceKey:'precio', nameId:'r-nombre', nameKey:'nombre', button:'PEDIR', fields:[['categoria','r-cat','eyebrow'],['propiedades','r-prop','description'],['preparacion','r-prep','options']], refresh:cargarRemedios },
             suscripciones: { label:'Suscripción', formId:'form-admin-suscripcion', endpoint:'/api/suscripciones', fileId:'s-file', fileKey:'imagen_archivo', urlId:'s-url', urlKey:'imagen_url', fallback:'', border:'var(--text-gold)', priceId:'s-precio', priceKey:'precio', nameId:'s-nombre', nameKey:'nombre', button:'UNIRME AL CÍRCULO', fields:[['frecuencia','s-frec','eyebrow'],['descripcion','s-desc','description'],['beneficios','s-ben','options']], refresh:cargarSuscripciones }
         };
@@ -1213,6 +1214,7 @@
                 body: JSON.stringify({items: carrito.map(item => ({
                     tipo: item.tipo,
                     id: item.id,
+                    variante: item.variante || '',
                     personalizacion: item.personalizacion || null
                 }))})
             });
@@ -1460,6 +1462,7 @@
             productos: { title: 'Editar producto', fields: [
                 {key:'nombre', label:'Nombre', required:true}, {key:'categoria', label:'Sección', type:'select', options:['amuletos','tarot','cristales','inciensos','otros']},
                 {key:'precio', label:'Precio ($ COP)', type:'number', required:true}, {key:'descripcion', label:'Descripción', type:'textarea'},
+                {key:'variantes', label:'Tipos disponibles (una por línea: nombre o nombre|precio COP)', type:'textarea'},
                 {key:'imagen_url', label:'URL de imagen (opcional)', type:'url'}, {key:'imagen_archivo', label:'Cambiar imagen', type:'file'}, {key:'imagen_posicion', label:'Encuadre de imagen', type:'position'}, {key:'imagen_zoom', label:'Tamaño de la foto', type:'zoom'}
             ]},
             rituales: { title: 'Editar ritual', fields: [
@@ -1639,7 +1642,9 @@
                     fields.appendChild(group);
                     return;
                 } else {
-                    input.value = item[def.key] ?? '';
+                    input.value = def.key === 'variantes'
+                        ? (item.variantes || []).map(variant => `${variant.nombre}${variant.precio ? `|${variant.precio}` : ''}`).join('\n')
+                        : item[def.key] ?? '';
                 }
                 group.append(label, input);
                 if (def.type === 'number' && ['precio', 'precio_base'].includes(def.key)) {
@@ -1892,25 +1897,40 @@
         async function cargarProductos() {
             const res = await fetch('/api/productos');
             const data = await res.json();
-            renderAdminInventory('admin-list-productos', data, 'productos', p => `${p.categoria || 'Producto'} · ${precioDobleAdmin(p.precio)}`);
+            renderAdminInventory('admin-list-productos', data, 'productos', p => `${p.categoria || 'Producto'} · ${precioDobleAdmin(p.precio)}${p.variantes?.length ? ` · ${p.variantes.length} tipos` : ''}`);
             const grid = document.getElementById('products-grid');
-            grid.innerHTML = '';
+            grid.replaceChildren();
             data.forEach(p => {
-                let del = estaAutenticado ? `<button class="delete-btn" onclick="eliminarItem('productos', ${p.id})"><i class="fa-solid fa-trash"></i></button>` : '';
-                grid.innerHTML += `
-                    <div class="custom-card">
-                        ${del}
-                        <img src="${p.imagen}" alt="" style="width:100%; height:180px; object-fit:cover; object-position:${cssImagenPosicion(p.imagen_posicion)}; transform:scale(${cssImagenZoom(p.imagen_zoom)});">
-                        <div class="card-body">
-                            <h3 style="color:white; margin-bottom:6px; font-size:1.1rem;">${p.nombre}</h3>
-                            <p style="color:#a496c4; font-size:0.8rem; margin-bottom:12px; flex-grow:1;">${p.descripcion}</p>
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <span class="card-price">${precioDobleHTML(p.precio)}</span>
-                                <button class="btn-purple" onclick="agregarAlCaldero('${p.nombre}', ${p.precio}, 'productos', ${p.id})">+ AÑADIR</button>
-                            </div>
-                        </div>
-                    </div>
-                `;
+                const card = document.createElement('article'); card.className = 'custom-card';
+                if (estaAutenticado) {
+                    const del = document.createElement('button'); del.type = 'button'; del.className = 'delete-btn'; del.setAttribute('aria-label', `Eliminar ${p.nombre}`);
+                    del.innerHTML = '<i class="fa-solid fa-trash" aria-hidden="true"></i>'; del.addEventListener('click', () => eliminarItem('productos', p.id)); card.appendChild(del);
+                }
+                const image = document.createElement('img'); image.src = p.imagen; image.alt = p.nombre; image.loading = 'lazy';
+                image.style.cssText = `width:100%;height:180px;object-fit:cover;object-position:${cssImagenPosicion(p.imagen_posicion)};transform:scale(${cssImagenZoom(p.imagen_zoom)});`;
+                const body = document.createElement('div'); body.className = 'card-body';
+                const title = document.createElement('h3'); title.style.cssText = 'color:white;margin-bottom:6px;font-size:1.1rem;'; title.textContent = p.nombre;
+                const description = document.createElement('p'); description.style.cssText = 'color:#a496c4;font-size:.8rem;margin-bottom:12px;flex-grow:1;'; description.textContent = p.descripcion || '';
+                const variants = Array.isArray(p.variantes) ? p.variantes : [];
+                let selector = null;
+                if (variants.length) {
+                    const label = document.createElement('label'); label.className = 'form-group'; label.style.marginBottom = '12px';
+                    const labelText = document.createElement('span'); labelText.textContent = 'Elige el tipo';
+                    selector = document.createElement('select'); selector.className = 'form-input'; selector.setAttribute('aria-label', `Tipo de ${p.nombre}`);
+                    const placeholder = document.createElement('option'); placeholder.value = ''; placeholder.textContent = 'Selecciona una opción'; placeholder.disabled = true; placeholder.selected = true; selector.appendChild(placeholder);
+                    variants.forEach((variant, index) => { const option = document.createElement('option'); option.value = String(index); option.textContent = `${variant.nombre}${variant.precio ? ` · $${Number(variant.precio).toLocaleString('es-CO')} COP` : ''}`; selector.appendChild(option); });
+                    label.append(labelText, selector); body.appendChild(label);
+                }
+                const footer = document.createElement('div'); footer.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:10px;';
+                const price = document.createElement('span'); price.className = 'card-price';
+                const selectedVariant = () => variants.length ? variants[Number(selector.value)] : null;
+                const renderPrice = () => { const variant = selectedVariant(); price.innerHTML = variants.length && !variant ? 'Selecciona un tipo' : precioDobleHTML(variant?.precio || p.precio); if (selector) add.disabled = !variant; };
+                if (selector) selector.addEventListener('change', renderPrice);
+                const add = document.createElement('button'); add.type = 'button'; add.className = 'btn-purple'; add.textContent = '+ AÑADIR';
+                add.disabled = variants.length > 0;
+                renderPrice();
+                add.addEventListener('click', () => { const variant = selectedVariant(); agregarAlCaldero(variant ? `${p.nombre} · ${variant.nombre}` : p.nombre, variant?.precio || p.precio, 'productos', p.id, variant?.nombre || ''); });
+                footer.append(price, add); body.append(title, description, footer); card.append(image, body); grid.appendChild(card);
             });
         }
 
@@ -2123,7 +2143,7 @@
         const ADMIN_PUBLISH_FIELDS = {
             personalizados: [['nombre','pers-nombre'],['tipo','pers-tipo'],['precio_base','pers-precio'],['descripcion','pers-desc'],['opciones','pers-opc']],
             rituales: [['nombre','rit-nombre'],['categoria','rit-cat'],['precio','rit-precio'],['duracion','rit-dur'],['proposito','rit-prop'],['incluye','rit-inc']],
-            productos: [['nombre','p-nombre'],['categoria','p-cat'],['precio','p-precio'],['descripcion','p-desc']],
+            productos: [['nombre','p-nombre'],['categoria','p-cat'],['precio','p-precio'],['descripcion','p-desc'],['variantes','p-variantes']],
             remedios: [['nombre','r-nombre'],['categoria','r-cat'],['precio','r-precio'],['preparacion','r-prep'],['propiedades','r-prop']],
             suscripciones: [['nombre','s-nombre'],['precio','s-precio'],['frecuencia','s-frec'],['descripcion','s-desc'],['beneficios','s-ben']]
         };
@@ -2295,6 +2315,7 @@
                 agregarTextoVistaPrevia(body, 'Incluye', values.options, '');
             } else if (publicationPreviewType === 'productos') {
                 agregarTextoVistaPrevia(body, 'Descripción', values.description, 'description');
+                agregarTextoVistaPrevia(body, 'Tipos disponibles', values.options, '');
             } else if (publicationPreviewType === 'remedios') {
                 agregarTextoVistaPrevia(body, 'Propiedades', values.description, 'description');
                 agregarTextoVistaPrevia(body, 'Preparación', values.options, '');
@@ -2529,8 +2550,8 @@
             cargarTodo();
         }
 
-        function agregarAlCaldero(nombre, precio, tipo, id) {
-            carrito.push({nombre, precio, tipo, id});
+        function agregarAlCaldero(nombre, precio, tipo, id, variante='') {
+            carrito.push({nombre, precio, tipo, id, variante});
             updateCart();
             showToast(`Añadido: ${nombre}`);
         }

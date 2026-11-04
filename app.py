@@ -60,6 +60,7 @@ class Producto(db.Model):
     imagen_posicion = db.Column(db.String(16), nullable=False, default='50% 50%')
     imagen_zoom = db.Column(db.Float, nullable=False, default=1.0)
     descripcion = db.Column(db.Text, nullable=True)
+    variantes = db.Column(db.Text, nullable=False, default='[]')
 
     def to_dict(self):
         return {
@@ -70,7 +71,8 @@ class Producto(db.Model):
             'imagen': self.imagen,
             'imagen_posicion': self.imagen_posicion or '50% 50%',
             'imagen_zoom': self.imagen_zoom or 1.0,
-            'descripcion': self.descripcion
+            'descripcion': self.descripcion,
+            'variantes': json.loads(self.variantes or '[]')
         }
 
 class Personalizado(db.Model):
@@ -424,6 +426,17 @@ def resolve_payment_items(raw_items):
         if not item:
             raise ValueError('Uno de los artículos ya no está disponible')
         price = Decimal(str(getattr(item, price_field))).quantize(Decimal('1'), rounding=ROUND_HALF_UP)
+        selected_variant = None
+        if item_type == 'productos':
+            variants = json.loads(item.variantes or '[]')
+            requested_variant = str(raw.get('variante') or '').strip()
+            if variants:
+                selected_variant = next((variant for variant in variants if variant['nombre'] == requested_variant), None)
+                if not selected_variant:
+                    raise ValueError('Selecciona un tipo disponible para cada producto')
+                price = Decimal(str(selected_variant.get('precio') or item.precio)).quantize(Decimal('1'), rounding=ROUND_HALF_UP)
+            elif requested_variant:
+                raise ValueError('Actualiza el caldero e inténtalo de nuevo')
         if price <= 0:
             raise ValueError('El precio de un artículo no es válido')
 
@@ -434,6 +447,8 @@ def resolve_payment_items(raw_items):
             name = f'Personalizado: {name}'
 
         details = raw.get('personalizacion') if item_type == 'personalizados' else None
+        if selected_variant:
+            name = f"{name} · {selected_variant['nombre']}"
         snapshot = {'tipo': item_type, 'id': item_id, 'nombre': name, 'precio_cop': int(price)}
         if details and isinstance(details, dict):
             # Keep customer customization for fulfillment, but never send these fields to PayPal.
@@ -452,7 +467,7 @@ def allowed_file(filename):
 ADMIN_EDIT_FIELDS = {
     'personalizados': (Personalizado, ('nombre', 'tipo', 'precio_base', 'descripcion', 'opciones', 'imagen', 'imagen_posicion', 'imagen_zoom'), {'precio_base'}),
     'citas': (Cita, ('nombre_cliente', 'telefono', 'tipo_servicio', 'modalidad', 'fecha', 'hora', 'notas'), set()),
-    'productos': (Producto, ('nombre', 'categoria', 'precio', 'descripcion', 'imagen', 'imagen_posicion', 'imagen_zoom'), {'precio'}),
+    'productos': (Producto, ('nombre', 'categoria', 'precio', 'descripcion', 'variantes', 'imagen', 'imagen_posicion', 'imagen_zoom'), {'precio'}),
     'rituales': (Ritual, ('nombre', 'categoria', 'precio', 'duracion', 'proposito', 'incluye', 'imagen', 'imagen_posicion', 'imagen_zoom'), {'precio'}),
     'suscripciones': (Suscripcion, ('nombre', 'precio', 'frecuencia', 'descripcion', 'beneficios', 'imagen', 'imagen_posicion', 'imagen_zoom'), {'precio'}),
     'remedios': (Remedio, ('nombre', 'categoria', 'precio', 'preparacion', 'propiedades', 'imagen', 'imagen_posicion', 'imagen_zoom'), {'precio'}),
@@ -491,6 +506,43 @@ def normalize_image_zoom(value):
         return 1.0
     return round(min(1.5, max(0.5, zoom)), 2)
 
+def normalize_product_variants(value):
+    """Parse one product option per line: Name or Name|price in COP."""
+    if isinstance(value, list):
+        raw_variants = value
+    else:
+        raw_variants = []
+        for line in str(value or '').splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            parts = line.split('|', 1)
+            raw_variants.append({'nombre': parts[0].strip(), 'precio': parts[1].strip() if len(parts) > 1 else ''})
+
+    variants = []
+    seen = set()
+    if len(raw_variants) > 20:
+        raise ValueError('Un producto puede tener hasta 20 tipos')
+    for raw_variant in raw_variants:
+        if not isinstance(raw_variant, dict):
+            raise ValueError('Revisa los tipos del producto')
+        name = str(raw_variant.get('nombre') or '').strip()
+        if not name or len(name) > 80 or name.lower() in seen:
+            raise ValueError('Cada tipo necesita un nombre único de hasta 80 caracteres')
+        seen.add(name.lower())
+        raw_price = str(raw_variant.get('precio') or '').strip()
+        variant = {'nombre': name, 'precio': None}
+        if raw_price:
+            try:
+                price = Decimal(raw_price).quantize(Decimal('1'), rounding=ROUND_HALF_UP)
+            except (InvalidOperation, TypeError, ValueError):
+                raise ValueError('El precio de cada tipo debe ser un número válido')
+            if not price.is_finite() or price <= 0:
+                raise ValueError('El precio de cada tipo debe ser mayor a cero')
+            variant['precio'] = int(price)
+        variants.append(variant)
+    return json.dumps(variants, ensure_ascii=False)
+
 @app.route('/api/<string:modulo>/<int:registro_id>', methods=['PUT'])
 def update_admin_item(modulo, registro_id):
     if not session.get('logged_in'):
@@ -511,7 +563,9 @@ def update_admin_item(modulo, registro_id):
             if field == 'imagen' or field not in values:
                 continue
             value = values.get(field)
-            if field == 'imagen_posicion':
+            if field == 'variantes':
+                value = normalize_product_variants(value)
+            elif field == 'imagen_posicion':
                 value = normalize_image_position(value)
             elif field == 'imagen_zoom':
                 value = normalize_image_zoom(value)
@@ -578,6 +632,9 @@ def init_db():
                     connection.execute(text(
                         f"ALTER TABLE {model.__tablename__} ADD COLUMN imagen_zoom FLOAT NOT NULL DEFAULT 1.0"
                     ))
+            if model is Producto and 'variantes' not in columns:
+                with db.engine.begin() as connection:
+                    connection.execute(text("ALTER TABLE productos ADD COLUMN variantes TEXT NOT NULL DEFAULT '[]'"))
         if Producto.query.count() == 0:
             prods = [
                 Producto(nombre="TALISMAN DE VIDA", categoria="amuletos", precio=45000, imagen="https://images.unsplash.com/photo-1567653418876-5bb0e566e1c2?auto=format&fit=crop&w=600&q=80", descripcion="Artículo ritual consagrado."),
@@ -1026,6 +1083,10 @@ def add_producto():
     categoria = request.form.get('categoria', 'amuletos')
     precio = float(request.form.get('precio', 0))
     descripcion = request.form.get('descripcion', '')
+    try:
+        variantes = normalize_product_variants(request.form.get('variantes', ''))
+    except ValueError as error:
+        return jsonify({'error': str(error)}), 400
     imagen_final = request.form.get('imagen_url', '')
 
     if 'imagen_archivo' in request.files:
@@ -1045,7 +1106,7 @@ def add_producto():
     nuevo = Producto(nombre=nombre, categoria=categoria, precio=precio, imagen=imagen_final,
                      imagen_posicion=normalize_image_position(request.form.get('imagen_posicion')),
                      imagen_zoom=normalize_image_zoom(request.form.get('imagen_zoom')),
-                     descripcion=descripcion)
+                     descripcion=descripcion, variantes=variantes)
     db.session.add(nuevo)
     db.session.commit()
     return jsonify(nuevo.to_dict()), 201
