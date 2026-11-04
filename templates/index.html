@@ -804,6 +804,69 @@
         @media (max-width: 360px) {
             .nav-more-menu { width: min(232px, calc(100vw - 66px)); }
         }
+
+        /* Android y pantallas táctiles pequeñas */
+        @media (max-width: 768px) {
+            html { -webkit-text-size-adjust: 100%; scroll-padding-top: max(12px, env(safe-area-inset-top)); }
+            body {
+                min-width: 320px;
+                padding-top: env(safe-area-inset-top);
+                padding-right: env(safe-area-inset-right);
+                padding-bottom: max(16px, env(safe-area-inset-bottom));
+                background-attachment: scroll, scroll, scroll;
+            }
+            header { left: max(6px, env(safe-area-inset-left)); }
+            .nav-more-trigger {
+                width: 52px;
+                min-height: 64px;
+                padding: 10px 5px;
+                touch-action: manipulation;
+                -webkit-tap-highlight-color: transparent;
+            }
+            .nav-more-menu {
+                width: min(270px, calc(100vw - 82px));
+                max-height: calc(100vh - 32px);
+                max-height: calc(100dvh - max(32px, env(safe-area-inset-top) + env(safe-area-inset-bottom) + 16px));
+                padding: 8px;
+                overflow-y: auto;
+                overscroll-behavior: contain;
+                -webkit-overflow-scrolling: touch;
+                touch-action: pan-y;
+            }
+            .nav-more-menu a {
+                min-height: 48px;
+                padding: 12px !important;
+                touch-action: manipulation;
+            }
+            .cart-trigger {
+                top: max(10px, env(safe-area-inset-top));
+                right: max(10px, env(safe-area-inset-right));
+                min-height: 48px;
+                touch-action: manipulation;
+            }
+            .hero-buttons > button, .social-link { min-height: 48px; touch-action: manipulation; }
+            .form-input, select, textarea { font-size: 16px; }
+            .shipping-dialog {
+                max-height: calc(100vh - 24px);
+                max-height: calc(100dvh - max(24px, env(safe-area-inset-top) + env(safe-area-inset-bottom) + 12px));
+            }
+            .shipping-dialog-inner { -webkit-overflow-scrolling: touch; }
+        }
+        @media (max-width: 380px) {
+            .nav-more-menu { width: min(248px, calc(100vw - 76px)); }
+            .hero-buttons { gap: 8px; }
+            .social-links { gap: 7px; }
+        }
+        @media (max-width: 768px) and (max-height: 500px) {
+            .nav-more-menu {
+                max-height: calc(100vh - 20px);
+                max-height: calc(100dvh - max(20px, env(safe-area-inset-top) + env(safe-area-inset-bottom) + 8px));
+            }
+            .nav-more-menu a { min-height: 44px; padding-block: 10px !important; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .nav-more-trigger { transition: none; }
+        }
     </style>
 </head>
 <body>
