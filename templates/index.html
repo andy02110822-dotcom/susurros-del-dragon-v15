@@ -1729,6 +1729,22 @@
             }
         }
 
+        function nombreVisibleVariante(variante) {
+            return String(variante?.nombre || '').replace(/\/\s*[\d.,]+\s*$/, '').trim();
+        }
+
+        function precioVariante(variante, precioBase) {
+            const precioGuardado = Number(variante?.precio);
+            if (Number.isFinite(precioGuardado) && precioGuardado > 0) return precioGuardado;
+            const match = String(variante?.nombre || '').match(/\/\s*([\d.,]+)\s*$/);
+            if (match) {
+                const precioTexto = match[1].replace(/[.,]/g, '');
+                const precioAntiguo = Number(precioTexto);
+                if (Number.isFinite(precioAntiguo) && precioAntiguo > 0) return precioAntiguo;
+            }
+            return Number(precioBase) || 0;
+        }
+
         function crearControlesCompra(item, tipo, precioBase, textoBoton, alComprar) {
             const variantes = Array.isArray(item.variantes) ? item.variantes : [];
             const wrap = document.createElement('div');
@@ -1747,7 +1763,7 @@
                 variantes.forEach((variante, index) => {
                     const opcion = document.createElement('option');
                     opcion.value = String(index);
-                    opcion.textContent = `${variante.nombre} · $${Number(variante.precio || precioBase).toLocaleString('es-CO')} COP`;
+                    opcion.textContent = `${nombreVisibleVariante(variante)} · $${precioVariante(variante, precioBase).toLocaleString('es-CO')} COP`;
                     selector.appendChild(opcion);
                 });
                 label.appendChild(selector); wrap.appendChild(label);
@@ -1758,7 +1774,7 @@
             const button = document.createElement('button'); button.type = 'button'; button.className = 'btn-purple'; button.textContent = textoBoton;
             const selected = () => selector && selector.value !== '' ? variantes[Number(selector.value)] : null;
             const update = () => {
-                const variante = selected(); const value = variante ? (variante.precio || precioBase) : precioBase;
+                const variante = selected(); const value = variante ? precioVariante(variante, precioBase) : precioBase;
                 price.innerHTML = variantes.length && !variante ? 'Selecciona un tipo' : precioDobleHTML(value);
             };
             selector?.addEventListener('change', update);
@@ -1799,7 +1815,7 @@
                 const body = grid.lastElementChild.querySelector('.card-body');
                 body.appendChild(crearControlesCompra(p, 'personalizados', p.precio_base, 'PERSONALIZAR', variante => {
                     if (p.variantes?.length && !variante) return;
-                    abrirModalCustom(p.id, p.nombre, variante?.precio || p.precio_base, p.descripcion, variante?.nombre || '');
+                    abrirModalCustom(p.id, p.nombre, precioVariante(variante, p.precio_base), p.descripcion, variante?.nombre || '');
                 }));
             });
         }
@@ -1945,8 +1961,8 @@
                 `);
                 grid.lastElementChild.querySelector('.card-body').appendChild(crearControlesCompra(r, 'rituales', r.precio, 'SOLICITAR', variante => {
                     if (r.variantes?.length && !variante) return;
-                    const precio = variante?.precio || r.precio;
-                    agregarAlCaldero(`Ritual: ${r.nombre}${variante ? ` · ${variante.nombre}` : ''}`, precio, 'rituales', r.id, variante?.nombre || '');
+                    const precio = precioVariante(variante, r.precio);
+                    agregarAlCaldero(`Ritual: ${r.nombre}${variante ? ` · ${nombreVisibleVariante(variante)}` : ''}`, precio, 'rituales', r.id, variante?.nombre || '');
                 }));
             });
         }
@@ -1971,7 +1987,7 @@
                 body.append(title, description); card.append(image, body); grid.appendChild(card);
                 body.appendChild(crearControlesCompra(p, 'productos', p.precio, '+ AÑADIR', variant => {
                     if (p.variantes?.length && !variant) return;
-                    agregarAlCaldero(variant ? `${p.nombre} · ${variant.nombre}` : p.nombre, variant?.precio || p.precio, 'productos', p.id, variant?.nombre || '');
+                    agregarAlCaldero(variant ? `${p.nombre} · ${nombreVisibleVariante(variant)}` : p.nombre, precioVariante(variant, p.precio), 'productos', p.id, variant?.nombre || '');
                 }));
             });
         }
@@ -1998,7 +2014,7 @@
                 `);
                 grid.lastElementChild.querySelector('.card-body').appendChild(crearControlesCompra(r, 'remedios', r.precio, '+ PEDIR', variante => {
                     if (r.variantes?.length && !variante) return;
-                    agregarAlCaldero(`${r.nombre}${variante ? ` · ${variante.nombre}` : ''}`, variante?.precio || r.precio, 'remedios', r.id, variante?.nombre || '');
+                    agregarAlCaldero(`${r.nombre}${variante ? ` · ${nombreVisibleVariante(variante)}` : ''}`, precioVariante(variante, r.precio), 'remedios', r.id, variante?.nombre || '');
                 }));
             });
         }
@@ -2028,7 +2044,7 @@
                 `);
                 grid.lastElementChild.querySelector('.card-body').appendChild(crearControlesCompra(s, 'suscripciones', s.precio, 'UNIRME AL CÍRCULO', variante => {
                     if (s.variantes?.length && !variante) return;
-                    agregarAlCaldero(`Suscripción: ${s.nombre}${variante ? ` · ${variante.nombre}` : ''}`, variante?.precio || s.precio, 'suscripciones', s.id, variante?.nombre || '');
+                    agregarAlCaldero(`Suscripción: ${s.nombre}${variante ? ` · ${nombreVisibleVariante(variante)}` : ''}`, precioVariante(variante, s.precio), 'suscripciones', s.id, variante?.nombre || '');
                 }));
             });
         }
@@ -2821,6 +2837,7 @@
     </script>
 </body>
 </html>
+
 
 
 
