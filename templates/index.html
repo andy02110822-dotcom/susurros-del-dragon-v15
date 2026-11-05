@@ -1210,12 +1210,13 @@
                     <h3 style="color: var(--text-gold); margin-bottom: 8px; font-size: 1.1rem;">Nuevo Producto</h3>
                     <div class="form-group"><label>Nombre</label><input type="text" id="p-nombre" class="form-input" required></div>
                     <div class="form-group"><label>Sección del catálogo</label><select id="p-cat" class="form-input"><option value="amuletos">Amuletos</option><option value="tarot">Tarot</option><option value="cristales">Cristales</option><option value="inciensos">Inciensos</option><option value="otros">Otros</option></select></div>
-                    <div class="form-group"><label>Precio (COP)</label><input type="number" id="p-precio" class="form-input" data-price-cop required><small class="price-usd-preview" data-price-preview>Equivalente USD: cargando TRM…</small></div>
+                    <div class="form-group"><label>Precio (COP)</label><input type="number" id="p-precio" class="form-input" data-price-cop min="1" step="1" required><small class="price-usd-preview" data-price-preview>Equivalente USD: cargando TRM…</small></div>
                     <div class="form-group"><label>Tipos o variantes disponibles (opcional)</label><textarea id="p-variantes" class="form-input" rows="3" placeholder="Pequeño&#10;Mediano|25000&#10;Grande|32000"></textarea><small>Escribe una opción por línea. Si no indicas precio, se usa el precio base del producto. Para asignar otro precio, escribe: nombre|precio en COP.</small></div>
 
                     <div class="form-group">
-                        <label>Subir Imagen (.jpg, .png, .webp)</label>
-                        <input type="file" id="p-file" class="form-input" accept=".jpg,.jpeg,.png,.webp,.gif">
+                        <label>Subir imagen (JPG, PNG, WEBP o GIF)</label>
+                        <input type="file" id="p-file" class="form-input" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif">
+                        <small>Máximo 12 MB. También puedes pegar una URL de imagen abajo.</small>
                     </div>
                     <p style="text-align: center; color: var(--text-gold); font-size: 0.8rem; margin: -5px 0 10px 0;">— O si prefieres —</p>
                     <div class="form-group">

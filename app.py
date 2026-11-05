@@ -34,11 +34,16 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_SECURE'] = os.environ.get('SESSION_COOKIE_SECURE', '').lower() in {'1', 'true', 'yes'}
+app.config['MAX_CONTENT_LENGTH'] = 12 * 1024 * 1024
 
 UPLOAD_FOLDER = os.path.join(DATA_DIR, 'uploads')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+@app.errorhandler(413)
+def request_too_large(_error):
+    return jsonify({'error': 'La imagen supera el límite de 12 MB. Reduce su tamaño e inténtalo de nuevo'}), 413
 
 db = SQLAlchemy(app)
 
@@ -615,6 +620,32 @@ def update_admin_item(modulo, registro_id):
 def init_db():
     with app.app_context():
         db.create_all()
+
+        def columns_for(model):
+            inspector = inspect(db.engine)
+            if not inspector.has_table(model.__tablename__):
+                # A second create_all handles a transient schema race during
+                # simultaneous worker startup before attempting an ALTER.
+                db.create_all()
+                inspector = inspect(db.engine)
+            if not inspector.has_table(model.__tablename__):
+                raise RuntimeError(f"No se pudo crear la tabla {model.__tablename__}")
+            return {column['name'] for column in inspector.get_columns(model.__tablename__)}
+
+        def add_column_if_missing(model, column_name, column_type):
+            if column_name in columns_for(model):
+                return
+            try:
+                with db.engine.begin() as connection:
+                    connection.execute(text(
+                        f'ALTER TABLE {model.__tablename__} ADD COLUMN {column_name} {column_type}'
+                    ))
+            except SQLAlchemyError:
+                # Another worker may have completed the same additive
+                # migration between inspection and ALTER.
+                if column_name not in columns_for(model):
+                    raise
+
         shipping_columns = {
             'shipping_name': 'VARCHAR(150)',
             'shipping_phone': 'VARCHAR(40)',
@@ -627,44 +658,14 @@ def init_db():
             'shipping_instructions': 'TEXT',
             'shipping_saved_at': 'TIMESTAMP',
         }
-        existing_shipping_columns = {
-            column['name'] for column in inspect(db.engine).get_columns(PedidoPayPal.__tablename__)
-        }
         for column_name, column_type in shipping_columns.items():
-            if column_name not in existing_shipping_columns:
-                with db.engine.begin() as connection:
-                    connection.execute(text(
-                        f'ALTER TABLE {PedidoPayPal.__tablename__} ADD COLUMN {column_name} {column_type}'
-                    ))
-                existing_shipping_columns.add(column_name)
+            add_column_if_missing(PedidoPayPal, column_name, column_type)
 
-        suscripcion_columns = {column['name'] for column in inspect(db.engine).get_columns(Suscripcion.__tablename__)}
-        if 'imagen' not in suscripcion_columns:
-            try:
-                with db.engine.begin() as connection:
-                    connection.execute(text(f'ALTER TABLE {Suscripcion.__tablename__} ADD COLUMN imagen TEXT'))
-            except Exception:
-                updated_columns = {column['name'] for column in inspect(db.engine).get_columns(Suscripcion.__tablename__)}
-                if 'imagen' not in updated_columns:
-                    raise
+        add_column_if_missing(Suscripcion, 'imagen', 'TEXT')
         for model in (Producto, Personalizado, Ritual, Remedio, Suscripcion):
-            columns = {column['name'] for column in inspect(db.engine).get_columns(model.__tablename__)}
-            if 'imagen_posicion' not in columns:
-                with db.engine.begin() as connection:
-                    connection.execute(text(
-                        f"ALTER TABLE {model.__tablename__} ADD COLUMN imagen_posicion VARCHAR(16) NOT NULL DEFAULT '50% 50%'"
-                    ))
-            columns = {column['name'] for column in inspect(db.engine).get_columns(model.__tablename__)}
-            if 'imagen_zoom' not in columns:
-                with db.engine.begin() as connection:
-                    connection.execute(text(
-                        f"ALTER TABLE {model.__tablename__} ADD COLUMN imagen_zoom FLOAT NOT NULL DEFAULT 1.0"
-                    ))
-            if model in (Producto, Personalizado, Ritual, Remedio, Suscripcion) and 'variantes' not in columns:
-                with db.engine.begin() as connection:
-                    connection.execute(text(
-                        f"ALTER TABLE {model.__tablename__} ADD COLUMN variantes TEXT NOT NULL DEFAULT '[]'"
-                    ))
+            add_column_if_missing(model, 'imagen_posicion', "VARCHAR(16) NOT NULL DEFAULT '50% 50%'")
+            add_column_if_missing(model, 'imagen_zoom', 'FLOAT NOT NULL DEFAULT 1.0')
+            add_column_if_missing(model, 'variantes', "TEXT NOT NULL DEFAULT '[]'")
         if Producto.query.count() == 0:
             prods = [
                 Producto(nombre="TALISMAN DE VIDA", categoria="amuletos", precio=45000, imagen="https://images.unsplash.com/photo-1567653418876-5bb0e566e1c2?auto=format&fit=crop&w=600&q=80", descripcion="Artículo ritual consagrado."),
@@ -760,8 +761,14 @@ def login():
     usuario = data.get('usuario')
     password = data.get('password')
     credenciales_configuradas = bool(ADMIN_USER and ADMIN_PASS)
-    usuario_valido = isinstance(usuario, str) and credenciales_configuradas and hmac.compare_digest(usuario, ADMIN_USER)
-    password_valida = isinstance(password, str) and credenciales_configuradas and hmac.compare_digest(password, ADMIN_PASS)
+    usuario_valido = (
+        isinstance(usuario, str) and credenciales_configuradas
+        and hmac.compare_digest(usuario.encode('utf-8'), ADMIN_USER.encode('utf-8'))
+    )
+    password_valida = (
+        isinstance(password, str) and credenciales_configuradas
+        and hmac.compare_digest(password.encode('utf-8'), ADMIN_PASS.encode('utf-8'))
+    )
     if usuario_valido and password_valida:
         session['logged_in'] = True
         return jsonify({'success': True})
@@ -1113,26 +1120,39 @@ def add_producto():
     if not session.get('logged_in'):
         return jsonify({'error': 'No autorizado'}), 403
 
-    nombre = request.form.get('nombre')
-    categoria = request.form.get('categoria', 'amuletos')
-    precio = float(request.form.get('precio', 0))
-    descripcion = request.form.get('descripcion', '')
+    nombre = request.form.get('nombre', '').strip()
+    categoria = request.form.get('categoria', 'amuletos').strip() or 'amuletos'
+    descripcion = request.form.get('descripcion', '').strip()
+    if not nombre or len(nombre) > 100:
+        return jsonify({'error': 'Escribe un nombre de hasta 100 caracteres'}), 400
+    if len(categoria) > 50:
+        return jsonify({'error': 'La sección debe tener hasta 50 caracteres'}), 400
     try:
+        precio_decimal = Decimal(request.form.get('precio', '').strip())
+        if not precio_decimal.is_finite() or precio_decimal <= 0 or precio_decimal > Decimal('1000000000000'):
+            raise InvalidOperation
+        precio = float(precio_decimal)
         variantes = normalize_product_variants(request.form.get('variantes', ''))
-    except ValueError as error:
-        return jsonify({'error': str(error)}), 400
-    imagen_final = request.form.get('imagen_url', '')
+    except (InvalidOperation, TypeError, ValueError) as error:
+        if isinstance(error, ValueError) and str(error):
+            return jsonify({'error': str(error)}), 400
+        return jsonify({'error': 'Escribe un precio en pesos mayor que cero'}), 400
 
-    if 'imagen_archivo' in request.files:
-        file = request.files['imagen_archivo']
-        if file and file.filename != '' and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            base, ext = os.path.splitext(filename)
-            import time
-            filename = f"{base}_{int(time.time())}{ext}"
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(filepath)
-            imagen_final = f"/static/uploads/{filename}"
+    imagen_final = request.form.get('imagen_url', '').strip()
+    uploaded = request.files.get('imagen_archivo')
+    saved_image_path = None
+    if uploaded and uploaded.filename:
+        if not allowed_file(uploaded.filename):
+            return jsonify({'error': 'La imagen debe ser JPG, PNG, WEBP o GIF'}), 400
+        extension = os.path.splitext(secure_filename(uploaded.filename))[1].lower()
+        filename = f"{uuid.uuid4().hex}{extension}"
+        saved_image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        try:
+            uploaded.save(saved_image_path)
+        except OSError:
+            app.logger.exception('No se pudo guardar la imagen del producto')
+            return jsonify({'error': 'No se pudo guardar la imagen. Inténtalo de nuevo'}), 500
+        imagen_final = f"/static/uploads/{filename}"
 
     if not imagen_final:
         imagen_final = "https://images.unsplash.com/photo-1567653418876-5bb0e566e1c2?auto=format&fit=crop&w=600&q=80"
@@ -1141,8 +1161,18 @@ def add_producto():
                      imagen_posicion=normalize_image_position(request.form.get('imagen_posicion')),
                      imagen_zoom=normalize_image_zoom(request.form.get('imagen_zoom')),
                      descripcion=descripcion, variantes=variantes)
-    db.session.add(nuevo)
-    db.session.commit()
+    try:
+        db.session.add(nuevo)
+        db.session.commit()
+    except SQLAlchemyError:
+        db.session.rollback()
+        if saved_image_path:
+            try:
+                os.remove(saved_image_path)
+            except OSError:
+                app.logger.warning('No se pudo limpiar una imagen de producto sin publicar')
+        app.logger.exception('No se pudo publicar el producto')
+        return jsonify({'error': 'No se pudo guardar el producto. Revisa los datos e inténtalo de nuevo'}), 500
     return jsonify(nuevo.to_dict()), 201
 
 @app.route('/api/productos/<int:prod_id>', methods=['DELETE'])
