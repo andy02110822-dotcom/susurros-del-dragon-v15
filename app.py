@@ -368,19 +368,28 @@ def paypal_api_request(path, method='GET', payload=None, request_id=None):
 
     auth = (f'{PAYPAL_CLIENT_ID}:{PAYPAL_CLIENT_SECRET}').encode('utf-8')
     import base64
-    token_request = Request(
-        f'{PAYPAL_API_BASE}/v1/oauth2/token',
-        data=b'grant_type=client_credentials',
-        headers={
-            'Authorization': f'Basic {base64.b64encode(auth).decode("ascii")}',
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        method='POST',
-    )
     operation = 'oauth'
     try:
-        with urlopen(token_request, timeout=15) as response:
-            access_token = json.loads(response.read().decode('utf-8'))['access_token']
+        access_token = None
+        for attempt in range(2):
+            token_request = Request(
+                f'{PAYPAL_API_BASE}/v1/oauth2/token',
+                data=b'grant_type=client_credentials',
+                headers={
+                    'Authorization': f'Basic {base64.b64encode(auth).decode("ascii")}',
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                method='POST',
+            )
+            try:
+                with urlopen(token_request, timeout=20) as response:
+                    access_token = json.loads(response.read().decode('utf-8'))['access_token']
+                break
+            except (URLError, TimeoutError):
+                if attempt == 1:
+                    raise
+                # Token creation is safe to retry; no order or payment is made here.
+                time.sleep(0.5)
         operation = 'api'
         body = json.dumps(payload).encode('utf-8') if payload is not None else None
         api_request = Request(
