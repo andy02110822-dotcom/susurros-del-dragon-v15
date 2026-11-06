@@ -585,6 +585,31 @@ def product_variant_price(variant, base_price):
             pass
     return Decimal(str(base_price)).quantize(Decimal('1'), rounding=ROUND_HALF_UP)
 
+def normalize_cop_price(value):
+    """Accept COP prices typed with or without Colombian thousands separators."""
+    raw = str(value or '').strip().replace('\u00a0', '').replace(' ', '')
+    raw = re.sub(r'(?i)COP', '', raw).replace('$', '')
+    if not raw or not re.fullmatch(r'\d+(?:[.,]\d+)*', raw):
+        raise ValueError('Escribe un precio válido en pesos, por ejemplo 75000')
+
+    if '.' in raw and ',' in raw:
+        if raw.rfind(',') > raw.rfind('.'):
+            raw = raw.replace('.', '').replace(',', '.')
+        else:
+            raw = raw.replace(',', '')
+    elif re.fullmatch(r'\d{1,3}(?:[.,]\d{3})+', raw):
+        raw = raw.replace('.', '').replace(',', '')
+    else:
+        raw = raw.replace(',', '.')
+
+    try:
+        price = Decimal(raw)
+    except InvalidOperation as error:
+        raise ValueError('Escribe un precio válido en pesos, por ejemplo 75000') from error
+    if not price.is_finite() or price <= 0 or price > Decimal('1000000000000'):
+        raise ValueError('El precio debe ser mayor que cero y menor a un billón de pesos')
+    return float(price.quantize(Decimal('1'), rounding=ROUND_HALF_UP))
+
 @app.route('/api/<string:modulo>/<int:registro_id>', methods=['PUT'])
 def update_admin_item(modulo, registro_id):
     if not session.get('logged_in'):
@@ -600,29 +625,63 @@ def update_admin_item(modulo, registro_id):
         return jsonify({'error': 'No encontrado'}), 404
 
     values = request.form if request.form else (request.get_json(silent=True) or {})
+    saved_image_path = None
     try:
         for field in fields:
             if field == 'imagen' or field not in values:
                 continue
             value = values.get(field)
             if field == 'variantes':
-                value = normalize_product_variants(value)
+                try:
+                    value = normalize_product_variants(value)
+                except ValueError as error:
+                    raise ValueError(f'Revisa los tipos del artículo: {error}') from error
             elif field == 'imagen_posicion':
                 value = normalize_image_position(value)
             elif field == 'imagen_zoom':
                 value = normalize_image_zoom(value)
-            setattr(item, field, float(value) if field in numeric_fields else value)
+            elif field in numeric_fields:
+                try:
+                    value = normalize_cop_price(value)
+                except ValueError as error:
+                    raise ValueError(f'Revisa el campo {field}: {error}') from error
+            setattr(item, field, value)
 
         if 'imagen' in fields:
-            image, error = save_updated_image(item.imagen)
+            uploaded = request.files.get('imagen_archivo')
+            if uploaded and uploaded.filename:
+                if not allowed_file(uploaded.filename):
+                    raise ValueError('La imagen debe ser JPG, PNG, WEBP o GIF')
+                filename = secure_filename(uploaded.filename)
+                filename = f"{uuid.uuid4().hex}_{filename}"
+                saved_image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                uploaded.save(saved_image_path)
+                image = f"/static/uploads/{filename}"
+                error = None
+            else:
+                image, error = save_updated_image(item.imagen)
             if error:
                 db.session.rollback()
                 return jsonify({'error': error}), 400
             item.imagen = image
         db.session.commit()
-    except (TypeError, ValueError):
+    except ValueError as error:
         db.session.rollback()
-        return jsonify({'error': 'Revisa los valores numéricos'}), 400
+        if saved_image_path:
+            try:
+                os.remove(saved_image_path)
+            except OSError:
+                app.logger.warning('No se pudo limpiar una imagen de edición fallida')
+        return jsonify({'error': str(error)}), 400
+    except (TypeError, OSError, SQLAlchemyError):
+        db.session.rollback()
+        if saved_image_path:
+            try:
+                os.remove(saved_image_path)
+            except OSError:
+                app.logger.warning('No se pudo limpiar una imagen de edición fallida')
+        app.logger.exception('No se pudo guardar la edición de un artículo')
+        return jsonify({'error': 'No se pudieron guardar los cambios. Inténtalo de nuevo'}), 500
 
     return jsonify(item.to_dict())
 
