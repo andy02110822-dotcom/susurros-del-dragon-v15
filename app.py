@@ -699,6 +699,7 @@ def update_admin_item(modulo, registro_id):
         db.session.commit()
     except ValueError as error:
         db.session.rollback()
+        app.logger.warning('Edición rechazada para %s/%s: %s', modulo, registro_id, error)
         if saved_image_path:
             try:
                 os.remove(saved_image_path)

@@ -2020,6 +2020,7 @@
                     input.value = def.key === 'variantes'
                         ? (item.variantes || []).map(variant => `${variant.nombre}${variant.precio ? `|${variant.precio}` : ''}`).join('\n')
                         : item[def.key] ?? '';
+                    if (def.key === 'variantes') input.dataset.originalValue = input.value;
                 }
                 group.append(label, input);
                 if (isCopPrice) {
@@ -2063,6 +2064,7 @@
                 const payload = new FormData();
                 config.fields.forEach(def => {
                     const field = event.currentTarget.elements[def.key];
+                    if (def.key === 'variantes' && field.value === field.dataset.originalValue) return;
                     if (def.type === 'file') {
                         if (field.files.length) payload.append('imagen_archivo', field.files[0]);
                     } else if (def.key !== 'imagen_url' || field.value.trim()) {
