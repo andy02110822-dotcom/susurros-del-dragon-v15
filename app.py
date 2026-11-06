@@ -570,6 +570,31 @@ def normalize_product_variants(value):
         variants.append(variant)
     return json.dumps(variants, ensure_ascii=False)
 
+def variants_as_editor_text(value):
+    """Recreate the textarea representation used by the admin editor."""
+    try:
+        variants = json.loads(value or '[]')
+    except (TypeError, json.JSONDecodeError):
+        return None
+    if not isinstance(variants, list):
+        return None
+
+    lines = []
+    for variant in variants:
+        if not isinstance(variant, dict):
+            return None
+        # Match the editor's template string exactly; it preserves whitespace.
+        name = str(variant.get('nombre') or '')
+        price = variant.get('precio')
+        if isinstance(price, (int, float)) and not isinstance(price, bool) and price and float(price).is_integer():
+            price = str(int(price))
+        elif price:
+            price = str(price)
+        else:
+            price = ''
+        lines.append(f'{name}|{price}' if price else name)
+    return '\n'.join(lines)
+
 def product_variant_price(variant, base_price):
     """Use a variant's explicit COP price or read a legacy trailing /price suffix."""
     raw_price = str(variant.get('precio') or '').strip()
@@ -635,6 +660,13 @@ def update_admin_item(modulo, registro_id):
                 try:
                     value = normalize_product_variants(value)
                 except ValueError as error:
+                    incoming_text = str(values.get(field) or '').strip()
+                    current_text = variants_as_editor_text(getattr(item, field) or '[]')
+                    if current_text is not None and incoming_text == current_text:
+                        # Legacy duplicate/invalid options should not prevent
+                        # edits to the article's other fields. A changed option
+                        # list still goes through full validation.
+                        continue
                     raise ValueError(f'Revisa los tipos del artículo: {error}') from error
             elif field == 'imagen_posicion':
                 value = normalize_image_position(value)
