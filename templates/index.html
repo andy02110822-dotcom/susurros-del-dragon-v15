@@ -1533,7 +1533,7 @@
         function abrirAnuncio() {
             const overlay = document.getElementById('announcement-overlay');
             if (!overlay) return;
-            try { if (sessionStorage.getItem('susurros-anuncio-navidad-cerrado') === '1') return; } catch (_) {}
+            try { if (sessionStorage.getItem('susurros-anuncio-navidad-cerrado-v2') === '1') return; } catch (_) {}
             document.body.dataset.announcementPreviousOverflow = document.body.style.overflow;
             document.body.style.overflow = 'hidden';
             overlay.setAttribute('aria-hidden', 'false');
@@ -1548,7 +1548,7 @@
             overlay.classList.add('is-closing');
             overlay.setAttribute('aria-hidden', 'true');
             document.body.style.overflow = document.body.dataset.announcementPreviousOverflow || '';
-            try { sessionStorage.setItem('susurros-anuncio-navidad-cerrado', '1'); } catch (_) {}
+            try { sessionStorage.setItem('susurros-anuncio-navidad-cerrado-v2', '1'); } catch (_) {}
             window.clearTimeout(anuncioCierreTimer);
             anuncioCierreTimer = window.setTimeout(() => overlay.classList.remove('is-closing'), 600);
         }
