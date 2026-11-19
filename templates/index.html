@@ -1,3 +1,4 @@
+Warning: fsx was declared with const; use let for reassignable variables.
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -899,10 +900,56 @@
             nav.desktop-nav a { min-width: 72px; flex: 0 0 72px; min-height: 56px; gap: 4px; padding: 5px 3px; font-size: .56rem; letter-spacing: 0; scroll-snap-align: start; }
             nav.desktop-nav a i { font-size: 1rem; }
         }
+
+        /* Anuncio emergente con aura mística */
+        .announcement-overlay {
+            position: fixed; inset: 0; z-index: 5000; display: flex; align-items: center; justify-content: center;
+            padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+            background: rgba(4, 1, 12, .82); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .55s ease, visibility .55s ease;
+        }
+        .announcement-overlay.is-open { opacity: 1; visibility: visible; pointer-events: auto; }
+        .announcement-dialog {
+            position: relative; width: min(440px, 100%); max-height: calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+            padding: 10px; border: 1px solid rgba(226, 168, 255, .88); border-radius: 22px;
+            background: linear-gradient(145deg, rgba(37, 9, 54, .98), rgba(9, 3, 20, .99));
+            box-shadow: 0 0 0 1px rgba(240, 198, 116, .22), 0 0 32px rgba(190, 73, 255, .5), 0 0 90px rgba(154, 48, 223, .36), 0 24px 90px rgba(0, 0, 0, .78);
+            transform: translateY(24px) scale(.92); opacity: 0; filter: blur(7px);
+            transition: transform .62s cubic-bezier(.18,.85,.22,1), opacity .42s ease, filter .62s ease, box-shadow .55s ease;
+        }
+        .announcement-dialog::before {
+            content: ''; position: absolute; z-index: 0; inset: -16px; border-radius: 30px; pointer-events: none;
+            background: radial-gradient(ellipse, rgba(207, 111, 255, .52), rgba(128, 46, 197, .2) 42%, transparent 72%);
+            filter: blur(18px); opacity: 0; transform: scale(.76); transition: opacity .7s ease, transform .85s ease;
+        }
+        .announcement-overlay.is-open .announcement-dialog { transform: translateY(0) scale(1); opacity: 1; filter: blur(0); }
+        .announcement-overlay.is-open .announcement-dialog::before { opacity: 1; transform: scale(1.08); animation: announcement-aura 3.2s ease-in-out .7s infinite alternate; }
+        .announcement-overlay.is-closing { opacity: 0; visibility: visible; pointer-events: auto; }
+        .announcement-overlay.is-closing .announcement-dialog { transform: translateY(10px) scale(.88); opacity: 0; filter: blur(12px); box-shadow: 0 0 100px rgba(206, 111, 255, .8), 0 0 0 0 rgba(189, 95, 255, 0); }
+        .announcement-overlay.is-closing .announcement-dialog::before { opacity: 0; transform: scale(1.65); }
+        .announcement-image { position: relative; z-index: 1; display: block; width: 100%; max-height: calc(100dvh - 74px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); object-fit: contain; border-radius: 14px; }
+        .announcement-close {
+            position: absolute; top: 17px; right: 17px; z-index: 2; display: grid; place-items: center;
+            width: 42px; height: 42px; border: 1px solid rgba(255, 231, 255, .75); border-radius: 50%;
+            color: #fff; background: rgba(19, 5, 31, .78); font-size: 1.65rem; line-height: 1; cursor: pointer;
+            box-shadow: 0 0 18px rgba(197, 101, 255, .55); transition: transform .2s ease, background .2s ease;
+        }
+        .announcement-close:hover { transform: rotate(90deg) scale(1.06); background: rgba(91, 26, 128, .92); }
+        @keyframes announcement-aura { from { filter: blur(18px); opacity: .68; } to { filter: blur(25px); opacity: 1; } }
+        @media (prefers-reduced-motion: reduce) {
+            .announcement-overlay, .announcement-dialog, .announcement-dialog::before { transition-duration: .01ms !important; animation: none !important; }
+        }
     
     </style>
 </head>
 <body>
+
+    <div class="announcement-overlay" id="announcement-overlay" aria-hidden="true" onclick="if (event.target === this) cerrarAnuncio()">
+        <section class="announcement-dialog" id="announcement-dialog" role="dialog" aria-modal="true" aria-label="Anuncio especial de Navidad" tabindex="-1">
+            <button class="announcement-close" type="button" onclick="cerrarAnuncio()" aria-label="Cerrar anuncio">&times;</button>
+            <img class="announcement-image" src="/static/images/anuncio-navidad.png" alt="Susurros del Dragón: Edición Especial de Navidad. Descuento navideño por tiempo limitado.">
+        </section>
+    </div>
 
     <div class="top-banner"><img class="brand-logo" src="/static/images/logo-dragon.jpeg" alt="Logo de Susurros del Dragón"><span>✦ ENVÍOS MÍSTICOS A TODO EL REINO | RITUALES & PERSONALIZADOS ✦</span></div>
 
@@ -1483,6 +1530,33 @@
 
     <script>
         let installPromptEvent = null;
+        let anuncioCierreTimer = null;
+        function abrirAnuncio() {
+            const overlay = document.getElementById('announcement-overlay');
+            if (!overlay) return;
+            try { if (sessionStorage.getItem('susurros-anuncio-navidad-cerrado') === '1') return; } catch (_) {}
+            document.body.dataset.announcementPreviousOverflow = document.body.style.overflow;
+            document.body.style.overflow = 'hidden';
+            overlay.setAttribute('aria-hidden', 'false');
+            overlay.classList.remove('is-closing');
+            requestAnimationFrame(() => overlay.classList.add('is-open'));
+            window.setTimeout(() => document.getElementById('announcement-dialog')?.focus(), 80);
+        }
+        function cerrarAnuncio() {
+            const overlay = document.getElementById('announcement-overlay');
+            if (!overlay || !overlay.classList.contains('is-open')) return;
+            overlay.classList.remove('is-open');
+            overlay.classList.add('is-closing');
+            overlay.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = document.body.dataset.announcementPreviousOverflow || '';
+            try { sessionStorage.setItem('susurros-anuncio-navidad-cerrado', '1'); } catch (_) {}
+            window.clearTimeout(anuncioCierreTimer);
+            anuncioCierreTimer = window.setTimeout(() => overlay.classList.remove('is-closing'), 600);
+        }
+        window.addEventListener('keydown', event => {
+            if (event.key === 'Escape') cerrarAnuncio();
+        });
+        window.addEventListener('load', () => window.setTimeout(abrirAnuncio, 650), { once: true });
         window.addEventListener('beforeinstallprompt', (event) => {
             event.preventDefault();
             installPromptEvent = event;
